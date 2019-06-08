@@ -1,6 +1,6 @@
 # tkmacosx
 
-Tkmacosx is a Python library extension to Tkinter module for masOS. Read more about tkmacos in detail in [tkmacosx](https://github.com/Saadmairaj/tkmacosx/tree/master/tkmacosx)
+Tkmacosx is a Python library which provides some modified widgets of Tkinter work better with macOS and some more useful functions and classes as well. Read more about tkmacos in detail in [tkmacosx](https://github.com/Saadmairaj/tkmacosx/tree/master/tkmacosx)
 
 ## Installation
 
