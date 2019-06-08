@@ -1,6 +1,6 @@
 # tkmacosx
 
-Tkmacosx is a Python library which provides some modified widgets of Tkinter work better with macOS and some more useful functions and classes as well. Read more about tkmacos in detail in [tkmacosx](https://github.com/Saadmairaj/tkmacosx/tree/master/tkmacosx)
+This module provides some modified widgets of Tkinter which works better on macOS and some more useful functions and classes as well. For example Button of tkmacosx which looks and feels exaclty like a native tkinter button can change its *background* and *foreground* colors. Read more about tkmacos in detail in [tkmacosx](https://github.com/Saadmairaj/tkmacosx/tree/master/tkmacosx)
 
 ## Installation
 
