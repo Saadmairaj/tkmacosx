@@ -163,7 +163,8 @@ class _Canvas(_TK.Widget):
 
 class Widget(_Canvas):
     """Internal class used for tkinter macos Buttton"""
-    
+
+    _buttons = []  # list of all buttons
     _features =  [  'activebackground', 'activeforeground', 'activeimage', 'activebitmap', 'anchor', 'bitmap', 
                     'borderwidth', 'bd', 'bordercolor', 'borderless', 'command', 'compound', 'disabledforeground', 
                     'disabledbackground', 'fg', 'font', 'foreground', 'height', 'image', 'overrelief', 'padx', 
@@ -179,6 +180,7 @@ class Widget(_Canvas):
 
         self.cnf['fg'] = self.cnf.get('fg') if self.cnf.get('fg', None) else self.cnf.get('foreground','black')
         self.cnf['bd'] = self.cnf.get('bd') if self.cnf.get('bd', None) else self.cnf.get('borderwidth',6)
+        self.cnf['borderless'] = self.cnf.get('borderless', False)
         self.cnf['disabledforeground'] = self.cnf.get('disabledforeground', 'grey')
         if self.cnf.get('textvariable') is not None: self.cnf['text'] = self.cnf['textvariable'].get()
         self.cnf['anchor'] = self.cnf.get('anchor', 'center')
@@ -189,6 +191,7 @@ class Widget(_Canvas):
         kw['height'] = kw.get('height', 24)
 
         super(Widget, self).__init__(master=master, **kw)
+        self._buttons.append(self)
         self._size = (self.winfo_width(), self.winfo_height())
         if self.cnf.get('text'): self._text(0,0,text=None, tag='_txt')
         if self.cnf.get('image'): self._image(0,0,image=None, tag='_img')
@@ -211,12 +214,10 @@ class Widget(_Canvas):
                 self.itemconfig('_border2', fill=color)
         main_win.bind_class(main_win,'<FocusIn>', _chngIn, '+')
         main_win.bind_class(main_win,'<FocusOut>', _chngIn, '+')
-
         self._getconfigure2(self.cnf)
 
     def _set_size(self, *ags):
         """Internal function. This will resize everything that is in the button"""
-
         if ags[0].width == self._size[0] and ags[0].height == self._size[1]: return
         self._size = (ags[0].width, ags[0].height)
         self.delete('_bd_color1')
@@ -458,12 +459,15 @@ class Widget(_Canvas):
                 arguments. To get an overview about
                 the allowed keyword arguments call the method keys.
                 """
+                #  Need a better fix ..
                 kw = _TK._cnfmerge((cnf, kw))
                 r = self.master._configure('configure', None, kw)
                 if kw.get('bg') or kw.get('background'):
-                    self.cnf.update( {'bordercolor': self.master['bg']} )
-                    self.itemconfig('_bd_color1', outline=self.master['bg'])
-                    self.itemconfig('_bd_color2', fill=self.master['bg'])
+                    for i in self._buttons:
+                        if i['borderless']:
+                            i.cnf.update( {'bordercolor': i.master['bg']} )
+                            i.itemconfig('_bd_color1', outline=i.master['bg'])
+                            i.itemconfig('_bd_color2', fill=i.master['bg'])
                 return r
 
             self.master.configure = configure
