@@ -1,6 +1,5 @@
 import tkinter as _TK
-from basewidget import _Frame, _Canvas, Widget
-
+from tkmacosx.basewidget import _Frame, _Canvas, Widget
 
 class SFrame(_Frame):
     """### Scrollable Frame Widget.    
@@ -120,11 +119,9 @@ class Button(Widget):
         root.mainloop()"""
 
     # all the instance of class Button will be stored in _button list.
-    _buttons = []
 
     def __init__(self, master=None, cnf={}, **kw):
         super(Button, self).__init__(master=master, cnf=cnf, **kw)
-        self._buttons.append(self)
     
     def invoke(self):
         """Invoke the command associated with the button.
@@ -162,7 +159,7 @@ def demo_sframe():
     root = _TK.Tk()
     frame = SFrame(root, bg='pink')
     frame.pack()
-    for i in range(100):
+    for i in range(50):
         Button(frame, text='Button %s'%i, borderless=1).pack()
     root.mainloop()
 
