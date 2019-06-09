@@ -1,11 +1,11 @@
 import os
 import tkinter as tk
-from widget import *
-from variables import *
 import tkinter.ttk as ttk
 from tkinter.colorchooser import askcolor
 from PIL import Image, ImageTk
-from colors import Hex as C_dict
+from tkmacosx.widget import *
+from tkmacosx.variables import *
+from tkmacosx.colors import Hex as C_dict
 
 def grid(root,row,column):
     "Defines rows and columns if grid method is used"
