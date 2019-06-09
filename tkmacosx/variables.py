@@ -137,16 +137,5 @@ def demo_colorvar():
     root.mainloop()
 
 if __name__ == "__main__":
-    # demo_colorvar()
-
-    from tkinter import *
-    # from tkmacosx import DictVar
-
-    root = Tk()
-
-    dictionary = DictVar(value = {'width': 100, 'height': 200})
-
-    print(type(dictionary.get()))
-    print(dictionary.get())
-    print(dictionary.get('width'))
+    demo_colorvar()
     
