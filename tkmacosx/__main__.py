@@ -5,6 +5,7 @@ from tkinter.colorchooser import askcolor
 from PIL import Image, ImageTk
 from tkmacosx.widget import *
 from tkmacosx.variables import *
+from tkmacosx.colorscale import Colorscale
 from tkmacosx.colors import Hex as C_dict
 
 def grid(root,row,column):
@@ -133,7 +134,11 @@ class sample(tk.Tk):
 
         self.B8 = Button(self.sfr, text='Change Bordercolor', borderless=1, bg="#d0c0ea") 
         self.B8['command']=lambda: self.B7.config(bordercolor=askcolor()[1])
-        self.B8.grid(row=19, columnspan=5)
+        # self.B8.grid(row=19, columnspan=5)
+
+        self.CS1 = Colorscale(self.sfr, value='hex', mousewheel=0,
+            command=lambda e: self.B7.config(bordercolor=e))
+        self.CS1.grid(row=19, columnspan=5, sticky='ew', padx=10)
 
 
         # ------------ Active Image and transparent Image ------------
