@@ -133,6 +133,9 @@ class _Canvas(_TK.Widget):
     def _text(self, *args, **kw):
         """Create text with coordinates x1,y1."""
         return self._create('text', args, kw)
+    def _rectangle(self, *args, **kw):
+        """Create rectangle with coordinates x1,y1,x2,y2."""
+        return self._create('rectangle', args, kw)
     def delete(self, *args):
         """Delete items identified by all tag or ids contained in ARGS."""
         self.tk.call((self._w, 'delete') + args)
@@ -159,6 +162,32 @@ class _Canvas(_TK.Widget):
         (optional above another item)."""
         self.tk.call((self._w, 'raise') + args)
     lift = tkraise = tag_raise
+    def rounded_rect(self, x, y, w, h, c, tag1=None, tag2=None, **kw):
+        'Internal function.'
+        # Need fix to just have one tag to change the background color
+        kw['extent'] = 90
+        kw['style'] = 'arc'
+        kw['outline'] = kw.pop('fill', 'black')
+        if tag1: kw['tag'] = tag1
+        self._arc(x,   y,   x+2*c,   y+2*c,   start= 90, **kw)
+        self._arc(x+w-2*c, y+h-2*c, x+w, y+h, start=270, **kw)
+        self._arc(x+w-2*c, y,   x+w, y+2*c,   start=  0, **kw)
+        self._arc(x,   y+h-2*c, x+2*c,   y+h, start=180, **kw)
+        kw.pop('extent', None)
+        kw.pop('style', None)
+        kw['fill'] = kw.pop('outline', None)
+        if tag2: kw['tag'] = tag2
+        self._line(x+c, y,   x+w-c, y    , **kw)
+        self._line(x+c, y+h, x+w-c, y+h  , **kw)
+        self._line(x,   y+c, x,     y+h-c, **kw)
+        self._line(x+w, y+c, x+w,   y+h-c, **kw)
+    def _rounded(self, x1, y1, x2, y2, r,**kw):
+        self._arc(x1,  y1,  x1+r,   y1+r, start= 90, extent=90, style='pieslice', outline="", **kw)
+        self._arc(x2-r-1, y1, x2-1, y1+r, start=  0, extent=90, style='pieslice', outline="", **kw)
+        self._arc(x1, y2-r-1, x1+r, y2-1, start=180, extent=90, style='pieslice', outline="", **kw)
+        self._arc(x2-r, y2-r, x2-1, y2-1, start=270, extent=90, style='pieslice', outline="", **kw)
+        self._rectangle(x1+r/2, y1, x2-r/2, y2, width=0, **kw)
+        self._rectangle(x1, y1+r/2, x2, y2-r/2, width=0, **kw)
 
 
 class Widget(_Canvas):
@@ -547,26 +576,6 @@ class Widget(_Canvas):
         tmp.destroy()
         return geo
 
-    def rounded_rect(self, x, y, w, h, c, tag1=None, tag2=None, **kw):
-        'Internal function.'
-        # Need fix to just have one tag to change the background color
-        kw['extent'] = 90
-        kw['style'] = 'arc'
-        kw['outline'] = kw.pop('fill', 'black')
-        if tag1: kw['tag'] = tag1
-        self._arc(x,   y,   x+2*c,   y+2*c,   start= 90, **kw)
-        self._arc(x+w-2*c, y+h-2*c, x+w, y+h, start=270, **kw)
-        self._arc(x+w-2*c, y,   x+w, y+2*c,   start=  0, **kw)
-        self._arc(x,   y+h-2*c, x+2*c,   y+h, start=180, **kw)
-        kw.pop('extent', None)
-        kw.pop('style', None)
-        kw['fill'] = kw.pop('outline', None)
-        if tag2: kw['tag'] = tag2
-        self._line(x+c, y,   x+w-c, y    , **kw)
-        self._line(x+c, y+h, x+w-c, y+h  , **kw)
-        self._line(x,   y+c, x,     y+h-c, **kw)
-        self._line(x+w, y+c, x+w,   y+h-c, **kw)
-    
     def _compound(self, flag, height, width):
         "Internal function. Use `compound = 'left'/'right'/'top'/'bottom'` to configure."
         _PiTag = '_img' if self.cnf.get('image') else '_bit'
