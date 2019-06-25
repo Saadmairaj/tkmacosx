@@ -54,7 +54,31 @@ The tkmacosx `SFrame` widget is just like a tkinter Frame but vertically scrolla
           
           root.mainloop()
 
+## Colorscale
 
+Colorscale is a new style color selector which is an alternate to tkinter's colorchooser.
+
+ - **Arguments:**
+
+    * `value`: Get either 'RGB' or 'HEX'.
+    * `command`: callback function with an argument.
+    * `orient`: Set the orientation.
+    * `mousewheel`: Set mousewheel to scroll the marker.
+    * `variable`: Give tkinter variable (`StringVar`).
+    * `showinfo`: Shows hex or rbg while selecting color.
+    * `showinfodelay`: Delay before the showinfo disappears (in ms).
+
+ - **Usage:**
+    
+        from tkinter import *
+        from tkmacosx import Colorscale
+        
+        root = Tk()
+        CS = Colorscale(root, value='hex')
+        CS.pack(side="bottom", padx=3, pady=3)
+        
+        root.mainloop()
+        
 # Variables
 
 ## ColorVar Variable
