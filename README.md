@@ -30,6 +30,9 @@ root.mainloop()
 
     python -m tkmacosx
     
+<p align="center">
+    <img src="https://github.com/Saadmairaj/tkmacosx/blob/master/demonstration.gif">
+</p>
     
 ## Contributing
 
