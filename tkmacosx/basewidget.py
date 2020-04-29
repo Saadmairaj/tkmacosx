@@ -232,17 +232,17 @@ class Widget(_Canvas):
 
         #  Focus in and out effect 
         main_win =  self.winfo_toplevel()
-        # def _chngIn(evt):
-        #     if self.focus_get() is None:
-        #         color = get_shade(self['bg'], 0.04, 'auto-120')
-        #         self.itemconfig('_border1', outline=color)
-        #         self.itemconfig('_border2', fill=color)
-        #     if self.focus_get() and get_shade(self['bg'], 0.04, 'auto-120') == self.itemcget('_border2','fill'):
-        #         color = get_shade(self['bg'], 0.1, 'auto-120')
-        #         self.itemconfig('_border1', outline=color)
-        #         self.itemconfig('_border2', fill=color)
-        # main_win.bind_class(main_win,'<FocusIn>', _chngIn, '+')
-        # main_win.bind_class(main_win,'<FocusOut>', _chngIn, '+')
+        def _chngIn(evt):
+            if self.focus_get() is None:
+                color = get_shade(self['bg'], 0.04, 'auto-120')
+                self.itemconfig('_border1', outline=color)
+                self.itemconfig('_border2', fill=color)
+            if self.focus_get() and get_shade(self['bg'], 0.04, 'auto-120') == self.itemcget('_border2','fill'):
+                color = get_shade(self['bg'], 0.1, 'auto-120')
+                self.itemconfig('_border1', outline=color)
+                self.itemconfig('_border2', fill=color)
+        main_win.bind_class(main_win,'<FocusIn>', _chngIn, '+')
+        main_win.bind_class(main_win,'<FocusOut>', _chngIn, '+')
         self._getconfigure2(self.cnf)
 
     def _set_size(self, *ags):
