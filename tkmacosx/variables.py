@@ -1,5 +1,6 @@
 import tkinter as _TK
 import re
+import ast
 
 
 # Modified Misc._options(...) to make ColorVar work with tkinter 
@@ -114,9 +115,12 @@ class DictVar(_TK.Variable):
     def get(self, key=None, d=None):
         """Return value of variable as string."""
         value = self._tk.globalgetvar(self._name)
-        if not isinstance(value, dict): value = eval(value)
-        if key: return value.get(key, d)
-        else: return value
+        if not isinstance(value, dict): 
+            value = ast.literal_eval(value)
+        if key: 
+            return value.get(key, d)
+        else: 
+            return value
 
 
 # ------------------ Testing ------------------
