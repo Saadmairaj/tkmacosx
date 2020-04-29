@@ -23,7 +23,8 @@ except Exception as e:
         Error_win.destroy()
         os.system('pip install colour')
         import colour as C
-    else: sys.exit(0)
+    else: 
+        sys.exit(0)
 
 
 def check_appearence(cmd='defaults read -g AppleInterfaceStyle'):
