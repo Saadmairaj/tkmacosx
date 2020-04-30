@@ -4,11 +4,17 @@ This module provides some modified widgets of Tkinter which works better on macO
 
 ## Installation
 
-Use the package manager [pip](https://pip.pypa.io/en/stable/) to install tkmacosx.
+Use the package manager [pip](https://pip.pypa.io/en/stable/) to install [tkmacosx](https://pypi.org/project/tkmacosx/).
 
 ```bash
 pip install tkmacosx
 ```
+
+Or install the latest repo
+```
+pip install git+https://github.com/Saadmairaj/tkmacosx#egg=tkmacosx
+```
+
 
 ## Usage
 ```
