@@ -28,5 +28,5 @@ setup(
     keywords=['tkinter', 'macos', 'variable', 'widgets'],
     packages=["tkmacosx"],
     include_package_data=True,
-    install_requires=['colour', 'pillow']
+    install_requires=['colour', 'pillow', 'tkmacosx@git+https://github.com/Saadmairaj/tkmacosx#egg=tkmacosx']
 )
