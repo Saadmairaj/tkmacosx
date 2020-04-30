@@ -1,9 +1,11 @@
 from setuptools import setup
 
+
 def long_description():
     with open('Information.md') as f:
         longdis = f.read()
     return longdis
+
 
 setup(
     name="tkmacosx",
@@ -25,8 +27,9 @@ setup(
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Environment :: MacOS X"
     ],
-    keywords=['tkinter', 'macos', 'variable', 'widgets'],
+    keywords=['tkinter', 'macos', 'variable', 'widgets', 'colorscale', 'tk'],
     packages=["tkmacosx"],
     include_package_data=True,
-    install_requires=['colour', 'pillow', 'tkmacosx@git+https://github.com/Saadmairaj/tkmacosx#egg=tkmacosx']
+    install_requires=['colour', 'pillow',
+                      'tkmacosx@git+https://github.com/Saadmairaj/tkmacosx#egg=tkmacosx']
 )
