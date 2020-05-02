@@ -104,3 +104,6 @@ venv.bak/
 .mypy_cache/
 .vscode/settings.json
 .vscode/launch.json
+.cache-savevar
+test.py
+.DS_Store
