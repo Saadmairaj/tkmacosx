@@ -225,7 +225,7 @@ class Marquee(_TK.Canvas):
         if text_width + 1 + self.cnf.get('left_margin') < frame_width:
             self.after(self.cnf.get('end_delay'), self.coords,
                        'text', 3, self.winfo_height()/2)  # RESETS TEXT
-            delay = self.cnf.get('initial_delay')  # INITITAL DEALY
+            delay = self.cnf.get('initial_delay') + self.cnf.get('end_delay') # INITITAL DEALY
         else:
             # MOVE -1 PIXEL EVERYTIME
             self.move('text', -self.cnf.get('smoothness'), 0)
