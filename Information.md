@@ -11,6 +11,9 @@ pip install tkmacosx
 ## Usage
 
 ```python
+from tkinter import *
+from tkmacosx import Button, ColorVar, Marquee, Colorscale
+
 root = Tk()
 var = ColorVar(value='pink')
 root['bg'] = var
@@ -33,7 +36,7 @@ root.mainloop()
 python -m tkmacosx
 ```
 
-![](https://raw.githubusercontent.com/Saadmairaj/tkmacosx/master/demonstration.gif")
+<!-- ![](https://raw.githubusercontent.com/Saadmairaj/tkmacosx/master/demonstration.gif") -->
 
 ## Widgets
 
