@@ -1,3 +1,17 @@
+#                       Copyright 2020 Saad Mairaj
+# 
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+# 
+#        http://www.apache.org/licenses/LICENSE-2.0
+# 
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+
 import os
 import tkinter as tk
 import tkinter.ttk as ttk
@@ -23,7 +37,7 @@ class sample(tk.Tk):
         self.geometry('420x700+300+100')
         self.title('Mac OSX Button Testing')
         self.wm_attributes('-modified',1)
-        self.main_color = ColorVar(value='#FFA69A')
+        self.main_color = ColorVar(value='lightpink')
         self['bg'] = self.main_color
         grid(self, 20, 5)
         self.L1 = tk.Label(self, text='Comparison', bg=self.main_color, font=('',18,'bold'))
@@ -167,6 +181,7 @@ class sample(tk.Tk):
         self.Scale1.bind('<Leave>', lambda _: self.Scale1.config(showvalue=0))
         self.Scale1.grid(row=22, columnspan=5, sticky='w')
         self.Scale1.set(200)
+        self.update_idletasks()
 
     def change_active_color(self, *ags):
         c1 = self.C1.get() if not self.C1.get() == 'Select' else None

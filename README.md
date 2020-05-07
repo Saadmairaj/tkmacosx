@@ -20,18 +20,25 @@ pip install git+https://github.com/Saadmairaj/tkmacosx#egg=tkmacosx
 
 ```python
 from tkinter import *
-from tkmacosx import SFrame, Button
+from tkmacosx import Button, ColorVar, Marquee, Colorscale
 
 root = Tk()
-frame = SFrame(root, bg='pink')
-frame.pack()
-
-for i in range(50):
-    b = Button(frame, text='Button %s'%i, borderless=1)
-    b.pack()
+var = ColorVar(value='pink')
+root['bg'] = var
+m = Marquee(root, left_margin=30, bg= var, initial_delay=2000,
+            text='Welcome to tkmacosx!! Slide the slider to change color :)')
+m.pack(pady=(10,0))
+b = Button(root, text='Button', borderless=1, fg=var, bg='black')
+b.pack(pady=10)
+c = Colorscale(root, variable=var, value='hex', height=25, mousewheel=0)
+c.pack(pady=(0,10))
 
 root.mainloop()
 ```
+
+<p align="center">
+    <img src="https://github.com/Saadmairaj/tkmacosx/blob/master/sampleimage.png">
+</p>
 
 ## Demonstration
 

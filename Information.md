@@ -11,25 +11,29 @@ pip install tkmacosx
 ## Usage
 
 ```python
-from tkinter import *
-from tkmacosx import SFrame, Button
-
 root = Tk()
-frame = SFrame(root, bg='pink')
-frame.pack()
-
-for i in range(50):
-    b = Button(frame, text='Button %s'%i, borderless=1)
-    b.pack()
+var = ColorVar(value='pink')
+root['bg'] = var
+m = Marquee(root, left_margin=30, bg= var, initial_delay=2000,
+            text='Welcome to tkmacosx!! Slide the slider to change color :)')
+m.pack(pady=(10,0))
+b = Button(root, text='Button', borderless=1, fg=var, bg='black')
+b.pack(pady=10)
+c = Colorscale(root, variable=var, value='hex', height=25, mousewheel=0)
+c.pack(pady=(0,10))
 
 root.mainloop()
 ```
+
+![](https://raw.githubusercontent.com/Saadmairaj/tkmacosx/master/sampleimage.png)
 
 ## Demonstration
 
 ```bash
 python -m tkmacosx
 ```
+
+![](https://raw.githubusercontent.com/Saadmairaj/tkmacosx/master/demonstration.gif")
 
 ## Widgets
 
@@ -116,17 +120,46 @@ Colorscale is a new style color selector which is an alternate to tkinter's colo
    root.mainloop()
    ```
 
+### Marquee
+
+Use `Marquee` for creating scrolling text which moves from right to left only if the text does not fit completely on the window.
+
+- **Arguments:**
+
+  - `text`: Give a string to display.
+  - `font`: Font of the text.
+  - `fg`: Set foreground color of the text.
+  - `fps`: Set fps(frames per seconds).
+  - `left_margin`: Set left margin to make text move further to right before reset.
+  - `initial_delay`: Delay before text start to move. *(in ms)*
+  - `end_delay`: Delay before text reset. *(in ms)*
+  - `smoothness`: Set the smoothness of the animation.
+
+- **Usage:**
+
+   ```python
+   from tkinter import *
+   from tkmacosx import Marquee
+
+   root=Tk()
+   marquee = Marquee(root, left_margin=20, initial_delay=2000, end_delay=2000,
+                     text='This text will move from right to left if does not fit the window.')
+   marquee.pack()
+
+   root.mainloop()
+   ```
+
 ## Variables
 
 ### ColorVar Variable
 
-ColorVar of tkmacosx set same color to each widget it is assigned to. As ColorVar is a tkinter variable wrapper so it will change the color of widgets whenever the change is made to ColorVar instances. ColorVar takes HEX values or all the color names which tkinter supports and the `get()` method returns only the HEX value. It will work with all of the following keyword arguments of diffenert widgets. ***'fg', 'foreground', 'bg', 'background', 'activebackground', 'activeforeground', 'disabledforeground', 'highlightbackground', 'highlightcolor', 'selectforeground', 'readonlybackground', 'selectbackground', 'insertbackground', 'disabledbackground'*** *(might work with more but have not tested).*
+ColorVar of tkmacosx set same color to each widget it is assigned to. As ColorVar is a tkinter variable wrapper so it will change the color of widgets whenever the change is made to ColorVar instances. ColorVar takes HEX values and all the color names which tkinter supports but the `get()` method returns only the HEX value. It will work with all of the following keyword arguments of diffenert widgets *(eg:- `Canvas`, `Frame`, `Button`, `Label`, Canvas items, ...)*. ***'fg', 'foreground', 'bg', 'background', 'activebackground', 'activeforeground', 'disabledforeground', 'highlightbackground', 'highlightcolor', 'selectforeground', 'readonlybackground', 'selectbackground', 'insertbackground', 'disabledbackground', 'activefill', 'activeoutline', 'disabledfill','disabledoutline', 'fill', 'outline', 'disabledbackground'*** *(might work with more but have not tested).*
   
 - **Usage:**
 
    ```python
    from tkinter import Tk, Label
-   from tkmacosx import colors, ColorVar
+   from tkmacosx import colors, ColorVar, Button
 
    root = Tk()
    root.geometry('100x100')
@@ -134,7 +167,9 @@ ColorVar of tkmacosx set same color to each widget it is assigned to. As ColorVa
    color = ColorVar()
    color_list = list(colors.OrderedHex)
    L = Label(root, textvariable=color, bg=color)
-   L.place(relx=0.5, rely=0.5, anchor='center')
+   L.pack(fill='x', expand=1, padx=10, pady=10)
+   B = Button(root, textvariable=color, bg=color)
+   B.pack(fill='x', expand=1, padx=10, pady=10)
 
    def change_color(c=0):
       if c >= len(color_list): c=0
@@ -177,19 +212,27 @@ SaveVar of tkmacosx will let you save and load values of tkinter variables (`Str
 
 - **Usage:**
 
-    ```python
-    from tkinter import *
-    from tkmacosx import SaveVar
+   ```python
+   from tkinter import *
+   from tkmacosx import SaveVar
 
-    root = Tk()
-    var1 = SaveVar(StringVar, root, 'Enter Username', 'Var1', '.cache-savevar')
-    var2 = SaveVar(StringVar, root, 'Enter Password', 'Var2', '.cache-savevar')
-    Entry(root, textvariable=var1).pack()
-    Entry(root, textvariable=var2).pack()
-    root.mainloop()
-    ```
+   root = Tk()
+   var1 = SaveVar(StringVar, root, 'Enter Username', 'Var1', '.cache-savevar')
+   var2 = SaveVar(StringVar, root, 'Enter Password', 'Var2', '.cache-savevar')
+   Entry(root, textvariable=var1).pack()
+   Entry(root, textvariable=var2).pack()
+   root.mainloop()
+   ```
 
 ## Changelog
+
+- **0.1.1**
+  - Added `Marquee` widget.
+  - `ColorVar` now works with `Canvas` items as well.
+  - Fixed `ColorVar` not working with the foreground of `tkmacosx.Button`.
+  - Fixed unnecessary `focus_set()` by `tkmacosx.Button`.
+  - Fixed issues with __main__.py file.
+  - Fixed issues with `SaveVar()`.
 
 - **0.1.0**
   - Added `SaveVar()` funtion to save and load tkinter variable.

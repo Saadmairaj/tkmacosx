@@ -84,17 +84,46 @@ Colorscale is a new style color selector which is an alternate to tkinter's colo
    root.mainloop()
    ```
 
+## Marquee
+
+Use `Marquee` for creating scrolling text which moves from right to left only if the text does not fit completely on the window.
+
+- **Arguments:**
+
+  - `text`: Give a string to display.
+  - `font`: Font of the text.
+  - `fg`: Set foreground color of the text.
+  - `fps`: Set fps(frames per seconds).
+  - `left_margin`: Set left margin to make text move further to right before reset.
+  - `initial_delay`: Delay before text start to move. *(in ms)*
+  - `end_delay`: Delay before text reset. *(in ms)*
+  - `smoothness`: Set the smoothness of the animation.
+
+- **Usage:**
+
+   ```python
+   from tkinter import *
+   from tkmacosx import Marquee
+
+   root=Tk()
+   marquee = Marquee(root, left_margin=20, initial_delay=2000, end_delay=2000,
+                     text='This text will move from right to left if does not fit the window.')
+   marquee.pack()
+
+   root.mainloop()
+   ```
+
 # Variables
 
 ## ColorVar Variable
 
-ColorVar of tkmacosx set same color to each widget it is assigned to. As ColorVar is a tkinter variable wrapper so it will change the color of widgets whenever the change is made to ColorVar instances. ColorVar takes HEX values or all the color names which tkinter supports and the `get()` method returns only the HEX value. It will work with all of the following keyword arguments of diffenert widgets. ***'fg', 'foreground', 'bg', 'background', 'activebackground', 'activeforeground', 'disabledforeground', 'highlightbackground', 'highlightcolor', 'selectforeground', 'readonlybackground', 'selectbackground', 'insertbackground', 'disabledbackground'*** *(might work with more but have not tested).*
+ColorVar of tkmacosx set same color to each widget it is assigned to. As ColorVar is a tkinter variable wrapper so it will change the color of widgets whenever the change is made to ColorVar instances. ColorVar takes HEX values and all the color names which tkinter supports but the `get()` method returns only the HEX value. It will work with all of the following keyword arguments of diffenert widgets *(eg:- `Canvas`, `Frame`, `Button`, `Label`, Canvas items, ...)*. ***'fg', 'foreground', 'bg', 'background', 'activebackground', 'activeforeground', 'disabledforeground', 'highlightbackground', 'highlightcolor', 'selectforeground', 'readonlybackground', 'selectbackground', 'insertbackground', 'disabledbackground', 'activefill', 'activeoutline', 'disabledfill','disabledoutline', 'fill', 'outline', 'disabledbackground'*** *(might work with more but have not tested).*
   
 - **Usage:**
 
    ```python
    from tkinter import Tk, Label
-   from tkmacosx import colors, ColorVar
+   from tkmacosx import colors, ColorVar, Button
 
    root = Tk()
    root.geometry('100x100')
@@ -102,7 +131,9 @@ ColorVar of tkmacosx set same color to each widget it is assigned to. As ColorVa
    color = ColorVar()
    color_list = list(colors.OrderedHex)
    L = Label(root, textvariable=color, bg=color)
-   L.place(relx=0.5, rely=0.5, anchor='center')
+   L.pack(fill='x', expand=1, padx=10, pady=10)
+   B = Button(root, textvariable=color, bg=color)
+   B.pack(fill='x', expand=1, padx=10, pady=10)
 
    def change_color(c=0):
       if c >= len(color_list): c=0
