@@ -37,7 +37,7 @@ root.mainloop()
 ```
 
 <p align="center">
-    <img src="https://github.com/Saadmairaj/tkmacosx/blob/master/sampleimage.png">
+    <img src="https://github.com/Saadmairaj/tkmacosx/blob/master/sampleimage.png" height="247" width="395">
 </p>
 
 ## Demonstration
@@ -47,7 +47,7 @@ python -m tkmacosx
 ```
 
 <p align="center">
-    <img src="https://github.com/Saadmairaj/tkmacosx/blob/master/demonstration.gif">
+    <img src="https://github.com/Saadmairaj/tkmacosx/blob/master/demonstration.gif" height="721" width="420">
 </p>
 
 ## Contributing
