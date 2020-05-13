@@ -13,10 +13,15 @@
 #    limitations under the License.
 
 import re
+import sys
 import ast
-import pickle as pkl
-import tkinter as _TK
 import tkmacosx
+import pickle as pkl
+
+if sys.version_info.major == 2:
+    import Tkinter as _TK
+elif sys.version_info.major == 3:
+    import tkinter as _TK
 
 
 # Modified Misc._options(...) to make ColorVar work with tkinter
@@ -47,13 +52,13 @@ def _configure(self, cmd, cnf, kw):
                       'foreground'):
                 if isinstance(cnf_copy.get(i), _TK.Variable):
                     var = cnf_copy[i]
-                    cbname = var.trace_add('write', lambda *a,
+                    cbname = var.trace_variable('w', lambda a, b, c,
                                            cls=self, opt=i,
                                            tagId=tag, var=var:
                                            cls.itemconfig(tagId, {opt: var.get()}))
                     if (self, (i, tag)) in _all_traces_colorvar:
                         v, cb = _all_traces_colorvar.get((self, (i, tag)))
-                        v.trace_remove('write', cb)
+                        v.trace_vdelete('w', cb)
                         _all_traces_colorvar[(self, (i, tag))] = (var, cbname)
                     else:
                         _all_traces_colorvar[(self, (i, tag))] = (var, cbname)
@@ -96,7 +101,7 @@ def _create(self, itemType, args, kw):  # Args: (val, val, ..., cnf={})
         wid, (opt, tag_id) = key
         var, cbname = value
         if tag_id is None and cbname is None:
-            cbname = var.trace_add('write', lambda *a,
+            cbname = var.trace_variable('w', lambda a, b, c,
                                    cls=self, opt=opt,
                                    tagId=tagId, var=var:
                                    cls.itemconfig(tagId, {opt: var.get()}))
@@ -126,11 +131,11 @@ def _options(self, cnf, kw=None):
                 continue
             elif isinstance(self, tkmacosx.Button) and cnf.get('fill'):
                 i = 'fg'
-            cbname = var.trace_add('write', lambda *a, i=i, var=var,
+            cbname = var.trace_variable('w', lambda a, b, c, i=i, var=var,
                                    cls=self: cls.config({i: var.get()}))
             if (self, i) in _all_traces_colorvar:
                 v, cb = _all_traces_colorvar.get((self, i))
-                v.trace_remove('write', cb)
+                v.trace_vdelete('w', cb)
                 _all_traces_colorvar[(self, i)] = (var, cbname)
             else:
                 _all_traces_colorvar[(self, i)] = (var, cbname)
@@ -181,13 +186,13 @@ class ColorVar(_TK.Variable):
         If NAME matches an existing variable and VALUE is omitted
         then the existing value is retained.
         """
-        super(ColorVar, self).__init__(master, value, name)
+        _TK.Variable.__init__(self, master, value, name)
 
     def set(self, value=''):
         """Set the variable to VALUE."""
         if value.startswith('#'):
             if not bool(self._rgbstring.match(value)):
-                raise ValueError('{} is not a vaild HEX.'.format(value))
+                raise ValueError('"{}" is not a valid HEX.'.format(value))
         elif isinstance(value, str):
             try:
                 r, g, b = self._root.winfo_rgb(value)
@@ -212,7 +217,7 @@ class DictVar(_TK.Variable):
     #### Value holder for Dictionaries.
     Get a specific value by getting the key from this \
     `get(self, key=None, d=None)` method if exists in the dictionary. \n
-    if `key=None` it will returrn the complete dictionory.
+    if `key=None` it will return the complete dictionary.
     """
     _default = {}
 
@@ -239,8 +244,7 @@ class DictVar(_TK.Variable):
             return value
 
 
-def SaveVar(var: _TK.Variable, master=None, value=None, name=None, filename='data.pkl') \
-        -> (_TK.Variable):
+def SaveVar(var, master=None, value=None, name=None, filename='data.pkl'):
     """Save tkinter variable data in a pickle file and load the 
     same value when the program is executed next time. 
 
@@ -300,13 +304,13 @@ def SaveVar(var: _TK.Variable, master=None, value=None, name=None, filename='dat
     var = var(master=master, value=value, name=name)
     defaultval = var.get()  # get a default value of the variable
     update_val()
-    for mode, cbname in (var.trace_info()):
-        if mode[0] == 'write' and update_val.__name__ in cbname:
+    for mode, cbname in (var.trace_vinfo()):
+        if mode[0] == 'w' and update_val.__name__ in cbname:
             try:
-                var.trace_remove('write', cbname)
+                var.trace_vdelete('w', cbname)
             except:
                 pass
-    res = var.trace_add('write',  update_val)
+    res = var.trace_variable('w',  update_val)
     return var
 
 

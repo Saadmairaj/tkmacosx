@@ -1,11 +1,11 @@
 #                       Copyright 2020 Saad Mairaj
-# 
+#
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
 #    You may obtain a copy of the License at
-# 
+#
 #        http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 #    Unless required by applicable law or agreed to in writing, software
 #    distributed under the License is distributed on an "AS IS" BASIS,
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,16 +15,28 @@
 '''
 Newer style colorchoosers for tkinter module.
 
-Version: 0.1.0
+Version: 0.1.1
 '''
 
-import tkinter as tk
-from tkmacosx.basewidget import _Canvas
-from PIL import Image, ImageTk
-from tkinter.font import Font
-from tkinter import font
-import numpy as np
 import os
+import sys
+import numpy as np
+from PIL import Image, ImageTk
+
+if sys.version_info.major == 2:  # For python 2.x
+    import Tkinter as tk
+    from tkFont import Font
+    import tkFont as font
+elif sys.version_info.major == 3:  # For python 3.x
+    import tkinter as tk
+    from tkinter import font
+    from tkinter.font import Font
+
+from tkmacosx.basewidget import _Canvas
+
+
+HEX = 'hex'
+RGB = 'rgb'
 
 
 class Colorscale(_Canvas):
@@ -45,23 +57,25 @@ class Colorscale(_Canvas):
     def __init__(self, master=None, cnf={}, **kw):
         kw = tk._cnfmerge((cnf, kw))
         self.cnf = {
-            'value'         :    kw.pop('value', 'rgb'),
-            'command'       :    kw.pop("command", None),
-            'orient'        :    kw.pop('orient', 'vertical'),
-            'mousewheel'    :    kw.pop("mousewheel", True),
-            'variable'      :    kw.pop('variable', None),
-            'showinfo'      :    kw.pop('showinfo', True),
-            'showinfodelay' :    kw.pop('showinfodelay', 1500),
+            'value':    kw.pop('value', 'hex'),
+            'command':    kw.pop("command", None),
+            'orient':    kw.pop('orient', 'vertical'),
+            'mousewheel':    kw.pop("mousewheel", True),
+            'variable':    kw.pop('variable', None),
+            'showinfo':    kw.pop('showinfo', True),
+            'showinfodelay':    kw.pop('showinfodelay', 1500),
         }
-        kw['width'] = kw.get("width",  250 if 'ver' in self.cnf['orient'] else 30)
-        kw['height'] = kw.get("height", 30 if 'ver' in self.cnf['orient'] else 250)
+        kw['width'] = kw.get(
+            "width",  250 if 'ver' in self.cnf['orient'] else 30)
+        kw['height'] = kw.get(
+            "height", 30 if 'ver' in self.cnf['orient'] else 250)
         kw['highlightthickness'] = kw.get('highlightthickness', 0)
-        tk.Canvas.__init__(self, master=master, **kw)
+        _Canvas.__init__(self, master=master, **kw)
         self.xy_axis = int(self.winfo_width()/3)
-        self._size = (0,0)
+        self._size = (0, 0)
 
         self.np_im = np.load(os.path.dirname
-                (os.path.abspath(__file__))+"/images/colorscale.npy")
+                             (os.path.abspath(__file__))+"/images/colorscale.npy")
         self.image_id = self._image(0, 0, anchor='nw')
 
         # Binds
@@ -69,13 +83,13 @@ class Colorscale(_Canvas):
         self.bind_class(self, "<B1-Motion>", self.move_marker, '+')
         self.set_mousewheel()
         self.bind_class(self, '<Configure>', self.on_resize, '+')
-    
+
     def set_mousewheel(self):
-        '''Intenal function. Sets mousewheel scrolling.'''
+        '''Internal function. Sets mousewheel scrolling.'''
         def on_mousewheel(evt=None):
             "Internal function."
-            if evt.delta <= -1 and bool(self.xy_axis < self.winfo_width() \
-                or self.xy_axis < self.winfo_height()):
+            if evt.delta <= -1 and bool(self.xy_axis < self.winfo_width()
+                                        or self.xy_axis < self.winfo_height()):
                 self.xy_axis += 1
                 self.move_marker(evt, mw=self.xy_axis)
             if evt.delta >= 1 and self.xy_axis > 1:
@@ -84,31 +98,33 @@ class Colorscale(_Canvas):
 
         if self.cnf['mousewheel']:
             self.bind("<MouseWheel>", on_mousewheel)
-        else: self.unbind("<MouseWheel>")
+        else:
+            self.unbind("<MouseWheel>")
 
     def on_resize(self, evt):
         '''Internal function.'''
-        if evt.width == self._size[0] and evt.height == self._size[1]: return
+        if evt.width == self._size[0] and evt.height == self._size[1]:
+            return
         self._size = (evt.width, evt.height)
         self._im = Image.fromarray(self.np_im).rotate(0 if 'ver' in
-                            self.cnf['orient'] else 270, expand=1).resize(
-                            (evt.width, evt.height))
+                                   self.cnf['orient'] else 270, expand=1).resize(
+                                   (evt.width, evt.height))
         self.pixels = self._im.load()
         self._im = ImageTk.PhotoImage(self._im)
         self.itemconfig(self.image_id, image=self._im)
-        
+
         self.delete('marker')
         self.delete('borderline1')
         self.delete('borderline2')
-        self.rounded_rect(1, 1, evt.width-2, evt.height-2, 1, width=2, 
-            fill='#81b3f4', tag1='borderline1', tag2='borderline2')
+        self.rounded_rect(1, 1, evt.width-2, evt.height-2, 1, width=2,
+                          fill='#81b3f4', tag1='borderline1', tag2='borderline2')
         self.rounded_rect(
             evt.width/3 if 'ver' in self.cnf['orient'] else 2,
             2 if 'ver' in self.cnf['orient'] else evt.height/3,
             5 if 'ver' in self.cnf['orient'] else evt.width-4,
             evt.height-4 if 'ver' in self.cnf['orient'] else 5,
             2, width=2, fill="black", tag="marker")
-        
+
     def configure(self, cnf={}, **kw):
         """Configure resources of a widget.
 
@@ -121,7 +137,7 @@ class Colorscale(_Canvas):
             if k in self.cnf.keys():
                 self.cnf[k] = cnf.pop(k)
         self.set_mousewheel()
-        rv = super().configure(**cnf) 
+        rv = super().configure(**cnf)
         if rv is not None:
             rv.update(self.cnf)
             return rv
@@ -132,7 +148,7 @@ class Colorscale(_Canvas):
         if key in self.cnf.keys():
             return self.cnf[key]
         return super().cget(key)
-    __getitem__=cget
+    __getitem__ = cget
 
     def Release(self, evt=None):
         "Internal function."
@@ -159,7 +175,7 @@ class Colorscale(_Canvas):
             hexcode = self.RGB2HEX(RGB[0], RGB[1], RGB[2])
             maker_color = 'black' if (
                 RGB[0]*0.299 + RGB[1]*0.587 + RGB[2]*0.114) > 110 else 'white'
-            
+
             self.itemconfig('borderline1', outline=hexcode)
             self.itemconfig('borderline2', fill=hexcode)
 
@@ -219,7 +235,11 @@ class Colorscale(_Canvas):
     def keys(self):
         """Return a list of all resource names of this widget."""
         return list(self.config().keys())
-
+    
+    def destroy(self):
+        """Destroy this widget."""
+        self.after_cancel(getattr(self, '_remove_id', ' '))
+        return _Canvas.destroy(self)
 
 # ------------------------------------ #
 #           Testing and demo           #
@@ -233,6 +253,7 @@ def demo_colorscale():
     CS.pack(side="bottom", padx=3, pady=3)
     root.mainloop()
     return "break"
+
 
 if __name__ == "__main__":
     demo_colorscale()

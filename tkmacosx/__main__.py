@@ -13,9 +13,16 @@
 #    limitations under the License.
 
 import os
-import tkinter as tk
-import tkinter.ttk as ttk
-from tkinter.colorchooser import askcolor
+import sys
+if sys.version_info.major == 2:
+    import ttk
+    import Tkinter as tk
+    from tkColorChooser import askcolor
+elif sys.version_info.major == 3:
+    from tkinter import ttk
+    import tkinter as tk
+    from tkinter.colorchooser import askcolor
+
 from PIL import Image, ImageTk
 from tkmacosx.widget import *
 from tkmacosx.variables import *
@@ -30,9 +37,9 @@ def grid(root,row,column):
         for x in range(row): tk.Grid.rowconfigure(root, x, weight=1)
     return
 
-class sample(tk.Tk):
+class Sample(tk.Tk):
     def __init__(self):
-        super(sample, self).__init__()
+        tk.Tk.__init__(self)
         self.resizable(0,0)
         self.geometry('420x700+300+100')
         self.title('Mac OSX Button Testing')
@@ -91,7 +98,7 @@ class sample(tk.Tk):
             self.Om2['menu'].entryconfig(i, foreground=list(C_dict)[i])
         
 
-        # ------------ Backgroung Color ------------
+        # ------------ Background Color ------------
 
         # ttk.Separator(self.sfr, orient='vertical').grid(row=6, column=2, columnspan=1, sticky='ew')
         self.L7 = tk.Label(self.sfr, text='2. Change Background color', bg=self.main_color, 
@@ -156,7 +163,6 @@ class sample(tk.Tk):
 
 
         # ------------ Active Image and transparent Image ------------
-
         self.L11 = tk.Label(self.sfr, text='5. Active and Transparent Image', bg=self.main_color, 
             font=('',15,'bold'))
         self.L11.grid(row=20, column=0, columnspan=5, sticky='sew', pady=(50,0))
@@ -206,7 +212,10 @@ class sample(tk.Tk):
             self.B10['image'] = self.Img_1
             self.B10['activeimage'] = self.Img_2
         
-        
+def main():
+    "Demonstration of tkmacosx."
+    Sample().mainloop()
+
 #  Testing Demo 
 if __name__ == "__main__":
-    sample().mainloop()
+    main()

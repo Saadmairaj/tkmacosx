@@ -12,16 +12,24 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-from tkinter import ttk
-import tkinter as _TK
 import re
-import subprocess
+import sys
+
+if sys.version_info.major == 2:
+    import ttk
+    import Tkinter as _TK
+elif sys.version_info.major == 3:
+    from tkinter import ttk
+    import tkinter as _TK
 
 try: 
     import colour as C
 except Exception as e:
-    import sys, os
-    import tkinter.messagebox as ms
+    import os
+    if sys.version_info.major == 2:
+        import tkMessageBox as ms
+    elif sys.version_info.major == 3:
+        import tkinter.messagebox as ms
     Error_win = _TK.Tk()
     Error_win.withdraw()
     message = """
@@ -41,19 +49,20 @@ except Exception as e:
         sys.exit(0)
 
 
-def check_appearence(cmd='defaults read -g AppleInterfaceStyle'):
+def check_appearance(cmd='defaults read -g AppleInterfaceStyle'):
     """### Checks DARK/LIGHT mode of macos. Returns Boolean.
     #### Args:
     - `cmd`: Give commands. Like to check DARK/LIGHT mode the command is `'defaults read -g AppleInterfaceStyle'` .
     """
+    import subprocess
     out, err = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             universal_newlines=True, shell=True).communicate()
     if out: return True
     elif err: return False
 
 
-def get_shade(color, shade: float, mode='auto'):
-    """### Darken or Lghten a shade of A HEX color.
+def get_shade(color, shade, mode='auto'):
+    """### Darken or Lighten a shade of color.
     #### Args:
     1. `color`: Give a color as either HEX or name of the color.
     2. `shade`: The amount of change required. Takes float. eg: shade=0.225.
@@ -90,7 +99,8 @@ def get_shade(color, shade: float, mode='auto'):
                 if float(color[1]*(1-shade) - shade*255) > 0 else 0.0
         B = float(color[2]*(1-shade) - shade*255) \
                 if float(color[2]*(1-shade) - shade*255) > 0 else 0.0
-    else: raise ValueError ('Invalid mode "{}"'. format(mode))
+    else: 
+        raise ValueError ('Invalid mode "{}"'. format(mode))
     return '#%02x%02x%02x' % (int(R),int(G),int(B))  
 
 
@@ -106,7 +116,7 @@ class _Frame(_TK.BaseWidget):
 class _Canvas(_TK.Widget):
     """Internal Class especially for Button widget"""
     def __init__(self, master=None, cnf={}, **kw):
-        super(_Canvas, self).__init__(master, 'canvas', cnf, kw)
+        _TK.Widget.__init__(self, master, 'canvas', cnf, kw)
     
     def find(self, *args):
         """Internal function."""
@@ -234,7 +244,7 @@ class Widget(_Canvas):
         kw['width'] = kw.get('width', 87)
         kw['height'] = kw.get('height', 24)
 
-        super(Widget, self).__init__(master=master, **kw)
+        _Canvas.__init__(self, master=master, **kw)
         self._buttons.append(self)
         self._size = (self.winfo_width(), self.winfo_height())
         if self.cnf.get('text'): self._text(0,0,text=None, tag='_txt')
@@ -345,7 +355,7 @@ class Widget(_Canvas):
 
     def _configure(self, cmd, cnf=None, kw=None):
         'Internal function to configure the inherited class'
-        return super()._configure(cmd, cnf, kw)
+        return _Canvas._configure(self, cmd, cnf, kw)
 
     def configure(self, cnf=None, **kw):
         """Configure resources of a widget.
@@ -361,7 +371,7 @@ class Widget(_Canvas):
         for i in list(kw):
             if i in self._features: 
                 cnf[i] = kw.pop(i,None)
-        r1 = super().configure(**kw)
+        r1 = _Canvas.configure(self, **kw)
         if kw.get('bg') or kw.get('background'):
             self.original_bg = self['bg']
         self.after(10, self._getconfigure2, cnf)
@@ -373,12 +383,12 @@ class Widget(_Canvas):
     def cget(self, key):
         """Return the resource value for a KEY given as string."""
         if key in self._features: return self.cnf[key]
-        else: return super().cget(key)
+        else: return _Canvas.cget(self, key)
     __getitem__ = cget
 
     def _getconfigure2(self, cnf={}, **kw):
         """Internal Function.
-        This function configure all the resouces of the Widget and save it to the class dict."""
+        This function configure all the resources of the Widget and save it to the class dict."""
         kw = _TK._cnfmerge( (cnf, kw) )
         kw = { k:v for k,v in kw.items() if v is not None }        
         self.cnf.update(kw)
@@ -388,9 +398,9 @@ class Widget(_Canvas):
         if self.cnf.get('textvariable') is not None: self.cnf['text'] = self.cnf['textvariable'].get()
 
         if self['state'] == 'disabled':
-            super().configure(bg=self.cnf.get('disabledbackground'))
+            _Canvas.configure(self, bg=self.cnf.get('disabledbackground'))
         elif self['state'] == 'normal':
-            super().configure(bg=self.original_bg)
+            _Canvas.configure(self, bg=self.original_bg)
 
         self._rel = self['relief']
         if self.cnf.get('overrelief') is not None:
@@ -478,7 +488,7 @@ class Widget(_Canvas):
                         fill=kw.get('fg', self.cnf.get('fg')), 
                         disabledfill=kw.get('disabledforeground', 
                         self.cnf.get('disabledforeground')))  
-        # if commented and state='disabled then doesnt disable completely. (NEED FIX)
+        # if commented and state='disabled then doesn't disable completely. (NEED FIX)
         self.after(10, lambda: self.itemconfig( '_txt', state=self['state']))   
              
         if int(self['takefocus']) and self['state'] == 'normal':
@@ -506,7 +516,7 @@ class Widget(_Canvas):
                 arguments. To get an overview about
                 the allowed keyword arguments call the method keys.
                 """
-                #  Need a better fix ..
+                #  Need a better alternative.
                 kw = _TK._cnfmerge((cnf, kw))
                 r = self.master._configure('configure', None, kw)
                 if kw.get('bg') or kw.get('background'):
@@ -531,23 +541,25 @@ class Widget(_Canvas):
             self.itemconfig('_bd_color2', fill=kw.get('bordercolor', bd_color) )
     
     def bind_class(self, className, sequence=None, func=None, add='+'):
-        className = className+str(self)
+        className = className + str(self)
         bindtags = list( self.bindtags() )
-        if className in bindtags: bindtags.remove(className)
+        if className in bindtags: 
+            bindtags.remove(className)
         bindtags.insert(bindtags.index('Canvas'), className)
-        self.bindtags(bindtags)
-        return super().bind_class(className, sequence=sequence, func=func, add=add)
+        self.bindtags(tuple(bindtags))
+        return _Canvas.bind_class(self, className, sequence=sequence, func=func, add=add)
     
     def unbind_class(self, className, sequence):
         className = className+str(self)
         bindtags = list(self.bindtags())
-        if className in bindtags: bindtags.remove(className)
-        self.bindtags(bindtags)
-        return super().unbind_class(className, sequence)
+        if className in bindtags: 
+            bindtags.remove(className)
+        self.bindtags(tuple(bindtags))
+        return _Canvas.unbind_class(self, className, sequence)
 
     def on_press_color(self, **kw):
         '''### Give gradient color effect
-        Internal funtion. return tag
+        Internal function. return tag
         #### Arguments:
         1. `color`: ("#4b91fe", "#055be5")
         2. `tag`
@@ -577,10 +589,10 @@ class Widget(_Canvas):
         return tag 
 
     def _info_button(self, **kw):
-        """Internal Funtion.\n
+        """Internal Function.\n
         This function takes essentials parameters to give
         the approximate width and height accordingly. \n
-        It creates a ttk button and use all the resouces given 
+        It creates a ttk button and use all the resources given 
         and returns width and height of the ttk button, after taking 
         width and height the button gets destroyed also the custom style."""
         _style_tmp = ttk.Style()
@@ -613,7 +625,7 @@ class Widget(_Canvas):
             elif flag is 'right' :
                 width = (width/2-W_im/2, width/2+W_txt/2)
                 height = (height/2, height/2)
-            elif flag is'left':
+            elif flag is 'left':
                 width = (width/2+W_im/2, width/2-W_txt/2)
                 height = (height/2, height/2)
             elif flag is not None:
@@ -627,10 +639,15 @@ class Widget(_Canvas):
     
     def keys(self):
         """Return a list of all resource names of this widget."""
-        K_all = ['background', 'bd', 'bg', 'borderwidth', 'cursor', 'height', 'highlightbackground', 'highlightcolor', 
+        return sorted(['background', 'bd', 'bg', 'borderwidth', 'cursor', 'height', 'highlightbackground', 'highlightcolor', 
             'highlightthickness','relief', 'state', 'takefocus', 'width', 'activebackground', 'activeforeground', 
             'activeimage', 'activebitmap', 'anchor', 'bitmap', 'command', 'compound', 'disabledforeground', 'fg', 
             'font', 'foreground', 'image', 'overrelief', 'padx', 'pady', 'repeatdelay', 'repeatinterval', 'text', 
-            'textvariable', 'underline', 'bordercolor', 'borderless', 'disabledbackground']
-        K_all.sort()
-        return K_all
+            'textvariable', 'underline', 'bordercolor', 'borderless', 'disabledbackground'])
+    
+    def destroy(self):
+        """Destroy this and all descendants widgets. This will
+        end the application of this Tcl interpreter."""
+        if self in self._buttons:
+            self._buttons.remove(self)
+        return _Canvas.destroy(self)

@@ -1,6 +1,18 @@
 # tkmacosx
 
-This module provides some modified widgets of Tkinter which works better on macOS and some more useful functions and classes as well. For example Button of tkmacosx which looks and feels exaclty like a native tkinter button can change its *background* and *foreground* colors. **Read more about all the features on [tkmacosx documentation.](https://github.com/Saadmairaj/tkmacosx/tree/master/tkmacosx)**
+This module provides some modified widgets of Tkinter which works better on macOS and some more useful functions and classes as well. For example Button of tkmacosx which looks and feels exactly like a native tkinter button can change its *background* and *foreground* color on a mac and can do much more.
+
+**Read more about all classes and methods of tkmacosx on [tkmacosx documentation.](https://github.com/Saadmairaj/tkmacosx/tree/master/tkmacosx#documentation-of-tkmacosx).**
+
+- [Button Widget](https://github.com/Saadmairaj/tkmacosx/tree/master/tkmacosx#button-widget)
+- [SFrame Widget](https://github.com/Saadmairaj/tkmacosx/tree/master/tkmacosx#sframe-widget)
+- [Colorscale Widget](https://github.com/Saadmairaj/tkmacosx/tree/master/tkmacosx#colorscale)
+- [Marquee Widget](https://github.com/Saadmairaj/tkmacosx/tree/master/tkmacosx#marquee)
+- [ColorVar Variable](https://github.com/Saadmairaj/tkmacosx/tree/master/tkmacosx#colorvar-variable)
+- [DictVar Variable](https://github.com/Saadmairaj/tkmacosx/tree/master/tkmacosx#dictvar-variable)
+- [SaveVar](https://github.com/Saadmairaj/tkmacosx/tree/master/tkmacosx#savevar)
+- [get_shade](https://github.com/Saadmairaj/tkmacosx/tree/master/tkmacosx#get_shade)
+- [check_appearance](https://github.com/Saadmairaj/tkmacosx/tree/master/tkmacosx#check_appearance)
 
 ## Installation
 

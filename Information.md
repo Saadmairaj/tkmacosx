@@ -1,12 +1,6 @@
 # tkmacosx
 
-This module provides some modified widgets of Tkinter which works better on macOS and some more useful functions and classes as well. For example Button of tkmacosx which looks and feels exaclty like a native tkinter button can change its *background* and *foreground* colors on a mac.
-
-## Installation
-
-```bash
-pip install tkmacosx
-```
+This module provides some modified widgets of Tkinter which works better on macOS and some more useful functions and classes as well. For example Button of tkmacosx which looks and feels exactly like a native tkinter button can change its *background* and *foreground* color on a mac and can do much more.
 
 ## Usage
 
@@ -38,11 +32,11 @@ python -m tkmacosx
 
 <!-- ![](https://raw.githubusercontent.com/Saadmairaj/tkmacosx/master/demonstration.gif") -->
 
-## Widgets
+## Documentation of tkmacosx
 
 ### Button Widget
 
-The tkmacosx `Button` widget is similar to defualt tkinter `Button` but supports all arguments of on a macos inclucding some extra features.
+The tkmacosx `Button` widget is similar to default tkinter `Button` but supports all arguments of on a macos including some extra features.
 
 - **Argument:**
 
@@ -96,7 +90,7 @@ The tkmacosx `SFrame` widget is just like a tkinter Frame but vertically scrolla
    root.mainloop()
    ```
 
-### Colorscale
+### Colorscale Widget
 
 Colorscale is a new style color selector which is an alternate to tkinter's colorchooser.
 
@@ -108,7 +102,7 @@ Colorscale is a new style color selector which is an alternate to tkinter's colo
   - `mousewheel`: Set mousewheel to scroll the marker.
   - `variable`: Give tkinter variable (`StringVar`).
   - `showinfo`: Shows hex or rbg while selecting color.
-  - `showinfodelay`: Delay before the showinfo disappears (in ms).
+  - `showinfodelay`: Delay before the show info disappears (in ms).
 
 - **Usage:**
 
@@ -123,7 +117,7 @@ Colorscale is a new style color selector which is an alternate to tkinter's colo
    root.mainloop()
    ```
 
-### Marquee
+### Marquee Widget
 
 Use `Marquee` for creating scrolling text which moves from right to left only if the text does not fit completely on the window.
 
@@ -152,11 +146,9 @@ Use `Marquee` for creating scrolling text which moves from right to left only if
    root.mainloop()
    ```
 
-## Variables
-
 ### ColorVar Variable
 
-ColorVar of tkmacosx set same color to each widget it is assigned to. As ColorVar is a tkinter variable wrapper so it will change the color of widgets whenever the change is made to ColorVar instances. ColorVar takes HEX values and all the color names which tkinter supports but the `get()` method returns only the HEX value. It will work with all of the following keyword arguments of diffenert widgets *(eg:- `Canvas`, `Frame`, `Button`, `Label`, Canvas items, ...)*. ***'fg', 'foreground', 'bg', 'background', 'activebackground', 'activeforeground', 'disabledforeground', 'highlightbackground', 'highlightcolor', 'selectforeground', 'readonlybackground', 'selectbackground', 'insertbackground', 'disabledbackground', 'activefill', 'activeoutline', 'disabledfill','disabledoutline', 'fill', 'outline', 'disabledbackground'*** *(might work with more but have not tested).*
+ColorVar of tkmacosx set same color to each widget it is assigned to. As ColorVar is a tkinter variable wrapper so it will change the color of widgets whenever the change is made to ColorVar instances. ColorVar takes HEX values and all the color names which tkinter supports but the `get()` method returns only the HEX value. It will work with all of the following keyword arguments of different widgets *(eg:- `Canvas`, `Frame`, `Button`, `Label`, Canvas items, ...)*. ***'fg', 'foreground', 'bg', 'background', 'activebackground', 'activeforeground', 'disabledforeground', 'highlightbackground', 'highlightcolor', 'selectforeground', 'readonlybackground', 'selectbackground', 'insertbackground', 'disabledbackground', 'activefill', 'activeoutline', 'disabledfill','disabledoutline', 'fill', 'outline', 'disabledbackground'*** *(might work with more but have not tested).*
   
 - **Usage:**
 
@@ -227,7 +219,29 @@ SaveVar of tkmacosx will let you save and load values of tkinter variables (`Str
    root.mainloop()
    ```
 
+### get_shade
+
+Darken or Lighten a shade of color.
+
+- **Arguments:**
+
+  - `color`: Give a color as either HEX or name of the color.
+  - `shade`: The amount of change required. Takes float. eg: shade=0.225.
+  - `mode`: `'-'` for darker shade, `'+'` for lighter shade, `'auto-110'` automatically decide lighter or darker. Where 110 is the intensity.
+
+### check_appearance
+
+Checks DARK/LIGHT mode of macOS and returns boolean value. Other settings can also be checked with this function just by passing a different command line argument to check a particular setting to `cmd` parameter of `check_appearance`.
+
+- **Arguments:**
+
+  - `cmd`: Give commands. Like to check DARK/LIGHT mode the command is `'defaults read -g AppleInterfaceStyle'`
+
 ## Changelog
+
+- **0.1.2**
+  - Added python 2.x support.
+  - Fixed half HEX issues.
 
 - **0.1.1**
   - Added `Marquee` widget.
