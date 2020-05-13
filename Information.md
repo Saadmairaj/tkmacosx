@@ -239,6 +239,9 @@ Checks DARK/LIGHT mode of macOS and returns boolean value. Other settings can al
 
 ## Changelog
 
+- **0.1.3**
+  - Fixed `can't invoke "bindtags" command` error.
+
 - **0.1.2**
   - Added python 2.x support.
   - Fixed half HEX issues.
