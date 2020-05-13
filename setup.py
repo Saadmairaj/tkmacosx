@@ -9,7 +9,7 @@ def long_description():
 
 setup(
     name="tkmacosx",
-    version="0.1.2",
+    version="0.1.3",
     description="Tkmacosx is a Python library extension to the Tkinter module for macOS",
     long_description=long_description(),
     long_description_content_type="text/markdown",
@@ -33,7 +33,6 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
-        "Programming Language :: Tcl",
         "Topic :: Software Development",
         "Topic :: Software Development :: Libraries",
         "Topic :: Software Development :: Build Tools",
