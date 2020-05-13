@@ -2,12 +2,12 @@
 
 This module provides some modified widgets of Tkinter which works better on macOS and some more useful functions and classes as well. For example Button of tkmacosx which looks and feels exactly like a native tkinter button can change its *background* and *foreground* color on a mac and can do much more.
 
-**Read more about all the classes and methods of tkmacosx on [tkmacosx documentation.](https://github.com/Saadmairaj/tkmacosx/tree/master/tkmacosx#documentation-of-tkmacosx).**
+**Read more about all the classes and methods of tkmacosx on [tkmacosx documentation](https://github.com/Saadmairaj/tkmacosx/tree/master/tkmacosx#documentation-of-tkmacosx).**
 
 - [Button Widget](https://github.com/Saadmairaj/tkmacosx/tree/master/tkmacosx#button-widget)
 - [SFrame Widget](https://github.com/Saadmairaj/tkmacosx/tree/master/tkmacosx#sframe-widget)
-- [Colorscale Widget](https://github.com/Saadmairaj/tkmacosx/tree/master/tkmacosx#colorscale)
-- [Marquee Widget](https://github.com/Saadmairaj/tkmacosx/tree/master/tkmacosx#marquee)
+- [Colorscale Widget](https://github.com/Saadmairaj/tkmacosx/tree/master/tkmacosx#colorscale-widget)
+- [Marquee Widget](https://github.com/Saadmairaj/tkmacosx/tree/master/tkmacosx#marquee-widget)
 - [ColorVar Variable](https://github.com/Saadmairaj/tkmacosx/tree/master/tkmacosx#colorvar-variable)
 - [DictVar Variable](https://github.com/Saadmairaj/tkmacosx/tree/master/tkmacosx#dictvar-variable)
 - [SaveVar](https://github.com/Saadmairaj/tkmacosx/tree/master/tkmacosx#savevar)
