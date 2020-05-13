@@ -73,14 +73,8 @@ def get_shade(color, shade, mode='auto'):
     
     return hexcode"""
     if isinstance( color, str ):
-        if color.startswith('#'):
-            Hex = color.lstrip('#')
-            color = tuple( int(Hex[i:i+2], 16) for i in (0, 2, 4) )
-        else:  
-            tmp = _TK.Frame()
-            r,g,b = tmp.winfo_rgb(color)
-            tmp.destroy()
-            color = (r/257, g/257, b/257)
+        r,g,b = _TK._default_root.winfo_rgb(color)
+        color = (r/257, g/257, b/257)
     if 'auto' in mode:
         intensity = 110.0 if len(mode)<=4 else float(mode.split('-')[1])
         mode = '-' if float(color[0]*0.299 + color[1]*0.587 \
