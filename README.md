@@ -2,7 +2,7 @@
 
 This module provides some modified widgets of Tkinter which works better on macOS and some more useful functions and classes as well. For example Button of tkmacosx which looks and feels exactly like a native tkinter button can change its *background* and *foreground* color on a mac and can do much more.
 
-**Read more about all classes and methods of tkmacosx on [tkmacosx documentation.](https://github.com/Saadmairaj/tkmacosx/tree/master/tkmacosx#documentation-of-tkmacosx).**
+**Read more about all the classes and methods of tkmacosx on [tkmacosx documentation.](https://github.com/Saadmairaj/tkmacosx/tree/master/tkmacosx#documentation-of-tkmacosx).**
 
 - [Button Widget](https://github.com/Saadmairaj/tkmacosx/tree/master/tkmacosx#button-widget)
 - [SFrame Widget](https://github.com/Saadmairaj/tkmacosx/tree/master/tkmacosx#sframe-widget)
