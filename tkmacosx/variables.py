@@ -163,7 +163,6 @@ def _options(self, cnf, kw=None):
             if isinstance(self, tkmacosx.Button) and cnf.get('fill'):
                 i = 'fill'
             cnf[i] = var.get()
-    print(_all_traces_colorvar)
     # -----------------------------------------------
     res = ()
     for k, v in cnf.items():
