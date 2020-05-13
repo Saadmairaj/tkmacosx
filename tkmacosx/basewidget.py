@@ -302,10 +302,10 @@ class Widget(_Canvas):
         self._rpinloop = True
 
         def cmd(*a):
-            self.cnf['command']() if self.cnf.get('command') else None
             self.unbind_class('button_command', '<ButtonRelease-1>')
             if self.cnf.get('repeatdelay', 0) and self.cnf.get('repeatinterval', 0) and self._rpinloop:
                 self._rpin = self.after( self.cnf.get('repeatinterval', 0), cmd )
+            self.cnf['command']() if self.cnf.get('command') else None
         def on_enter(*a):
             self.itemconfig('_activebg', state='normal')
             self.itemconfig('_border1', state='hidden')
