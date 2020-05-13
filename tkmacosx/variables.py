@@ -1,11 +1,11 @@
 #                       Copyright 2020 Saad Mairaj
-# 
+#
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
 #    You may obtain a copy of the License at
-# 
+#
 #        http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 #    Unless required by applicable law or agreed to in writing, software
 #    distributed under the License is distributed on an "AS IS" BASIS,
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,6 +26,27 @@ elif sys.version_info.major == 3:
 
 # Modified Misc._options(...) to make ColorVar work with tkinter
 _all_traces_colorvar = {}
+
+
+def destroy(self):
+    """Internal function.
+
+    Delete all Tcl commands created for
+    this widget in the Tcl interpreter."""
+    if self._tclCommands is not None:
+        # Deletes the widget from the _all_traces_colorvar 
+        # and deletes the traces too.
+        if self in dict(_all_traces_colorvar.keys()).keys():
+            d = dict(_all_traces_colorvar.keys())
+            key = (self, d[self])
+            var, cbname = _all_traces_colorvar[key]
+            var.trace_vdelete('w', cbname)
+            _all_traces_colorvar.pop(key)
+        #--------------------------------------
+        for name in self._tclCommands:
+            # print '- Tkinter: deleted command', name
+            self.tk.deletecommand(name)
+        self._tclCommands = None
 
 
 def _configure(self, cmd, cnf, kw):
@@ -53,9 +74,9 @@ def _configure(self, cmd, cnf, kw):
                 if isinstance(cnf_copy.get(i), _TK.Variable):
                     var = cnf_copy[i]
                     cbname = var.trace_variable('w', lambda a, b, c,
-                                           cls=self, opt=i,
-                                           tagId=tag, var=var:
-                                           cls.itemconfig(tagId, {opt: var.get()}))
+                                                cls=self, opt=i,
+                                                tagId=tag, var=var:
+                                                cls.itemconfig(tagId, {opt: var.get()}))
                     if (self, (i, tag)) in _all_traces_colorvar:
                         v, cb = _all_traces_colorvar.get((self, (i, tag)))
                         v.trace_vdelete('w', cb)
@@ -102,9 +123,9 @@ def _create(self, itemType, args, kw):  # Args: (val, val, ..., cnf={})
         var, cbname = value
         if tag_id is None and cbname is None:
             cbname = var.trace_variable('w', lambda a, b, c,
-                                   cls=self, opt=opt,
-                                   tagId=tagId, var=var:
-                                   cls.itemconfig(tagId, {opt: var.get()}))
+                                        cls=self, opt=opt,
+                                        tagId=tagId, var=var:
+                                        cls.itemconfig(tagId, {opt: var.get()}))
             _all_traces_colorvar[(self, (opt, tagId))] = (var, cbname)
             _all_traces_colorvar.pop((self, (opt, None)))
     return tagId
@@ -132,7 +153,7 @@ def _options(self, cnf, kw=None):
             elif isinstance(self, tkmacosx.Button) and cnf.get('fill'):
                 i = 'fg'
             cbname = var.trace_variable('w', lambda a, b, c, i=i, var=var,
-                                   cls=self: cls.config({i: var.get()}))
+                                        cls=self: cls.config({i: var.get()}))
             if (self, i) in _all_traces_colorvar:
                 v, cb = _all_traces_colorvar.get((self, i))
                 v.trace_vdelete('w', cb)
@@ -142,6 +163,7 @@ def _options(self, cnf, kw=None):
             if isinstance(self, tkmacosx.Button) and cnf.get('fill'):
                 i = 'fill'
             cnf[i] = var.get()
+    print(_all_traces_colorvar)
     # -----------------------------------------------
     res = ()
     for k, v in cnf.items():
@@ -165,6 +187,7 @@ def _options(self, cnf, kw=None):
     return res
 
 
+_TK.Misc.destroy = destroy
 _TK.Misc._options = _options
 _TK.Canvas._create = _create
 _TK.Misc._configure = _configure
