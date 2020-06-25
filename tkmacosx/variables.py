@@ -19,77 +19,118 @@ import tkmacosx
 import pickle as pkl
 
 if sys.version_info.major == 2:
-    import Tkinter as _TK
+    import Tkinter as _tk
 elif sys.version_info.major == 3:
-    import tkinter as _TK
+    import tkinter as _tk
 
 
 # Modified Misc._options(...) to make ColorVar work with tkinter
 _all_traces_colorvar = {}
 
 
-def destroy(self):
-    """Internal function.
+def _colorvar_patch_destroy(fn):
+    """Internal function.\n
+    Deletes the traces if any when widget is destroy."""
 
-    Delete all Tcl commands created for
-    this widget in the Tcl interpreter."""
-    if self._tclCommands is not None:
-        # Deletes the widget from the _all_traces_colorvar 
-        # and deletes the traces too.
-        if self in dict(_all_traces_colorvar.keys()).keys():
-            d = dict(_all_traces_colorvar.keys())
-            key = (self, d[self])
-            var, cbname = _all_traces_colorvar[key]
-            var.trace_vdelete('w', cbname)
-            _all_traces_colorvar.pop(key)
-        #--------------------------------------
-        for name in self._tclCommands:
-            # print '- Tkinter: deleted command', name
-            self.tk.deletecommand(name)
-        self._tclCommands = None
+    def _patch(self):
+        """Interanl function."""
+        if self._tclCommands is not None:
+            # Deletes the widget from the _all_traces_colorvar 
+            # and deletes the traces too.
+            if self in dict(_all_traces_colorvar.keys()).keys():
+                d = dict(_all_traces_colorvar.keys())
+                key = (self, d[self])
+                var, cbname = _all_traces_colorvar[key]
+                var.trace_vdelete('w', cbname)
+                _all_traces_colorvar.pop(key)
+        return fn(self)
+    return _patch
 
 
-def _configure(self, cmd, cnf, kw):
-    """Internal function."""
-    if kw:
-        cnf = _TK._cnfmerge((cnf, kw))
-    elif cnf:
-        cnf = _TK._cnfmerge(cnf)
-    if cnf is None:
-        return self._getconfigure(_TK._flatten((self._w, cmd)))
-    if isinstance(cnf, str):
-        return self._getconfigure1(_TK._flatten((self._w, cmd, '-'+cnf)))
+def _colorvar_patch_configure(fn):
+    """Internal function.\n
+    Patch for Canvas items to support ColorVar functionality."""
 
-    # -------------------- Added the below block --------------------
-    # Add the resources to the list to have ColorVar functionality.
-    if isinstance(cmd, tuple) and isinstance(self, _TK.Canvas):
-        tags = self.find_withtag(cmd[1])
-        cnf_copy = cnf.copy()
-        for tag in tags:
-            for i in ('activefill', 'activeoutline', 'disabledfill',
-                      'disabledoutline', 'fill', 'outline', 'background',
-                      'activebackground', 'activeforeground',
-                      'disabledbackground', 'disabledforeground',
-                      'foreground'):
-                if isinstance(cnf_copy.get(i), _TK.Variable):
-                    var = cnf_copy[i]
-                    cbname = var.trace_variable('w', lambda a, b, c,
-                                                cls=self, opt=i,
-                                                tagId=tag, var=var:
-                                                cls.itemconfig(tagId, {opt: var.get()}))
-                    if (self, (i, tag)) in _all_traces_colorvar:
-                        v, cb = _all_traces_colorvar.get((self, (i, tag)))
-                        v.trace_vdelete('w', cb)
-                        _all_traces_colorvar[(self, (i, tag))] = (var, cbname)
-                    else:
-                        _all_traces_colorvar[(self, (i, tag))] = (var, cbname)
-                    cnf[i] = var.get()
-    self.tk.call(_TK._flatten((self._w, cmd)) + self._options(cnf))
+    def _patch(self, cmd, cnf, kw):
+        """Internal function."""
+
+        cnf = _tk._cnfmerge((cnf, kw))
+        # -------------------- Added the below block --------------------
+        # Add the resources to the list to have ColorVar functionality.
+        if isinstance(cmd, tuple) and isinstance(self, _tk.Canvas):
+            tags = _tk.Canvas.find_withtag(self, cmd[1])
+            cnf_copy = cnf.copy()
+            for tag in tags:
+                for i in ('activefill', 'activeoutline', 'disabledfill',
+                          'disabledoutline', 'fill', 'outline', 'background',
+                          'activebackground', 'activeforeground',
+                          'disabledbackground', 'disabledforeground',
+                          'foreground'):
+                    if isinstance(cnf_copy.get(i), _tk.Variable):
+                        var = cnf_copy[i]
+                        cbname = var.trace_variable('w', lambda a, b, c,
+                                                    cls=self, opt=i,
+                                                    tagId=tag, var=var:
+                                                    cls.itemconfig(tagId, {opt: var.get()}))
+                        if (self, (i, tag)) in _all_traces_colorvar:
+                            v, cb = _all_traces_colorvar.get((self, (i, tag)))
+                            v.trace_vdelete('w', cb)
+                            _all_traces_colorvar[(self, (i, tag))] = (var, cbname)
+                        else:
+                            _all_traces_colorvar[(self, (i, tag))] = (var, cbname)
+                        cnf[i] = var.get()
+        return fn(self, cmd, cnf, None)
+    return _patch
+
+
+def _colorvar_patch_options(fn):
+    """Internal function.\n
+    Patch for ColorVar to work with tkinter widgets."""
+    
+    def _patch(self, cnf, kw=None):
+        """Interbal function."""
+        if kw:
+            cnf = _tk._cnfmerge((cnf, kw))
+        else:
+            cnf = _tk._cnfmerge(cnf)
+            
+        for i in ('fg', 'foreground', 'bg', 'background',
+                'activebackground', 'activeforeground', 'disabledforeground',
+                'highlightbackground', 'highlightcolor', 'selectforeground',
+                'readonlybackground', 'selectbackground', 'insertbackground',
+                'disabledbackground', 'fill'):
+            if isinstance(cnf.get(i), _tk.Variable):
+                var = cnf[i]
+                if not isinstance(self, tkmacosx.Button) and cnf.get('fill'):
+                    continue
+                elif isinstance(self, tkmacosx.Button) and cnf.get('fill'):
+                    i = 'fg'
+                cbname = var.trace_variable('w', lambda a, b, c, i=i, var=var,
+                                            cls=self: cls.config({i: var.get()}))
+                if (self, i) in _all_traces_colorvar:
+                    v, cb = _all_traces_colorvar.get((self, i))
+                    v.trace_vdelete('w', cb)
+                    _all_traces_colorvar[(self, i)] = (var, cbname)
+                else:
+                    _all_traces_colorvar[(self, i)] = (var, cbname)
+                if isinstance(self, tkmacosx.Button) and cnf.get('fill'):
+                    i = 'fill'
+                cnf[i] = var.get()
+            # [issue-1] once a ColorVar is assigned, it cannot be removed 
+            #           untill the widget is destroyed or give another ColorVar
+            # [issue-1] (trial) the below doesn't work as excepted.
+            # elif (self, i) in _all_traces_colorvar:
+            #     if self[i] != _all_traces_colorvar[(self, i)][0].get():
+            #         print( self, i, self[i])
+            #         v, cb = _all_traces_colorvar.pop((self, i))
+            #         v.trace_vdelete('w', cb)
+        return fn(self, cnf, None)
+    return _patch
 
 
 def _create(self, itemType, args, kw):  # Args: (val, val, ..., cnf={})
     """Internal function."""
-    args = _TK._flatten(args)
+    args = _tk._flatten(args)
     cnf = args[-1]
     if isinstance(cnf, (dict, tuple)):
         args = args[:-1]
@@ -98,14 +139,14 @@ def _create(self, itemType, args, kw):  # Args: (val, val, ..., cnf={})
 
     # -------------------- Added the below block --------------------
     # Add the resources to the list to have ColorVar functionality.
-    ckw = _TK._cnfmerge((cnf, kw))
+    ckw = _tk._cnfmerge((cnf, kw))
     var = None
     for i in ('activefill', 'activeoutline', 'disabledfill',
               'disabledoutline', 'fill', 'outline', 'background',
               'activebackground', 'activeforeground',
               'disabledbackground', 'disabledforeground',
               'foreground'):
-        if isinstance(ckw.get(i), _TK.Variable):
+        if isinstance(ckw.get(i), _tk.Variable):
             var = ckw[i]
             _all_traces_colorvar[(self, (i, None))] = (var, None)
             if i in cnf:
@@ -131,68 +172,13 @@ def _create(self, itemType, args, kw):  # Args: (val, val, ..., cnf={})
     return tagId
 
 
-def _options(self, cnf, kw=None):
-    """Internal function."""
-    if kw:
-        cnf = _TK._cnfmerge((cnf, kw))
-    else:
-        cnf = _TK._cnfmerge(cnf)
-
-    # ----------- Added the below block -------------
-    # Add the resources to the list to have ColorVar functionality.
-    # It'll work as long as it's not an item of canvas or mark_tag of text.
-    for i in ('fg', 'foreground', 'bg', 'background',
-              'activebackground', 'activeforeground', 'disabledforeground',
-              'highlightbackground', 'highlightcolor', 'selectforeground',
-              'readonlybackground', 'selectbackground', 'insertbackground',
-              'disabledbackground', 'fill'):
-        if isinstance(cnf.get(i), _TK.Variable):
-            var = cnf[i]
-            if not isinstance(self, tkmacosx.Button) and cnf.get('fill'):
-                continue
-            elif isinstance(self, tkmacosx.Button) and cnf.get('fill'):
-                i = 'fg'
-            cbname = var.trace_variable('w', lambda a, b, c, i=i, var=var,
-                                        cls=self: cls.config({i: var.get()}))
-            if (self, i) in _all_traces_colorvar:
-                v, cb = _all_traces_colorvar.get((self, i))
-                v.trace_vdelete('w', cb)
-                _all_traces_colorvar[(self, i)] = (var, cbname)
-            else:
-                _all_traces_colorvar[(self, i)] = (var, cbname)
-            if isinstance(self, tkmacosx.Button) and cnf.get('fill'):
-                i = 'fill'
-            cnf[i] = var.get()
-    # -----------------------------------------------
-    res = ()
-    for k, v in cnf.items():
-        if v is not None:
-            if k[-1] == '_':
-                k = k[:-1]
-            if callable(v):
-                v = self._register(v)
-            elif isinstance(v, (tuple, list)):
-                nv = []
-                for item in v:
-                    if isinstance(item, int):
-                        nv.append(str(item))
-                    elif isinstance(item, str):
-                        nv.append(_TK._stringify(item))
-                    else:
-                        break
-                else:
-                    v = ' '.join(nv)
-            res = res + ('-'+k, v)
-    return res
+_tk.Misc.destroy = _colorvar_patch_destroy(_tk.Misc.destroy)
+_tk.Misc._options = _colorvar_patch_options(_tk.Misc._options)
+_tk.Misc._configure = _colorvar_patch_configure(_tk.Misc._configure)
+_tk.Canvas._create = _create
 
 
-_TK.Misc.destroy = destroy
-_TK.Misc._options = _options
-_TK.Canvas._create = _create
-_TK.Misc._configure = _configure
-
-
-class ColorVar(_TK.Variable):
+class ColorVar(_tk.Variable):
     """Value holder for HEX color. Default is white"""
 
     _default = "white"
@@ -208,7 +194,7 @@ class ColorVar(_TK.Variable):
         If NAME matches an existing variable and VALUE is omitted
         then the existing value is retained.
         """
-        _TK.Variable.__init__(self, master, value, name)
+        _tk.Variable.__init__(self, master, value, name)
 
     def set(self, value=''):
         """Set the variable to VALUE."""
@@ -234,7 +220,7 @@ class ColorVar(_TK.Variable):
         return str(value)
 
 
-class DictVar(_TK.Variable):
+class DictVar(_tk.Variable):
     """
     #### Value holder for Dictionaries.
     Get a specific value by getting the key from this \
@@ -253,7 +239,7 @@ class DictVar(_TK.Variable):
         If NAME matches an existing variable and VALUE is omitted
         then the existing value is retained.
         """
-        _TK.Variable.__init__(self, master, value, name)
+        _tk.Variable.__init__(self, master, value, name)
 
     def get(self, key=None, d=None):
         """Return value of variable as string."""
@@ -340,11 +326,11 @@ def SaveVar(var, master=None, value=None, name=None, filename='data.pkl'):
 
 def demo_colorvar():
     import tkmacosx.colors as colors
-    root = _TK.Tk()
+    root = _tk.Tk()
     root.geometry('100x100')
     color = ColorVar()
     color_list = list(colors.OrderedHex)
-    L = _TK.Label(root, textvariable=color, bg=color)
+    L = _tk.Label(root, textvariable=color, bg=color)
     L.place(relx=0.5, rely=0.5, anchor='center')
 
     def change_color(c=0):
@@ -359,13 +345,13 @@ def demo_colorvar():
 
 
 def demo_savevar():
-    root = _TK.Tk()
-    var1 = SaveVar(_TK.StringVar, root, 'Enter Username',
+    root = _tk.Tk()
+    var1 = SaveVar(_tk.StringVar, root, 'Enter Username',
                    'Var1', '.cache-savevar')
-    var2 = SaveVar(_TK.StringVar, root, 'Enter Password',
+    var2 = SaveVar(_tk.StringVar, root, 'Enter Password',
                    'Var2', '.cache-savevar')
-    _TK.Entry(root, textvariable=var1).pack()
-    _TK.Entry(root, textvariable=var2).pack()
+    _tk.Entry(root, textvariable=var1).pack()
+    _tk.Entry(root, textvariable=var2).pack()
     root.mainloop()
 
 
