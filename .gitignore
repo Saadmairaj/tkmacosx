@@ -107,4 +107,9 @@ venv.bak/
 .cache-savevar
 test.py
 .DS_Store
-Need Fixes.txt
+tkmacosx/images(delete)/animated2.gif
+tkmacosx/images(delete)/B1.png
+tkmacosx/images(delete)/B2.png
+tkmacosx/images(delete)/colorscale.npy
+tkmacosx/images(delete)/images.txt
+extra.py
