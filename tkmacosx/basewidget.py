@@ -391,6 +391,22 @@ class _BaseWidget(_Canvas):
             cnf.pop('activebackground')
         return cnf, kw
 
+    def _set_trace(self, kw):
+        """Internal function."""
+        for i in ('overforeground', 'foreground', 'fg', 'activeforeground'):
+            if isinstance(kw.get(i), _tk.Variable):
+                var = kw[i]
+                cbname = var.trace_variable('w', lambda a, b, c, i=i, var=var,
+                                cls=self: cls.config({i: var.get()}))
+                if (self, i) in tkv._all_traces_colorvar:
+                    v, cb = tkv._all_traces_colorvar.get((self, i))
+                    v.trace_vdelete('w', cb)
+                    tkv._all_traces_colorvar[(self, i)] = (var, cbname)
+                else:
+                    tkv._all_traces_colorvar[(self, i)] = (var, cbname)
+                kw[i] = var.get()
+        return kw
+
     def _create_items(self, cmd, safe_create=False, **kw):
         """Internal function.\n
         Checks and creates (text, image, bitmap, border, 
@@ -861,7 +877,7 @@ class _BaseWidget(_Canvas):
             return self._compound(self.cnf.get('compound'), 
                                 self.cnf.get('width'),  
                                 self.cnf.get('height')) \
-                                or {cmd: ((self.cnf['width']/2)-2, 
+                                or {cmd: ((self.cnf['width']/2), 
                                            self.cnf['height']/2)}
 
     def _set_coords(self, cnf={}, **kw):
@@ -900,21 +916,8 @@ class _BaseWidget(_Canvas):
         """Internal Function.
         This function configure all the resources of 
         the Widget and save it to the class dict."""
-        kw = _cnfmerge((cnf, kw))
-        for i in ('overforeground', 'foreground', 'fg', 'activeforeground'):
-            if isinstance(kw.get(i), _tk.Variable):
-                var = kw[i]
-                cbname = var.trace_variable('w', lambda a, b, c, i=i, var=var,
-                                cls=self: cls.config({i: var.get()}))
-                if (self, i) in tkv._all_traces_colorvar:
-                    v, cb = tkv._all_traces_colorvar.get((self, i))
-                    v.trace_vdelete('w', cb)
-                    tkv._all_traces_colorvar[(self, i)] = (var, cbname)
-                else:
-                    tkv._all_traces_colorvar[(self, i)] = (var, cbname)
-                kw[i] = var.get()
-
-        self.cnf, kw = self._make_dictionaries(self.cnf, kw)
+        self.cnf, kw = self._make_dictionaries(self.cnf, 
+                            self._set_trace(_cnfmerge((cnf, kw))))
         # Checks the items
         self._create_items('check')
         # >.<
@@ -1113,7 +1116,7 @@ class _BaseWidget(_Canvas):
     def _compound(self, flag, width, height):
         """Internal function.\n
         Use `compound = 'left'/'right'/'top'/'bottom'` to configure."""
-        width -= 2
+        # width -= 2
         _PiTag = ''
         if self.cnf.get('image', self.cnf.get('activeimage')):
             _PiTag = '_img'
@@ -1153,7 +1156,7 @@ class ButtonBase(_BaseWidget):
     """Internal class used for tkinter macos Buttton"""
 
     def __init__(self, master=None, cnf={}, **kw):
-        kw = _cnfmerge((cnf, kw))
+        kw = self._set_trace(_cnfmerge((cnf, kw)))
         kw = {k: v for k, v in kw.items() if v is not None}
         self._after_IDs = {} # _after_IDs
         self._fixed_size = {'w': False, 'h': False}
@@ -1256,7 +1259,7 @@ class SFrameBase(_Frame):
         self.cnf = {}
         self._after_ids = {}
         self.cnf['scrollbarwidth'] = kw.pop('scrollbarwidth', 10)
-        self.cnf['mousewheel'] = kw.pop('scrollbarwidth', 10)
+        self.cnf['mousewheel'] = kw.pop('mousewheel', True)
         self.cnf['avoidmousewheel'] = kw.pop('avoidmousewheel', ())
         self.cnf['canvas'] = kw.pop('canvas', _tk.Canvas(master=master, 
                                                          highlightthickness=0,
@@ -1392,7 +1395,7 @@ class SFrameBase(_Frame):
     __getitem__ = cget
 
 
-class MarqueeBase(_Canvas):
+class MarqueeBase(_tk.Canvas):
     """Base class for Marquee."""
 
     def __init__(self, master=None, cnf={}, **kw):
@@ -1411,7 +1414,7 @@ class MarqueeBase(_Canvas):
         )
         kw['height'] = kw.get('height', 24)
         kw['highlightthickness'] = kw.get('highlightthickness', 0)
-        _Canvas.__init__(self, master=master, **kw)
+        _tk.Canvas.__init__(self, master=master, **kw)
         self._create('text', (3, 1), dict(anchor='w', tag='text', text=self.cnf.get('text'),
                                           font=self.cnf.get('font'), fill=self.cnf.get('fg')))
         _bind(self, className='configure',
@@ -1424,7 +1427,7 @@ class MarqueeBase(_Canvas):
         height = bbox[3] - bbox[1] + 8
         if int(self['height']) == height: 
             return
-        _Canvas._configure(self, 'configure', {'height': height}, None)
+        _tk.Canvas._configure(self, 'configure', {'height': height}, None)
 
     def _reset(self, force_reset=False):
         """Internal function.\n
@@ -1482,19 +1485,19 @@ class MarqueeBase(_Canvas):
             end_delay=kw.pop('end_delay', self.cnf.get('end_delay')),
             smoothness=kw.pop('smoothness', self.cnf.get('smoothness')),
         )
-        _Canvas._configure(self, ('itemconfigure','text'), dict(text=self.cnf.get('text'),
+        _tk.Canvas._configure(self, ('itemconfigure','text'), dict(text=self.cnf.get('text'),
                         font=self.cnf.get('font'), fill=self.cnf.get('fg')), None)
         self._set_height()
-        return _Canvas._configure(self, cmd, kw, None)
+        return _tk.Canvas._configure(self, cmd, kw, None)
 
     def cget(self, key):
         """Return the resource value for a KEY given as string."""
         if key in self.cnf.keys():
             return self.cnf['key']
-        return _Canvas.cget(self, key)
+        return _tk.Canvas.cget(self, key)
     __getitem__ = cget
 
     def destroy(self):
         """Destroy this widget."""
         self.after_cancel(self.after_id)
-        return _Canvas.destroy(self)
+        return _tk.Canvas.destroy(self)
