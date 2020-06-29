@@ -15,7 +15,6 @@
 import re
 import sys
 import ast
-import tkmacosx
 import pickle as pkl
 
 if sys.version_info.major == 2:
@@ -25,8 +24,19 @@ elif sys.version_info.major == 3:
 
 
 # Modified Misc._options(...) to make ColorVar work with tkinter
+# {(self, option, tag): (var, cbname)}
 _all_traces_colorvar = {}
 
+
+def _colorvar_patch_cget(fn):
+    """Internal function."""
+    def _patch(self, key):
+        """Return the resource value for a KEY given as string."""
+        if (self, key) in _all_traces_colorvar:
+            return _all_traces_colorvar[(self, key)][0]
+        return fn(self, key)
+    return _patch
+            
 
 def _colorvar_patch_destroy(fn):
     """Internal function.\n
@@ -55,11 +65,11 @@ def _colorvar_patch_configure(fn):
         """Internal function."""
 
         cnf = _tk._cnfmerge((cnf, kw))
+        cnf_copy = dict(cnf)
         # -------------------- Added the below block --------------------
         # Add the resources to the list to have ColorVar functionality.
         if isinstance(cmd, tuple) and isinstance(self, _tk.Canvas):
-            tags = _tk.Canvas.find_withtag(self, cmd[1])
-            cnf_copy = cnf.copy()
+            tags = self.find('withtag', cmd[1])
             for tag in tags:
                 for i in ('activefill', 'activeoutline', 'disabledfill',
                           'disabledoutline', 'fill', 'outline', 'background',
@@ -71,7 +81,8 @@ def _colorvar_patch_configure(fn):
                         cbname = var.trace_variable('w', lambda a, b, c,
                                                     cls=self, opt=i,
                                                     tagId=tag, var=var:
-                                                    cls.itemconfig(tagId, {opt: var.get()}))
+                                                    cls._configure(('itemconfigure',tagId), 
+                                                            {opt: var.get()}))
                         if (self, (i, tag)) in _all_traces_colorvar:
                             v, cb = _all_traces_colorvar.get((self, (i, tag)))
                             v.trace_vdelete('w', cb)
@@ -88,7 +99,7 @@ def _colorvar_patch_options(fn):
     Patch for ColorVar to work with tkinter widgets."""
     
     def _patch(self, cnf, kw=None):
-        """Interbal function."""
+        """Internal function."""
         if kw:
             cnf = _tk._cnfmerge((cnf, kw))
         else:
@@ -98,13 +109,9 @@ def _colorvar_patch_options(fn):
                 'activebackground', 'activeforeground', 'disabledforeground',
                 'highlightbackground', 'highlightcolor', 'selectforeground',
                 'readonlybackground', 'selectbackground', 'insertbackground',
-                'disabledbackground', 'fill'):
+                'disabledbackground'):
             if isinstance(cnf.get(i), _tk.Variable):
                 var = cnf[i]
-                if not isinstance(self, tkmacosx.Button) and cnf.get('fill'):
-                    continue
-                elif isinstance(self, tkmacosx.Button) and cnf.get('fill'):
-                    i = 'fg'
                 cbname = var.trace_variable('w', lambda a, b, c, i=i, var=var,
                                             cls=self: cls.config({i: var.get()}))
                 if (self, i) in _all_traces_colorvar:
@@ -113,8 +120,6 @@ def _colorvar_patch_options(fn):
                     _all_traces_colorvar[(self, i)] = (var, cbname)
                 else:
                     _all_traces_colorvar[(self, i)] = (var, cbname)
-                if isinstance(self, tkmacosx.Button) and cnf.get('fill'):
-                    i = 'fill'
                 cnf[i] = var.get()
             # [issue-1] once a ColorVar is assigned, it cannot be removed 
             #           untill the widget is destroyed or give another ColorVar
@@ -159,14 +164,15 @@ def _create(self, itemType, args, kw):  # Args: (val, val, ..., cnf={})
         self._w, 'create', itemType,
         *(args + self._options(cnf, kw))))
 
-    for key, value in _all_traces_colorvar.copy().items():
+    for key, value in dict(_all_traces_colorvar).items():
         wid, (opt, tag_id) = key
         var, cbname = value
         if tag_id is None and cbname is None:
             cbname = var.trace_variable('w', lambda a, b, c,
                                         cls=self, opt=opt,
                                         tagId=tagId, var=var:
-                                        cls.itemconfig(tagId, {opt: var.get()}))
+                                        cls._configure(('itemconfigure',tagId), 
+                                                {opt: var.get()}))
             _all_traces_colorvar[(self, (opt, tagId))] = (var, cbname)
             _all_traces_colorvar.pop((self, (opt, None)))
     return tagId
