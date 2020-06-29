@@ -22,11 +22,11 @@ Read more about tkmacosx in detail on
 https://github.com/Saadmairaj/tkmacosx/tree/master/tkmacosx.
 """
 
-from tkmacosx.basewidget import check_appearance, get_shade
-from tkmacosx.variables import ColorVar, DictVar, demo_colorvar, SaveVar, demo_savevar
-from tkmacosx.widget import Button, SFrame, demo_sframe, demo_button, demo_marquee, Marquee
-from tkmacosx.colors import Hex, OrderedHex
-from tkmacosx.colorscale import Colorscale, demo_colorscale
+from tkmacosx.basewidget import check_appearance, get_shade, delta
+from tkmacosx.variables import ColorVar, DictVar, SaveVar, demo_colorvar, demo_savevar
+from tkmacosx.widget import Button, SFrame, Marquee, demo_sframe, demo_button, demo_marquee
+from tkmacosx.colors import Hex, OrderedHex, all_colors, named_colors, hue_color
+from tkmacosx.colorscale import Colorscale, demo_colorscale, gradient
 
 if __name__ == "__main__":
     demo_sframe()
