@@ -17,17 +17,22 @@ if sys.version_info.major == 2:
     import Tkinter as _TK
 elif sys.version_info.major == 3:
     import tkinter as _TK
-from tkmacosx.basewidget import _Frame, _Canvas, Widget
+import tkmacosx.basewidget as tkb
 
 
-class SFrame(_Frame):
-    """### Scrollable Frame Widget.    
+class SFrame(tkb.SFrameBase):
+    """### Scrollable Frame ButtonBase.    
     (Only supports vertical scrolling)
 
-    ### Agrs:
     Sames as tkinter Frame. These are some extra resources.
-    1. `scrollbarwidth`: Set the width of scrollbar.
-    2. `mousewheel`: Set mousewheel scrolling.
+    - `scrollbarwidth`: Set the width of scrollbar.
+    - `mousewheel`: Set mousewheel scrolling.
+    - `avoidmousewheel`: Give widgets that also have mousewheel scrolling and is a child of SFrame \
+        this will configure widgets to support their mousewheel scrolling as well. \
+        For eg:- Text widget inside SFrame can have mousewheel scrolling as well as SFrame.
+
+    Scrollbar of SFrame can be configured by calling `scrollbar_configure(**options)`. 
+    To access methods of the scrollbar it can be called through the scrollbar instance `self['scrollbar']`.
 
     ### How to use?
     Use it like a normal frame.
@@ -43,107 +48,24 @@ class SFrame(_Frame):
 
         root.mainloop()
     """
+    def __init__(self, master=None, cnf={}, **kw):
+        tkb.SFrameBase.__init__(self, master=master, cnf=cnf, **kw)
+        # Extra functions
+        self.scrollbar_configure = self['scrollbar'].configure
 
-    def __init__(self, master=None, **kw):
-        self.scrollbarwidth = kw.pop('scrollbarwidth', 10)
-        self.mousewheel = kw.pop('mousewheel', 1)
-        self._canvas = _TK.Canvas(master=master, highlightthickness=0, width=kw.pop('width', 250),
-                                  height=kw.pop('height', 250))
-        _Frame.__init__(self, self._canvas, **kw)
-        self.yScroll = _TK.Scrollbar(
-            self._canvas, orient='vertical', width=self.scrollbarwidth)
-        self.yScroll.place(relx=1, rely=0, anchor='ne', relheight=1)
-        self.yScroll.configure(command=self._canvas.yview)
-        self._canvas.configure(yscrollcommand=self.yScroll.set)
-        self._canvas.create_window(0, 0, anchor='nw', tags="window", window=self,
-                                   width=self._canvas.winfo_reqwidth()-self.yScroll.winfo_reqwidth())
-        self._canvas.bind("<Configure>", self._configure_height, add="+")
-        self.bind_class(self, "<Configure>", self._configure_window, add="+")
-        self._mouse_scrolling()
-        self._geometryManager()
-
-    def _mouse_scrolling(self):
-        """Internal function."""
-        if self.mousewheel:
-            self.bind_class(self, '<Enter>', lambda _:
-                            self.bind_all('<MouseWheel>', self._on_mouse_scroll))
-            self.bind_class(self, '<Leave>', lambda _:
-                            self.unbind_all('<MouseWheel>'))
-        else:
-            self.unbind_class(self, '<Enter>')
-            self.unbind_class(self, '<Leave>')
-
-    def _on_mouse_scroll(self, evt):
-        """Internal function."""
-        if evt.state == 0:
-            self._canvas.yview_scroll(-1*(evt.delta), 'units')
-
-    def _configure_height(self, evt):
-        """Internal function."""
-        if self.winfo_height() < self._canvas.winfo_height():
-            self._canvas.itemconfig(
-                "window", height=self._canvas.winfo_height(), anchor='nw')
-        self._canvas.itemconfig(
-            'window', width=self._canvas.winfo_width()-self.yScroll.winfo_width())
-
-    def _configure_window(self, evt):
-        """Internal function."""
-        # this will update the position of scrollbar when scrolled from mousewheel.
-        # fixes some bugs
-        # makes scrolling more smoother
-        self.update()
-        self._canvas.configure(scrollregion=self._canvas.bbox('all'))
-
-    def _geometryManager(self):
-        """Internal function."""
-        # Can be done in a loop with setatr but then it underlines with red when these
-        # attributes are called as they're created at runtime.
-        self.grid = self.grid_configure = self._canvas.grid_configure
-        self.grid_forget = self._canvas.grid_forget
-        self.grid_info = self._canvas.grid_info
-        self.grid_remove = self._canvas.grid_remove
-        self.pack = self.pack_configure = self._canvas.pack_configure
-        self.pack_forget = self._canvas.pack_forget
-        self.pack_info = self._canvas.pack_info
-        self.place = self.place_configure = self._canvas.place_configure
-        self.place_forget = self._canvas.place_forget
-        self.place_info = self._canvas.place_info
-
-    def configure(self, cnf=None, **kw):
-        """Configure resources of a widget.
-
-        The values for resources are specified as keyword
-        arguments. To get an overview about
-        the allowed keyword arguments call the method keys.
-        """
-        kw = _TK._cnfmerge((cnf, kw))
-        self._canvas['width'] = kw.pop('width', self._canvas['width'])
-        self._canvas['height'] = kw.pop('height', self._canvas['height'])
-        self.yScroll['width'] = kw.pop('scrollbarwidth', self.yScroll['width'])
-        self.mousewheel = kw.pop('mousewheel', self.mousewheel)
-        self._mouse_scrolling()
-        return _Frame.configure(self, **kw)
-
-    def cget(self, key):
-        """Return the resource value for a KEY given as string."""
-        if key in ('scrollbarwidth', 'mousewheel'):
-            return self.__dict__.get(key)
-        return _Frame.cget(self, key)
-    config = configure
-    __getitem__ = cget
-
-
-class Button(Widget):
+class Button(tkb.ButtonBase):
     """ Button for macos, supports almost all the features of tkinter button,
     - Looks very similar to ttk Button.
     - There are few extra features as compared to default Tkinter Button:
     - To check the list of all the resources. To get an overview about
-        the allowed keyword arguments call the method keys 
+        the allowed keyword arguments call the method `keys`. 
             print(Button().keys())
 
     ### Examples:
         import tkinter as tk
         import tkmacosx as tkm
+        import tkinter.ttk as ttk
+
         root = tk.Tk()
         root.geometry('200x200')
         tkm.Button(root, text='Mac OSX', bg='lightblue', fg='yellow').pack()
@@ -154,6 +76,7 @@ class Button(Widget):
     ### Get a cool gradient effect in activebackground color.
         import tkinter as tk
         import tkmacosx as tkm
+        
         root = tk.Tk()
         root.geometry('200x200')
         tkm.Button(root, text='Press Me!!', activebackground=('pink','blue') ).pack()
@@ -164,7 +87,7 @@ class Button(Widget):
     # all the instance of class Button will be stored in _button list.
 
     def __init__(self, master=None, cnf={}, **kw):
-        Widget.__init__(self, master=master, cnf=cnf, **kw)
+        tkb.ButtonBase.__init__(self, master=master, cnf=cnf, **kw)
 
     def invoke(self):
         """Invoke the command associated with the button.
@@ -174,11 +97,11 @@ class Button(Widget):
         the button. This command is ignored if the button's state
         is disabled.
         """
-        if self['state'] == 'normal':
+        if self['state'] not in ('disable', 'disabled'):
             return self.cnf['command']() if self.cnf.get('command') else None
 
 
-class Marquee(_TK.Canvas):
+class Marquee(tkb.MarqueeBase):
     """Use `Marquee` for creating scrolling text which moves from 
     right to left only if the text does not fit completely.
 
@@ -194,95 +117,45 @@ class Marquee(_TK.Canvas):
 
     ### Example: 
         root=tk.Tk()
-        marquee = Marquee(root, text='This text will move from right to left if does not fit the window.')
+        marquee = Marquee(root, 
+                          text='This text will move from right to left if does not fit the window.')
         marquee.pack()
-        root.mainloop()"""
+        root.mainloop()
+        
+    ### To move the text when cursor is over the text then follow the below example.
 
-    def __init__(self, master=None, cnf={}, **kw):
-        kw = _TK._cnfmerge((cnf, kw))
-        self.cnf = dict(
-            text=kw.pop('text', ''),
-            font=kw.pop('font', None),
-            fg=kw.pop('fg', 'black') if kw.get(
-                'fg') else kw.pop('foreground', 'black'),
-            fps=kw.pop('fps', 30),
-            left_margin=kw.pop('left_margin', 10),
-            initial_delay=kw.pop('initial_delay', 1000),
-            end_delay=kw.pop('end_delay', 1000),
-            smoothness=kw.pop('smoothness', 1),  # 1 <= smooth < 1
-        )
-        kw['height'] = kw.get('height', 24)
-        kw['highlightthickness'] = kw.get('highlightthickness', 0)
-        _TK.Canvas.__init__(self, master=master, **kw)
-        self.create_text(3, 1, anchor='w', tag='text', text=self.cnf.get('text'),
-                         font=self.cnf.get('font'), fill=self.cnf.get('fg'))
-        self.bind_class(self, '<Configure>', self.check, '+')
-        self.after_id = ' '
-
-    def check(self, evt=None):
-        "Sets the text properly in the frame."
-        self.coords('text', 3, self.winfo_height()/2)
-        text_width = self.bbox('text')[2]   # TEXT WIDTH
-        frame_width = self.winfo_width()    # FRAME WIDTH
-        if text_width + 1 < frame_width:
-            self.after_cancel(self.after_id)
-            self.coords('text', 3, self.winfo_height()/2)  # RESETS TEXT
-            self.after_id = ' '
-        elif self.after_id == ' ':
-            delay = self.cnf.get('initial_delay')  # INITITAL DEALY
-            self.after_id = self.after(delay, self.animate)
-
-    def animate(self, evt=None):
-        "Process text and move text."
-        text_width = self.bbox('text')[2]   # TEXT WIDTH
-        frame_width = self.winfo_width()    # FRAME WIDTH
-        delay = int(self.cnf.get('smoothness')*1000 / self.cnf.get('fps'))
-        if text_width + 1 + self.cnf.get('left_margin') < frame_width:
-            self.after(self.cnf.get('end_delay'), self.coords,
-                       'text', 3, self.winfo_height()/2)  # RESETS TEXT
-            delay = self.cnf.get('initial_delay') + \
-                self.cnf.get('end_delay')  # INITITAL DEALY
-        else:
-            # MOVE -1 PIXEL EVERYTIME
-            self.move('text', -self.cnf.get('smoothness'), 0)
-        self.after_id = self.after(delay, self.animate)
-
-    def configure(self, cnf={}, **kw):
-        """Configure resources of a widget.
-
-        The values for resources are specified as keyword
-        arguments. To get an overview about
-        the allowed keyword arguments call the method keys.
+        text = "Please hover over the text to move it. \
+        This text will move only if the cursor hovers over the text widget".
+        root = tk.Tk()
+        m = tkm.Marquee(root, bg='lightgreen', text=text)
+        m.pack()
+        m.stop(True)
+        m.bind('<Enter>', lambda _: m.play())
+        m.bind('<Leave>', lambda _: m.stop())
+        root.mainloop()
         """
-        kw = _TK._cnfmerge((cnf, kw))
-        self.cnf = dict(
-            text=kw.pop('text', self.cnf.get('text')),
-            font=kw.pop('font', self.cnf.get('font')),
-            fg=kw.pop('fg', self.cnf.get('fg')) if kw.get('fg')
-            else kw.pop('foreground', self.cnf.get('foreground')),
-            fps=kw.pop('fps', self.cnf.get('fps')),
-            left_margin=kw.pop('left_margin', self.cnf.get('left_margin')),
-            initial_delay=kw.pop(
-                'initial_delay', self.cnf.get('initial_delay')),
-            end_delay=kw.pop('end_delay', self.cnf.get('end_delay')),
-            smoothness=kw.pop('smoothness', self.cnf.get('smoothness')),
-        )
-        self.itemconfig('text', text=self.cnf.get('text'),
-                        font=self.cnf.get('font'), fill=self.cnf.get('fg'))
-        return _TK.Canvas.configure(self, **kw)
 
-    def cget(self, key):
-        """Return the resource value for a KEY given as string."""
-        if key in self.cnf.keys():
-            return self.cnf['key']
-        return _TK.Canvas.cget(self, key)
-    __getitem__ = cget
-    config = configure
-
-    def destroy(self):
-        """Destroy this widget."""
+    def reset(self):
+        """Reset the text postion."""
+        self._reset(True)
+        self._stop_state = False
+    
+    def stop(self, reset=False):
+        """Stop the text movement."""
+        if reset: 
+            self.reset()
+        self._stop_state = True
         self.after_cancel(self.after_id)
-        return _TK.Canvas.destroy(self)
+        self.after_id = ' '
+    
+    def play(self, reset=False):
+        """Play/continue the text movement."""
+        if not self._stop_state: return
+        self._stop_state = False
+        if reset:
+            self.reset()
+        self._animate()
+        
 
 # ------------------ Testing ------------------
 
