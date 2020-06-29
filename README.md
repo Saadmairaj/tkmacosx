@@ -49,7 +49,7 @@ root.mainloop()
 ```
 
 <p align="center">
-    <img src="https://github.com/Saadmairaj/tkmacosx/blob/master/sampleimage.png" height="247" width="395">
+    <img src="https://github.com/Saadmairaj/tkmacosx/blob/master/assets/sampleimage.png" height="250">
 </p>
 
 ## Demonstration
@@ -59,7 +59,7 @@ python -m tkmacosx
 ```
 
 <p align="center">
-    <img src="https://github.com/Saadmairaj/tkmacosx/blob/master/demonstration.gif" height="721" width="420">
+    <img src="https://github.com/Saadmairaj/tkmacosx/blob/master/assets/demonstration.gif" height="700">
 </p>
 
 ## Contributing
