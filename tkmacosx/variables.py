@@ -47,12 +47,12 @@ def _colorvar_patch_destroy(fn):
         if self._tclCommands is not None:
             # Deletes the widget from the _all_traces_colorvar 
             # and deletes the traces too.
-            if self in dict(_all_traces_colorvar.keys()).keys():
-                d = dict(_all_traces_colorvar.keys())
-                key = (self, d[self])
-                var, cbname = _all_traces_colorvar[key]
-                var.trace_vdelete('w', cbname)
-                _all_traces_colorvar.pop(key)
+            for key, value in dict(_all_traces_colorvar).items():
+                if self == key[0]:
+                    var, cbname = value
+                    try: var.trace_vdelete('w', cbname)
+                    except: pass
+                    _all_traces_colorvar.pop(key)
         return fn(self)
     return _patch
 
@@ -148,33 +148,33 @@ def _create(self, itemType, args, kw):  # Args: (val, val, ..., cnf={})
     var = None
     for i in ('activefill', 'activeoutline', 'disabledfill',
               'disabledoutline', 'fill', 'outline', 'background',
-              'activebackground', 'activeforeground',
-              'disabledbackground', 'disabledforeground',
-              'foreground'):
+              'activebackground', 'activeforeground', 'foreground',
+              'disabledbackground', 'disabledforeground'):
         if isinstance(ckw.get(i), _tk.Variable):
             var = ckw[i]
             _all_traces_colorvar[(self, (i, None))] = (var, None)
-            if i in cnf:
+            if isinstance(cnf, dict) and i in cnf:
                 cnf[i] = var.get()
             elif i in kw:
                 kw[i] = var.get()
     # ---------------------------------------------------------------
 
     tagId = self.tk.getint(self.tk.call(
-        self._w, 'create', itemType,
-        *(args + self._options(cnf, kw))))
+                self._w, 'create', itemType,
+                *(args + self._options(cnf, kw))))
 
     for key, value in dict(_all_traces_colorvar).items():
-        wid, (opt, tag_id) = key
-        var, cbname = value
-        if tag_id is None and cbname is None:
-            cbname = var.trace_variable('w', lambda a, b, c,
-                                        cls=self, opt=opt,
-                                        tagId=tagId, var=var:
-                                        cls._configure(('itemconfigure',tagId), 
-                                                {opt: var.get()}))
-            _all_traces_colorvar[(self, (opt, tagId))] = (var, cbname)
-            _all_traces_colorvar.pop((self, (opt, None)))
+        if isinstance(len(key[1]), (tuple, list)):
+            wid, (opt, tag_id) = key
+            var, cbname = value
+            if tag_id is None and cbname is None:
+                cbname = var.trace_variable('w', lambda a, b, c,
+                                            cls=self, opt=opt,
+                                            tagId=tagId, var=var:
+                                            cls._configure(('itemconfigure',tagId), 
+                                                    {opt: var.get()}))
+                _all_traces_colorvar[(self, (opt, tagId))] = (var, cbname)
+                _all_traces_colorvar.pop((self, (opt, None)))
     return tagId
 
 
