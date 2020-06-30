@@ -100,7 +100,7 @@ The tkmacosx `SFrame` widget is just like a tkinter Frame but vertically scrolla
 
    ```python
    from tkinter import *
-   from tkmacosx import SFrame
+   from tkmacosx import SFrame, Button
 
    root = Tk()
    root.geometry('350x300')
@@ -115,7 +115,7 @@ The tkmacosx `SFrame` widget is just like a tkinter Frame but vertically scrolla
    frame.config(avoidmousewheel=(text, frame2))
    frame.pack(expand=1, fill='both')
    for i in range(50):
-      tkm.Button(frame2, text='Button %s'%i).pack()
+      Button(frame2, text='Button %s'%i).pack()
       text.insert('end', 'Text Line: %s\n'%i)
 
    root.mainloop()
@@ -197,7 +197,7 @@ Use `Marquee` for creating scrolling text which moves from right to left only if
    This text will move only if the cursor hovers over \
    the text widget."""
 
-   root = tk.Tk()
+   root = Tk()
    root['bg'] = '#333'
    Marquee(root, bg='#FEE715', fg='#101820', text=text1).pack(pady=10)
    m = Marquee(root, fg='#FEE715', bg='#101820', text=text2)
