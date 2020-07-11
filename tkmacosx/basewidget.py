@@ -243,14 +243,6 @@ def get_shade(color, shade, mode='auto'):
     return '#%02x%02x%02x' % (color[0], color[1], color[2])
 
 
-class _Frame(_tk.BaseWidget):
-    """Don't use this Frame widget. The widget has no geometry manager.\n
-    It is used in SFrame widget to support screen."""
-
-    def __init__(self, master=None, cnf={}, **kw):
-        _tk.BaseWidget.__init__(self, master, 'frame', cnf, kw)
-
-
 class _Canvas(_tk.Widget):
     """Internal Class."""
 
@@ -773,7 +765,7 @@ class _BaseWidget(_Canvas):
                         cnf[i] = self.cnf.get(i)
 
             if self._fixed_size['w'] and kw.get('width', True):
-                kw.cnf['width'] = self.cnf['width']
+                kw['width'] = self.cnf['width']
             if self._fixed_size['h'] and kw.get('height', True):
                 kw['height'] = self.cnf['height']
             self._fixed_size['w'] = True if kw.get('width') else False
@@ -932,7 +924,6 @@ class _BaseWidget(_Canvas):
                         or opt == 'compound':
                     self._set_coords(**self._get_options(
                                      ('_txt', '_img', '_bit'), kw))
-
         # Size
         if bool({'text', 'font', 'textvariable', 'image', 'bitmap', 'compound',
                  'padx', 'pady', 'width', 'height', 'activeimage',
@@ -958,16 +949,20 @@ class _BaseWidget(_Canvas):
 
         def _chngIn(evt):
             """Internal function."""
-            if self.focus_get() is None:
-                color = get_shade(self['bg'], intensity, 'auto-120')
-                _Canvas._configure(self, ('itemconfigure', '_border'),
-                                   {'outline': color}, None)
-            c1 = get_shade(self['bg'], intensity, 'auto-120')
-            c2 = self.itemcget('_border', 'outline')
-            if self.focus_get() and c1 == c2:
-                color = get_shade(self['bg'], 0.1, 'auto-120')
-                _Canvas._configure(self, ('itemconfigure', '_border'),
-                                   {'outline': color}, None)
+            try:
+                if self.focus_get() is None:
+                    color = get_shade(self['bg'], intensity, 'auto-120')
+                    _Canvas._configure(self, ('itemconfigure', '_border'),
+                            {'outline': color}, None)
+                c1 = get_shade(self['bg'], intensity, 'auto-120')
+                c2 = self.itemcget('_border', 'outline')
+                if self.focus_get() and c1 == c2:
+                    color = get_shade(self['bg'], 0.1, 'auto-120')
+                    _Canvas._configure(self, ('itemconfigure', '_border'),
+                             {'outline': color}, None)
+            # [issue-8] tkinter issue with combobox (w = w.children[n])
+            except KeyError: pass
+
         _bind(main_win, 
               {'className': 'focus%s' % str(self),
                'sequence': '<FocusIn>', 'func': _chngIn},
@@ -1108,7 +1103,7 @@ class _BaseWidget(_Canvas):
         if self['state'] in 'disabled': return
         self._active('on_release')
         self._rpinloop = False
-        if self._rpin: self.after_cancel(self._rpin)
+        if getattr(self, '_rpin', None): self.after_cancel(self._rpin)
         _bind(self, {'className': 'on_press_enter', 'sequence': '<Enter>'},
               {'className': 'on_press_leave', 'sequence': '<Leave>'},
               {'className': 'button_command', 'sequence': '<ButtonRelease-1>'})
@@ -1167,7 +1162,6 @@ class ButtonBase(_BaseWidget):
                 self.cnf[i] = kw.pop(i, None)
 
         self.cnf['fg'] = self.cnf['foreground'] = self.cnf.get('fg', self.cnf.get('foreground', 'black'))
-        # self.cnf['text'] = self.cnf.get('textvariable', self.cnf.get('text', ''))
         self.cnf['anchor'] = self.cnf.get('anchor', 'center')
         self.cnf['borderless'] = self.cnf.get('borderless', False)
         
@@ -1178,6 +1172,7 @@ class ButtonBase(_BaseWidget):
         kw['width'] = kw.get('width', 87)
         kw['height'] = kw.get('height', 24)
         kw['takefocus'] = kw.get('takefocus', 1)
+        kw['bg'] = kw.pop('bg', kw.pop('background', 'white'))
         kw['highlightthickness'] = kw.get('highlightthickness', 0)
 
         _Canvas.__init__(self, master=master, **kw)
@@ -1248,7 +1243,7 @@ class ButtonBase(_BaseWidget):
         return _Canvas.destroy(self)
 
 
-class SFrameBase(_Frame):
+class SFrameBase(_tk.Frame):
     """Base Class for SFrame."""
 
     _features = ('scrollbarwidth', 'mousewheel',
@@ -1268,7 +1263,8 @@ class SFrameBase(_Frame):
         self.cnf['scrollbar'] = kw.pop('scrollbar', _tk.Scrollbar(self.cnf['canvas'],
                                                                   orient='vertical', 
                                                                   width=self.cnf['scrollbarwidth']))
-        _Frame.__init__(self, self.cnf['canvas'], **kw)
+        _tk.Frame.__init__(self, self.cnf['canvas'], **kw)
+        self.cnf['canvas']['bg'] = self['bg']
         self.cnf['scrollbar'].place(relx=1, rely=0, anchor='ne', relheight=1)
         self.cnf['scrollbar'].configure(command=self.cnf['canvas'].yview)
         self.cnf['canvas'].configure(yscrollcommand=self.cnf['scrollbar'].set)
@@ -1291,15 +1287,13 @@ class SFrameBase(_Frame):
             """Internal function.\n
             Binds <Enter> and <Leave> to the widget 
             to enable/disable mousewheel scrolling."""
-            # [issue 1] doesn't work with Sframe inside Sframe.
-            if isinstance(wid, SFrameBase):
-                return
-            _bind(wid,
-                  {'className': 'mw_state_sframe', 'sequence':
-                   '<Enter>', 'func': lambda _: self._mouse_scrolling(False)},
-                  {'className': 'mw_state_sframe', 'sequence':
-                   '<Leave>', 'func': lambda _: self._mouse_scrolling(True)})
-
+            binds = [{'className': 'mw_state_sframe', 'sequence':
+                   '<Leave>', 'func': lambda _: self._mouse_scrolling(True)}]
+            if not isinstance(wid, SFrameBase):
+                binds.append({'className': 'mw_state_sframe', 'sequence': 
+                    '<Enter>', 'func': lambda _: self._mouse_scrolling(False)})
+            _bind(wid, *binds)
+    
         if isinstance(widgets, (list, tuple)):
             for widget in widgets:
                 set_widget(widget)
@@ -1331,43 +1325,33 @@ class SFrameBase(_Frame):
 
     def _on_mouse_scroll(self, evt):
         """Internal function."""
+        if self.winfo_height() < self.cnf['canvas'].winfo_height(): 
+            return 
         if evt.state == 0:
             self.cnf['canvas'].yview_scroll(-1*delta(evt), 'units')
 
     def _configure_height(self, evt):
         """Internal function."""
-        if self.winfo_height() < self.cnf['canvas'].winfo_height():
-            self.cnf['canvas'].itemconfig("window",
-                                          height=self.cnf['canvas'].winfo_height(), 
-                                          anchor='nw')
-        self.cnf['canvas'].itemconfig('window',
-                                      width=self.cnf['canvas'].winfo_width()-\
-                                            self.cnf['scrollbar'].winfo_width())
-        self.update()
+        width = self.cnf['canvas'].winfo_width()-self.cnf['scrollbar'].winfo_width()
+        self.cnf['canvas'].itemconfig('window', width=width)
 
     def _configure_window(self, evt):
         """Internal function."""
         # this will update the position of scrollbar when scrolled from mousewheel.
         # fixes some bugs
         # makes scrolling more smoother
-        self.cnf['canvas'].configure(
-            scrollregion=self.cnf['canvas'].bbox('all'))
-        self.update()
+        self.after_cancel(self._after_ids.get(0, ' '))
+        self._after_ids[0] = self.after(1, lambda: self.cnf['canvas'].configure(
+                scrollregion=self.cnf['canvas'].bbox('all')))
 
     def _geometryManager(self):
         """Internal function."""
-        # Can be done in a loop with setatr but then it underlines with red when these
-        # attributes are called as they're created at runtime.
-        self.grid = self.grid_configure = self.cnf['canvas'].grid_configure
-        self.grid_forget = self.cnf['canvas'].grid_forget
-        self.grid_info = self.cnf['canvas'].grid_info
-        self.grid_remove = self.cnf['canvas'].grid_remove
-        self.pack = self.pack_configure = self.cnf['canvas'].pack_configure
-        self.pack_forget = self.cnf['canvas'].pack_forget
-        self.pack_info = self.cnf['canvas'].pack_info
-        self.place = self.place_configure = self.cnf['canvas'].place_configure
-        self.place_forget = self.cnf['canvas'].place_forget
-        self.place_info = self.cnf['canvas'].place_info
+        # Use set to support the following in both python 2 and python 3
+        geo_methods = [m for m in (set(_tk.Pack.__dict__) | set(_tk.Grid.__dict__) |
+                       set(_tk.Place.__dict__)) if m not in _tk.Frame.__dict__]
+        for m in geo_methods:
+            if m[0] != '_' and 'config' not in m:
+                setattr(self, m, getattr(self.cnf['canvas'], m))
 
     def _configure(self, cmd, cnf=None, kw=None):
         kw = _tk._cnfmerge((cnf, kw))
@@ -1382,7 +1366,9 @@ class SFrameBase(_Frame):
             'height', self.cnf['canvas']['height'])
         self._mouse_scrolling(self.cnf['mousewheel'])
         self._avoid_mousewheel(self.cnf['avoidmousewheel'])
-        _return = _Frame._configure(self, cmd, {}, kw)
+        _return = _tk.Frame._configure(self, cmd, {}, kw)
+        if kw.get('bg', kw.get('background')):
+            self.cnf['canvas']['bg'] = self['bg']
         if isinstance(_return, dict):
             _return.update(self.cnf)
         return _return
@@ -1391,7 +1377,7 @@ class SFrameBase(_Frame):
         """Return the resource value for a KEY given as string."""
         if key in self._features:
             return self.cnf.get(key)
-        return _Frame.cget(self, key)
+        return _tk.Frame.cget(self, key)
     __getitem__ = cget
 
 
