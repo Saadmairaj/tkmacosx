@@ -317,7 +317,11 @@ Checks DARK/LIGHT mode of macOS and returns boolean value. Other settings can al
 - **0.1.4**
   - Added new feature `"gradient"` to `Colorscale` widget.
   - Added new features to `Button` widget.
+  - Added new `stop`, `play` and `reset` methods to Marquee.
+  - Added new feature `avoidmousewheel` to SFrame.
   - Fixed height not working with Button widget issue.
+  - Fixed `foreground` argument not working in Button widget.
+  - Fixed SFrame not autosizing according to widgets.
   - Redesign classes of widgets.
   - Removed large images.
   - Removed numpy and PIL dependencies.
