@@ -21,8 +21,8 @@ c.pack(pady=(0,10))
 
 root.mainloop()
 ```
-
-![](https://github.com/Saadmairaj/tkmacosx/blob/master/assets/sampleimage.png)
+<!-- https://raw.githubusercontent.com/Saadmairaj/tkmacosx/master/assets/Button.gif -->
+![](https://raw.githubusercontent.com/Saadmairaj/tkmacosx/master/assets/sampleimage.png)
 
 ## Demonstration
 
@@ -78,7 +78,7 @@ The tkmacosx `Button` widget is alternative to tkinter's Button that supports al
    root.mainloop()
    ```
 
-  ![](https://github.com/Saadmairaj/tkmacosx/blob/master/assets/Button.gif)
+  ![](https://raw.githubusercontent.com/Saadmairaj/tkmacosx/master/assets/Button.gif)
 
    <!-- <p align="center">
       <img src="https://github.com/Saadmairaj/tkmacosx/blob/master/assets/Button.gif">
@@ -121,7 +121,7 @@ The tkmacosx `SFrame` widget is just like a tkinter Frame but vertically scrolla
    root.mainloop()
    ```
 
-  ![](https://github.com/Saadmairaj/tkmacosx/blob/master/assets/SFrame.gif)
+  ![](https://raw.githubusercontent.com/Saadmairaj/tkmacosx/master/assets/SFrame.gif)
 
    <!-- <p align="center">
       <img src="https://github.com/Saadmairaj/tkmacosx/blob/master/assets/SFrame.gif">
@@ -164,7 +164,7 @@ Colorscale is a new style color selector which is an alternate to tkinter's colo
    root.mainloop()
    ```
 
-  ![](https://github.com/Saadmairaj/tkmacosx/blob/master/assets/Colorscale.gif)
+  ![](https://raw.githubusercontent.com/Saadmairaj/tkmacosx/master/assets/Colorscale.gif)
 
   <!-- <p align="center">
     <img src="https://github.com/Saadmairaj/tkmacosx/blob/master/assets/Colorscale.gif">
@@ -208,7 +208,7 @@ Use `Marquee` for creating scrolling text which moves from right to left only if
    root.mainloop()
    ```
 
-  ![](https://github.com/Saadmairaj/tkmacosx/blob/master/assets/Marquee.gif)
+  ![](https://raw.githubusercontent.com/Saadmairaj/tkmacosx/master/assets/Marquee.gif)
 
   <!-- <p align="center">
     <img src="https://github.com/Saadmairaj/tkmacosx/blob/master/assets/Marquee.gif">
@@ -244,7 +244,7 @@ ColorVar of tkmacosx set same color to each widget it is assigned to. As ColorVa
    root.mainloop()
    ```
 
-  ![](https://github.com/Saadmairaj/tkmacosx/blob/master/assets/Colorvar.gif)
+  ![](https://raw.githubusercontent.com/Saadmairaj/tkmacosx/master/assets/Colorvar.gif)
 
   <!-- <p align="center">
     <img src="https://github.com/Saadmairaj/tkmacosx/blob/master/assets/Colorvar.gif">
