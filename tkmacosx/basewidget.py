@@ -1035,9 +1035,10 @@ class _BaseWidget(_Canvas):
 
         elif value in ('on_leave', 'on_release') or value == False:  # When not active (False)
             if self['state'] != 'pressed':
-                self.cnf['state'] = self.cnf['_state']
+                if self.cnf.get('_state'): 
+                    self.cnf['state'] = self.cnf['_state']
                 if value == 'on_release':
-                    del self.cnf['_state']
+                    self.cnf.pop('_state', None)
                     if self['state'] == 'active': self['state'] = 'normal'
                 _Canvas._configure(self, ('itemconfigure', '_activebg'), 
                                    {'state': 'hidden'}, None)
