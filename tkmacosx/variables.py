@@ -82,7 +82,7 @@ def _colorvar_patch_configure(fn):
                                                     cls=self, opt=i,
                                                     tagId=tag, var=var:
                                                     cls._configure(('itemconfigure',tagId), 
-                                                            {opt: var.get()}))
+                                                            {opt: var.get()}, None))
                         if (self, (i, tag)) in _all_traces_colorvar:
                             v, cb = _all_traces_colorvar.get((self, (i, tag)))
                             v.trace_vdelete('w', cb)
@@ -164,7 +164,7 @@ def _create(self, itemType, args, kw):  # Args: (val, val, ..., cnf={})
                 *(args + self._options(cnf, kw))))
 
     for key, value in dict(_all_traces_colorvar).items():
-        if isinstance(len(key[1]), (tuple, list)):
+        if isinstance(key[1], (tuple, list)):
             wid, (opt, tag_id) = key
             var, cbname = value
             if tag_id is None and cbname is None:
@@ -172,7 +172,7 @@ def _create(self, itemType, args, kw):  # Args: (val, val, ..., cnf={})
                                             cls=self, opt=opt,
                                             tagId=tagId, var=var:
                                             cls._configure(('itemconfigure',tagId), 
-                                                    {opt: var.get()}))
+                                                    {opt: var.get()}, None))
                 _all_traces_colorvar[(self, (opt, tagId))] = (var, cbname)
                 _all_traces_colorvar.pop((self, (opt, None)))
     return tagId
