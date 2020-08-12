@@ -22,6 +22,8 @@ Read more about tkmacosx in detail on
 https://github.com/Saadmairaj/tkmacosx/tree/master/tkmacosx.
 """
 
+__version__ = '0.1.4'
+
 from tkmacosx.basewidget import check_appearance, get_shade, delta
 from tkmacosx.variables import ColorVar, DictVar, SaveVar, demo_colorvar, demo_savevar
 from tkmacosx.widget import Button, SFrame, Marquee, demo_sframe, demo_button, demo_marquee
