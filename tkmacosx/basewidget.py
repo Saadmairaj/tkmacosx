@@ -1480,7 +1480,7 @@ class MarqueeBase(_tk.Canvas):
     def cget(self, key):
         """Return the resource value for a KEY given as string."""
         if key in self.cnf.keys():
-            return self.cnf['key']
+            return self.cnf[key]
         return _tk.Canvas.cget(self, key)
     __getitem__ = cget
 
