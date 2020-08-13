@@ -1,5 +1,13 @@
 # tkmacosx
 
+[![GitHub license](https://img.shields.io/github/license/Saadmairaj/tkmacosx.svg)](https://github.com/Saadmairaj/tkmacosx/blob/master/LICENSE)
+[![GitHub issues-closed](https://img.shields.io/github/issues-closed/Saadmairaj/tkmacosx.svg)](https://github.com/Saadmairaj/tkmacosx/issues)
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Saadmairaj/tkmacosx/graphs/commit-activity)
+[![PyPI version shields.io](https://img.shields.io/pypi/v/tkmacosx)](https://pypi.org/project/tkmacosx/)
+[![Downloads](https://pepy.tech/badge/tkmacosx)](https://pepy.tech/project/tkmacosx) 
+[![Downloads](https://pepy.tech/badge/tkmacosx/month)](https://pepy.tech/project/tkmacosx/month)
+[![Documentation Status](https://readthedocs.org/projects/ansicolortags/badge/?version=latest)](https://github.com/Saadmairaj/tkmacosx/tree/master/tkmacosx#documentation-of-tkmacosx)
+
 This module provides some modified widgets of Tkinter which works better on macOS and some more useful functions and classes as well. For example Button of tkmacosx which looks and feels exactly like a native tkinter button can change its *background* and *foreground* color on a mac and can do much more.
 
 **Read more about all the classes and methods of tkmacosx on [tkmacosx documentation](https://github.com/Saadmairaj/tkmacosx/tree/master/tkmacosx#documentation-of-tkmacosx).**
