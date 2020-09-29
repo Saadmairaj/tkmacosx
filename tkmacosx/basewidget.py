@@ -12,7 +12,6 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-import re
 import sys
 
 if sys.version_info.major == 2:
@@ -51,6 +50,7 @@ except ImportError as e:
         sys.exit(0)
 
 import tkmacosx.variables as tkv
+
 
 def delta(evt):
     """Modified delta to work with all platforms."""
@@ -436,6 +436,7 @@ class _BaseWidget(_Canvas):
                 fill = self.cnf.get('activeforeground', 'white')
             ids.append(self._create('text', (0, 0), {
                        'text': None, 'tag': '_txt', 'fill': fill}))
+        
         # Image item (image and activeimage).
         if check_tag('_img') and cond_image:
             img = self.cnf.get('image', '')
@@ -443,6 +444,7 @@ class _BaseWidget(_Canvas):
                 img = self.cnf.get('activeimage', img)
             ids.append(self._create('image', (0, 0), {
                        'image': None, 'tag': '_img', 'image': img}))
+        
         # Bitmap items (bitmap and activebitmap).
         if check_tag('_bit') and cond_bitmap:
             bit = self.cnf.get('image', '')
@@ -450,44 +452,72 @@ class _BaseWidget(_Canvas):
                 bit = self.cnf.get('activeimage', bit)
             ids.append(self._create('bitmap', (0, 0), {
                        'bitmap': None, 'tag': '_bit', 'bitmap': bit}))
+        
         # Border color item.
         if check_tag('_bd_color'):
-            _bd_points = (0, -1,
-                          self.cnf.get('width', 87),
-                          self.cnf.get('height', 24)+3, 7)  # was 6
-            ids.append(self.rounded_rect(_bd_points, width=6,
-                                         tag='_bd_color', style='arc',
-                                         outline=self.cnf.get('bordercolor',
-                                         get_shade(self['bg'], 0.04, 'auto-120'))))
+            bd_color = self.cnf.get('bordercolor', get_shade(self['bg'], 0.04, 'auto-120'))
+            if self._type == 'circle':
+                pad = 2
+                width = r = int(self.cnf.get('width', 87)/2)  # radius = x = y (in pixels)
+                _bd_points = (pad-width, pad-width, r*2+width-pad, r*2+width-pad)
+                kw_bd_color = {
+                    'tag': '_bd_color', 
+                    'state': 'hidden' if self['state'] in ('pressed', 'active') else 'normal',
+                    'width': width*2,'outline': bd_color}
+                ids.append(self._create('oval', _bd_points, kw_bd_color))
+            else:
+                _bd_points = (0, -1, self.cnf.get('width', 87), self.cnf.get('height', 24)+3, 7)  # was 6
+                ids.append(self.rounded_rect(
+                    _bd_points, width=6, tag='_bd_color', style='arc', outline=bd_color))
+        
         # Border item.
         if check_tag('_border'):
             bo_color = get_shade(self['bg'], 0.1, 'auto-120')
-            h = 4
-            if int(self['highlightthickness']):
-                h += 1
-            _bo_points = (2, 2,
-                          self.cnf.get('width', 87)-5,
-                          self.cnf.get('height', 24)-h,
-                          4)  # was 3
-            ids.append(self.rounded_rect(_bo_points, width=1,
-                                         outline=bo_color, smooth=1,
-                                         tag='_border', style='arc', 
-                                         state='hidden' if self['state'] in (
-                                             'pressed', 'active') else 'normal'))
+            if self._type == 'circle':
+                pad = 2
+                r = int(self.cnf.get('width', 87)/2)  # radius = x = y
+                _bo_points = (pad, pad, r*2-(pad+1), r*2-(pad+1))
+                ids.append(self._create('oval', _bo_points, {
+                    'tag': '_border', 'outline': self.cnf.get('bordercolor', bo_color) }))
+            else:
+                h = 4
+                if int(self['highlightthickness']):
+                    h += 1
+                _bo_points = (2, 2, self.cnf.get('width', 87)-5, self.cnf.get('height', 24)-h, 4)  # was 3
+                ids.append(self.rounded_rect(
+                    _bo_points, width=1, outline=bo_color, smooth=1, tag='_border', style='arc', 
+                    state='hidden' if self['state'] in ('pressed', 'active') else 'normal'))
+        
         # Takefocus highlight ring.
         if check_tag('_tf'):
-            # takefocuswidth can be changed.
-            w = self.cnf.get('focusthickness', 2)
-            diff1 = diff2 = (int(self['highlightthickness'])*2)+(w*2)
-            if diff2 == (w*2):
-                diff2 -= 1
-            _tk_points = (w+int(self['highlightthickness']),
-                          w+int(self['highlightthickness']),
-                          self.cnf.get('width',  87)-diff1,
-                          self.cnf.get('height', 24)-diff2, 4)
-            ids.append(self.rounded_rect(_tk_points, width=w, style='arc',
-                                         outline=self.cnf.get('focuscolor', '#81b3f4'), 
-                                         tag='_tf', state='hidden'))
+            if self._type == 'circle':
+                pad = 1
+                width = self.cnf.get('focusthickness', 2)
+                r = int(self.cnf.get('width', 87)/2)  # radius = x = y
+                _tk_points = (pad+width, pad+width, r*2-width-pad, r*2-width-pad)
+                ids.append(self._create('oval', _tk_points, {
+                    'tag': '_tf', 'width': width, 'outline': self.cnf.get('focuscolor', '#81b3f4')}))
+            else:
+                # takefocuswidth can be changed.
+                # Focus line is not on point the line is off when thickness is changed.
+                s = w = self.cnf.get('focusthickness', 2)
+                if s == 1:
+                    s = 2
+                    diff2 = (int(self['highlightthickness'])*2) + (s*2)
+                    diff1 = diff2 + 1
+                else:
+                    diff1 = diff2 = (int(self['highlightthickness'])*2) + (s*2)
+                    if diff2 == (s*2):
+                        diff2 -= 1
+                
+                _tk_points = (s+int(self['highlightthickness']),
+                              s+int(self['highlightthickness']),
+                              self.cnf.get('width',  87)-diff1,
+                              self.cnf.get('height', 24)-diff2, 4)
+                ids.append(self.rounded_rect(
+                    _tk_points, width=w, style='arc', 
+                    outline=self.cnf.get('focuscolor', '#81b3f4'), 
+                    tag='_tf', state='hidden'))
         return tuple(ids)
 
     def _get_functions(self, cmds, kw={}):
@@ -616,10 +646,8 @@ class _BaseWidget(_Canvas):
             if kw.get(cmd, '') != '':
                 color = kw.get(cmd, self.cnf.get(cmd))
             return [self, {'tag': '_activebg',
-                           'width':  self.winfo_width(),#kw.get('width', 
-                                        # self.cnf.get('width', self.winfo_width())),
-                           'height': self.winfo_height(), #kw.get('height', 
-                                        # self.cnf.get('height', self.winfo_height())),
+                           'width':  self.winfo_width(),
+                           'height': self.winfo_height(),
                            'color': color}]
         
         elif cmd == 'activeforeground':
@@ -763,17 +791,15 @@ class _BaseWidget(_Canvas):
                         cnf[i] = str(self.cnf[i]) + 'c'
                     else:
                         cnf[i] = self.cnf.get(i)
-
+            if self._type == 'circle' and kw.get('radius'):
+                self.cnf['width'] = self.cnf['height'] = kw.get(
+                    'width', kw.get('height', int(kw['radius']*2)))
             if self._fixed_size['w'] and kw.get('width', True):
                 kw['width'] = self.cnf['width']
             if self._fixed_size['h'] and kw.get('height', True):
                 kw['height'] = self.cnf['height']
-            self._fixed_size['w'] = True if kw.get('width') else False
-            self._fixed_size['h'] = True if kw.get('height') else False
-            # if kw.get('width') or kw.get('height'):
-            #     self._fixed_size = True
-            # elif kw.get('width') == 0 or kw.get('height') == 0:
-            #     self._fixed_size = False
+            self._fixed_size['w'] = True if kw.get('width', kw.get('radius')) else False
+            self._fixed_size['h'] = True if kw.get('height', kw.get('radius')) else False
             W, H = _info_button(self, **cnf)
             self.cnf['width'] = self.cnf.get('width') if self._fixed_size['w'] else W
             self.cnf['height'] = self.cnf.get('height') if self._fixed_size['h'] else H
@@ -782,7 +808,6 @@ class _BaseWidget(_Canvas):
 
         elif cmd == 'state':
             cnf = {}
-            # and self['bg'] != self.cnf.get('disabledbackground'):
             if kw.get(cmd) in 'disabled':
                 cnf[1] = ('configure', {'bg': self.cnf.get('disabledbackground'),
                                         'state': 'disabled'}, None)
@@ -793,7 +818,7 @@ class _BaseWidget(_Canvas):
                 cnf[3] = (('itemconfigure', '_activebg'), {'state': 'hidden'}, None)
                 cnf[5] = (('itemconfigure', '_img'), {'state': 'disabled'}, None)
                 cnf[6] = (('itemconfigure', '_bit'), {'state': 'disabled'}, None)
-            elif kw.get(cmd) == 'normal':  # and self['bg'] != self._org_bg:
+            elif kw.get(cmd) == 'normal':
                 _bg = self._org_bg
                 if self._mouse_state_condition() and self.cnf.get('overbackground'):
                     _bg = self.cnf['overbackground']
@@ -864,13 +889,13 @@ class _BaseWidget(_Canvas):
                     {'outline': get_shade(self['bg'], 0.1, 'auto-120')}, None]
 
         elif cmd == '_txt' or cmd == '_img' or cmd == '_bit':
-            self.cnf['width'] = self.winfo_width()
-            self.cnf['height'] = self.winfo_height()
-            return self._compound(self.cnf.get('compound'), 
-                                self.cnf.get('width'),  
-                                self.cnf.get('height')) \
-                                or {cmd: ((self.cnf['width']/2), 
-                                           self.cnf['height']/2)}
+            if not self.cnf.get('width'):
+                self.cnf['width'] = self.winfo_width()
+            if not self.cnf.get('height'):
+                self.cnf['height'] = self.winfo_height()
+            r1 = self._compound(self.cnf.get('compound'), self.cnf.get('width'), self.cnf.get('height'))
+            r2 = {cmd: ((self.cnf['width']/2), self.cnf['height']/2)}
+            return r1 or r2
 
     def _set_coords(self, cnf={}, **kw):
         """Internal function.\n
@@ -926,7 +951,7 @@ class _BaseWidget(_Canvas):
                                      ('_txt', '_img', '_bit'), kw))
         # Size
         if bool({'text', 'font', 'textvariable', 'image', 'bitmap', 'compound',
-                 'padx', 'pady', 'width', 'height', 'activeimage',
+                 'padx', 'pady', 'width', 'height', 'activeimage', 'radius',
                  'activebitmap',}.intersection(set(kw))):
             self._set_configure(self._get_options('size', kw))
         # Text
@@ -960,8 +985,9 @@ class _BaseWidget(_Canvas):
                     color = get_shade(self['bg'], 0.1, 'auto-120')
                     _Canvas._configure(self, ('itemconfigure', '_border'),
                              {'outline': color}, None)
-            # [issue-8] tkinter issue with combobox (w = w.children[n])
-            except KeyError: pass
+            # [issue-8] (Fixed) tkinter issue with combobox (w = w.children[n])
+            except KeyError: 
+                pass
 
         _bind(main_win, 
               {'className': 'focus%s' % str(self),
@@ -986,10 +1012,19 @@ class _BaseWidget(_Canvas):
         return kw
 
     def _set_size(self, evt=None):
-        """Internal function. This will resize everything that is in the button"""
+        """Internal function.\n
+        This will resize everything that is in the button"""
         if evt.width == self._size[0] and evt.height == self._size[1]:
             return
-        self.cnf['width'], self.cnf['height'] = self._size = (evt.width, evt.height)
+        # [issue-8] On resizing the window the circlebutton doesn't resize properly, 
+        #           current fix doesn't work properly.
+        if self._type == 'circle' and evt.width != evt.height:
+            if evt.width > evt.height:
+                evt.width = evt.height
+            else:
+                evt.height = evt.width
+            return
+        self._size = (self.cnf['width'], self.cnf['height']) = (evt.width, evt.height)
         self.delete('_activebg')
         # [issue-6] (Fixed) Need fix (laggy on resizing) --> workaround: cancel if still resizing
         for i in self._after_IDs:
@@ -998,10 +1033,8 @@ class _BaseWidget(_Canvas):
             '_txt', '_img', '_bit'), safe_create=True)
         self._set_coords(self._get_options(('_txt', '_img', '_bit'), self.cnf))
         self._after_IDs[1] = self.after(1, self._get_functions('_activebg'))
-        self.tag_raise('_txt')
-        self.tag_raise('_img')
-        self.tag_raise('_bit')
-        self.tag_raise('_tf')
+        for t in ('_txt', '_img', '_bit', '_bd_color', '_border', '_tf'):
+            self.tag_raise(t)
         self._after_IDs[2] = self.after(1, self._configure1)
         cur_focus = self.master.focus_get()
         if cur_focus and self.master != cur_focus and cur_focus != self:
@@ -1029,9 +1062,9 @@ class _BaseWidget(_Canvas):
             _Canvas._configure(self, ('itemconfigure', '_txt'), 
                                {'fill': self.cnf.get('activeforeground', 'white')}, None)
             _Canvas._configure(self, ('itemconfigure', '_img'), 
-                            {'image': self.cnf.get('activeimage', '')}, None)
+                            {'image': self.cnf.get('activeimage', self.cnf.get('image', ''))}, None)
             _Canvas._configure(self, ('itemconfigure', '_bit'), 
-                            {'bitmap': self.cnf.get('activebitmap', '')}, None)
+                            {'bitmap': self.cnf.get('activebitmap', self.cnf.get('bitmap', ''))}, None)
 
         elif value in ('on_leave', 'on_release') or value == False:  # When not active (False)
             if self['state'] != 'pressed':
@@ -1151,9 +1184,10 @@ class _BaseWidget(_Canvas):
 class ButtonBase(_BaseWidget):
     """Internal class used for tkinter macos Buttton"""
 
-    def __init__(self, master=None, cnf={}, **kw):
+    def __init__(self, _type=None, master=None, cnf={}, **kw):
         kw = self._set_trace(_cnfmerge((cnf, kw)))
         kw = {k: v for k, v in kw.items() if v is not None}
+        self._type = _type  # button type (circle, normal)
         self._after_IDs = {} # _after_IDs
         self._fixed_size = {'w': False, 'h': False}
         self._var_cb = None
@@ -1165,13 +1199,18 @@ class ButtonBase(_BaseWidget):
         self.cnf['fg'] = self.cnf['foreground'] = self.cnf.get('fg', self.cnf.get('foreground', 'black'))
         self.cnf['anchor'] = self.cnf.get('anchor', 'center')
         self.cnf['borderless'] = self.cnf.get('borderless', False)
-        
         self.cnf['disabledforeground'] = self.cnf.get('disabledforeground', 'grey')
         self.cnf['state'] = self.cnf.get('state', 'normal')
         self.cnf['activeforeground'] = self.cnf.get('activeforeground', 'white')
 
-        kw['width'] = kw.get('width', 87)
-        kw['height'] = kw.get('height', 24)
+        if self._type == 'circle':
+            self.cnf['radius'] = int(kw.pop('radius', 35)) 
+            ra = int(self.cnf['radius']*2 + 4)
+            kw['width'] = kw['height'] = kw.get('width', kw.get('height', ra))
+        else:
+            kw['width'] = kw.get('width', 87)
+            kw['height'] = kw.get('height', 24)
+
         kw['takefocus'] = kw.get('takefocus', 1)
         kw['bg'] = kw.pop('bg', kw.pop('background', 'white'))
         kw['highlightthickness'] = kw.get('highlightthickness', 0)
@@ -1204,7 +1243,8 @@ class ButtonBase(_BaseWidget):
         kw = self._relief(cnf, kw)
         cnf = {}
         for i in list(kw):
-            if i in self._features:
+            if (i in self._features) or \
+               (i == 'radius' and self._type == 'circle'):
                 cnf[i] = kw.pop(i, None)
         _return = _Canvas._configure(self, cmd, None, kw)
         if kw.get('bg') or kw.get('background'):
@@ -1217,6 +1257,8 @@ class ButtonBase(_BaseWidget):
     # @tkv._colorvar_patch_cget
     def cget(self, key):
         """Return the resource value for a KEY given as string."""
+        if key == 'radius' and self._type == 'circle':
+            return self.cnf.get('radius')
         if key in self._features:
             return self.cnf.get(key)
         else:

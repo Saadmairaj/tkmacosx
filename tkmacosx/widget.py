@@ -48,13 +48,15 @@ class SFrame(tkb.SFrameBase):
 
         root.mainloop()
     """
+
     def __init__(self, master=None, cnf={}, **kw):
         tkb.SFrameBase.__init__(self, master=master, cnf=cnf, **kw)
         # Extra functions
         self.scrollbar_configure = self['scrollbar'].configure
 
+
 class Button(tkb.ButtonBase):
-    """ Button for macos, supports almost all the features of tkinter button,
+    """Button for macos, supports almost all the features of tkinter button,
     - Looks very similar to ttk Button.
     - There are few extra features as compared to default Tkinter Button:
     - To check the list of all the resources. To get an overview about
@@ -76,7 +78,7 @@ class Button(tkb.ButtonBase):
     ### Get a cool gradient effect in activebackground color.
         import tkinter as tk
         import tkmacosx as tkm
-        
+
         root = tk.Tk()
         root.geometry('200x200')
         tkm.Button(root, text='Press Me!!', activebackground=('pink','blue') ).pack()
@@ -84,10 +86,46 @@ class Button(tkb.ButtonBase):
         tkm.Button(root, text='Press Me!!', activebackground=('red','blue') ).pack()
         root.mainloop()"""
 
-    # all the instance of class Button will be stored in _button list.
-
     def __init__(self, master=None, cnf={}, **kw):
-        tkb.ButtonBase.__init__(self, master=master, cnf=cnf, **kw)
+        tkb.ButtonBase.__init__(self, 'normal', master, cnf, **kw)
+
+    def invoke(self):
+        """Invoke the command associated with the button.
+
+        The return value is the return value from the command,
+        or an empty string if there is no command associated with
+        the button. This command is ignored if the button's state
+        is disabled.
+        """
+        if self['state'] not in ('disable', 'disabled'):
+            return self.cnf['command']() if self.cnf.get('command') else None
+
+
+class CircleButton(tkb.ButtonBase):
+    """
+    #### Beta-Disclaimer: Please note that this is a BETA version of this widget. \
+    Issues at https://github.com/Saadmairaj/tkmacosx/issues/new/choose \
+    or email me at saadmairaj@yahoo.in.
+
+    Circle shaped Button supports almost all options of a tkinter button 
+    and have some few more useful options such as 'activebackground', overbackground', 
+    'overforeground', 'activeimage', 'activeforeground', 'borderless' and much more. 
+
+    To check all the configurable options for CircleButton run `print(CircleButton().keys())`.
+
+    Example:
+    ```
+    import tkinter as tk
+    import tkmacosx as tkm
+
+    root = tk.Tk()
+    cb = tkm.CircleButton(root, text='Hello')
+    cb.pack()
+    root.mainloop()
+    ```
+    """
+    def __init__(self, master=None, cnf={}, **kw):
+        tkb.ButtonBase.__init__(self, 'circle', master, cnf, **kw)
 
     def invoke(self):
         """Invoke the command associated with the button.
@@ -121,7 +159,7 @@ class Marquee(tkb.MarqueeBase):
                           text='This text will move from right to left if does not fit the window.')
         marquee.pack()
         root.mainloop()
-        
+
     ### To move the text when cursor is over the text then follow the below example.
 
         text = "Please hover over the text to move it. \
@@ -139,23 +177,24 @@ class Marquee(tkb.MarqueeBase):
         """Reset the text postion."""
         self._reset(True)
         self._stop_state = False
-    
+
     def stop(self, reset=False):
         """Stop the text movement."""
-        if reset: 
+        if reset:
             self.reset()
         self._stop_state = True
         self.after_cancel(self.after_id)
         self.after_id = ' '
-    
+
     def play(self, reset=False):
         """Play/continue the text movement."""
-        if not self._stop_state: return
+        if not self._stop_state and not reset:
+            return
         self._stop_state = False
         if reset:
             self.reset()
         self._animate()
-        
+
 
 # ------------------ Testing ------------------
 

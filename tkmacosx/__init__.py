@@ -26,7 +26,7 @@ __version__ = '0.1.4'
 
 from tkmacosx.basewidget import check_appearance, get_shade, delta
 from tkmacosx.variables import ColorVar, DictVar, SaveVar, demo_colorvar, demo_savevar
-from tkmacosx.widget import Button, SFrame, Marquee, demo_sframe, demo_button, demo_marquee
+from tkmacosx.widget import Button, CircleButton, SFrame, Marquee, demo_sframe, demo_button, demo_marquee
 from tkmacosx.colors import Hex, OrderedHex, all_colors, named_colors, hue_color
 from tkmacosx.colorscale import Colorscale, demo_colorscale, gradient
 
