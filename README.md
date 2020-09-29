@@ -72,7 +72,7 @@ Run the above command in the terminal or command line after installing tkmacosx 
 
 <p align='center'><img src="https://raw.githubusercontent.com/Saadmairaj/tkmacosx/master/assets/demonstration.gif" height="600"></p>
 
-Also if you want to style your button to stand out, scroll down to bottom and randomise or configure button to different styles your program.
+Also if you want to style your button to stand out, scroll down to bottom of the window opened from the above command and randomise or configure button to different styles.
 
 Few sample of different styles of button.
 
