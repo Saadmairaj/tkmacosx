@@ -3,14 +3,14 @@
 
 ## Button Widget
 
-The tkmacosx `Button` widget is alternative to tkinter's Button that supports all features on a macos that were not possible with tkinter Button like background, relief, overrelief, activebackground, and some other features can be set.
+The tkmacosx `Button` widget is alternative to tkinter's Button that supports all features on a macos that were not possible with tkinter Button like background, relief, overrelief, activebackground, and some other features can be set. There is a blue focus ring that tells if the button has the focus or not to disable or hide the focus ring, either set `takefocus=0` or `focuscolor=''`.
 
 - **Argument:**
 
     Modifies one or more widget options. If no options are given, the method returns a dictionary containing all current option values. All the options are pretty much the same as Tkinter [Button](https://effbot.org/tkinterbook/button.htm). Here are the extra options of tkmacosx Button.
 
   - `activebackground`: What background color to use when the button is active. The default is system specific. Give tuple of two colors for gradient effect in active background.
-  - `activebackground`: What foreground color to use when the button is active. The default is system specific.
+  - `activeforeground`: What foreground color to use when the button is active. The default is system specific.
   - `activeimage`: What Image to display when the button is active. No image to display by default.
   - `activebitmap`: What Bitmap to display when the button is active. No bitmap to display by default.
   - `bordercolor`: The color to use for the highlight border when the button does not have focus. The default is system specific. Same as **highlightbackground.**
@@ -18,10 +18,12 @@ The tkmacosx `Button` widget is alternative to tkinter's Button that supports al
   - `disabledbackground`: The color to use when the button is disabled. The default is system specific.
   - `focuscolor`: The color to use for the focus border when the button have focus. The default is system specific.
   - `focusthickness`: The width of the focus border. The default is system specific.
+  - `height`: The height of the button. The size is given in **pixels**.
   - `state`: The button state: NORMAL, ACTIVE, PRESSED or DISABLED. Default is NORMAL.
   - `takefocus`: Indicates that the user can use the Tab key to move to this button. Default is an empty string, which means that the button accepts focus only if it has any keyboard bindings (default is on, in other words).
   - `overforeground`: Alternative foreground to use when the mouse is moved over the widget.
   - `overbackground`: Alternative background to use when the mouse is moved over the widget.
+  - `width`: The width of the button. The size is given in **pixels**.
 
 - **Usage:**
 
@@ -48,9 +50,44 @@ The tkmacosx `Button` widget is alternative to tkinter's Button that supports al
       <img src="https://github.com/Saadmairaj/tkmacosx/blob/master/assets/Button.gif">
    </p>
 
+## CircleButton Widget
+
+***BETA-Disclaimer:*** *Please note that this is a BETA version. Issues can be reported [here](https://github.com/Saadmairaj/tkmacosx/issues/new/choose).*
+
+Circle shaped tkinter Button can contain text or images, and you can associate a Python function or method with each button. There is a blue focus ring that tells if the button has the focus or not to disable or hide the focus ring, either set `takefocus=0` or `focuscolor=''`. The CircleButton widget supports all the configurable options of tkmacosx [Button](https://github.com/Saadmairaj/tkmacosx/tree/master/tkmacosx#button-widget).
+
+- **Argument:**
+    Modifies one or more widget options. If no options are given, the method returns a dictionary containing all current option values. All the options are pretty much the same as tkmaocsx [Button](https://github.com/Saadmairaj/tkmacosx/tree/master/tkmacosx#button-widget).
+
+  - `radius`: Set the size of the button using radius **(in pixels)**. If width or height are given then radius value gets cancelled out.
+
+- **Usage:**
+
+```python
+from tkinter import *
+from tkmacosx import CircleButton
+
+root = Tk()
+B0 = CircleButton(root, text='Button')
+B0.grid(row=0)
+B1 = CircleButton(root, text='Button', bg='#ADEFD1', 
+            fg='#00203F', borderless=1)
+B1.grid(row=0, column=1)
+B2 = CircleButton(root, text='Button', bg='#E69A8D', 
+            fg='#5F4B8B', borderless=1,
+            activebackground=('#AE0E36', '#D32E5E'),
+            activeforeground='#E69A8D')
+B2.grid(row=0, column=2)
+root.mainloop()
+```
+
+   <p align="center">
+      <img src="https://github.com/Saadmairaj/tkmacosx/blob/master/assets/CircleButton.gif">
+   </p>
+
 ## SFrame Widget
 
-The tkmacosx `SFrame` widget is just like a tkinter Frame but vertically scrollable.
+The tkmacosx `SFrame` widget is just like a tkinter Frame but can be vertically scrolled. The SFrame supports intelligent mousewheel scrolling where it let you use mousewheel with other children widgets also having mousewheel scrolling without interfering with other widgets scrolling, a list of widgets having mousewheel scrolling can be passed to `avoidmousewheel` argument *(ex: `avoidmousewheel=(text1, text2, sframe)` or just one `avoidmousewheel=text2`).*
 
 - **Arguments:**
 
@@ -58,7 +95,7 @@ The tkmacosx `SFrame` widget is just like a tkinter Frame but vertically scrolla
 
   - `scrollbarwidth`: Set the width of scrollbar.
   - `mousewheel`: Set mousewheel scrolling.
-  - `avoidmousewheel`: Give widgets that also have mousewheel scrolling and is a child of SFrame this will configure widgets to support their mousewheel scrolling as well. For eg:- Text widget inside SFrame can have mousewheel scrolling as well as SFrame.
+  - `avoidmousewheel`: Give widgets that also have mousewheel scrolling and is a child widget of SFrame, this will configure widgets to support their mousewheel scrolling as well. *For eg: Text widget inside SFrame can have mousewheel scrolling as well as SFrame.*
   
 - **Usage:**
 
@@ -69,9 +106,9 @@ The tkmacosx `SFrame` widget is just like a tkinter Frame but vertically scrolla
    root = Tk()
    root.geometry('350x300')
    frame = SFrame(root, bg='#333')
-   text = Text(frame, background='#5F4B8B', 
+   text = Text(frame, background='#5F4B8B',
                width=35, height=10, foreground='white')
-   text.pack(pady=(0,20)) 
+   text.pack(pady=(0,20))
 
    frame2 = SFrame(frame, bg='#E69A8D', scrollbarwidth=3)
    frame2.pack(pady=20)
@@ -116,11 +153,11 @@ Colorscale is a new style color selector which is an alternate to tkinter's colo
    fgvar = ColorVar(value='white')
    Label(root, text="I am a Label, Hello! :-)",bg=bgvar, fg=fgvar).pack(pady=10)
    Colorscale(root, value='hex', variable=bgvar, mousewheel=1).pack(padx=20)
-   Colorscale(root, value='hex', variable=bgvar, mousewheel=1, 
+   Colorscale(root, value='hex', variable=bgvar, mousewheel=1,
             gradient=('pink', 'purple')).pack(pady=10)
-   Colorscale(root, value='hex', variable=fgvar, mousewheel=1, 
+   Colorscale(root, value='hex', variable=fgvar, mousewheel=1,
             gradient=('lightgreen', 'orange')).pack()
-   Colorscale(root, value='hex', variable=fgvar, mousewheel=1, 
+   Colorscale(root, value='hex', variable=fgvar, mousewheel=1,
             gradient=('white', '#89ABE3')).pack(pady=10)
 
    root.mainloop()
