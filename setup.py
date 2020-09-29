@@ -9,7 +9,7 @@ def long_description():
 
 setup(
     name="tkmacosx",
-    version="0.1.4",
+    version="0.1.5",
     description="Tkmacosx is a Python library extension to the Tkinter module for macOS.",
     long_description=long_description(),
     long_description_content_type="text/markdown",
@@ -40,7 +40,9 @@ setup(
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Environment :: MacOS X",
     ],
-    keywords=['tkinter', 'macos', 'variable', 'widgets', 'colorscale', 'tk', 'color'],
+    keywords=['tkinter', 'macos', 'variable', 'widgets', 'colorscale', 'tk', 'color',
+              'button', 'circlebutton', 'marquee', 'tkinter-widgets', 'tkinter-scrollableframe',
+              'scrollableframe'],
     packages=["tkmacosx"],
     include_package_data=True,
     install_requires=['colour'],
