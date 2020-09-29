@@ -68,7 +68,7 @@ root.mainloop()
 python -m tkmacosx
 ```
 
-Run the above command in the terminal or command line after installing tkmacosx to see working and almost all the configurable options of different widgets of tkmacosx. Also if you want to style your button to stand out, scroll down to bottom and randomise or configure button to different styles your program.
+Run the above command in the terminal or command line after installing tkmacosx to see working and almost all the configurable options of different widgets of tkmacosx. Also if you want to style your button to stand out, scroll down to bottom of the window opened from the above command and randomise or configure button to different styles.
 
 Few sample of different styles of button.
 
