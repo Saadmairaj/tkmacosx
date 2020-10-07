@@ -25,8 +25,8 @@ elif sys.version_info.major == 3:
     import tkinter.font as font
     from tkinter.colorchooser import askcolor
 
-from tkmacosx.widget import *
-from tkmacosx.variables import *
+from tkmacosx.widget import SFrame, Button
+from tkmacosx.variables import ColorVar
 from tkmacosx.colorscale import Colorscale
 from tkmacosx.colors import Hex as C_dict, all_colors
 
@@ -36,13 +36,10 @@ color_list = [list(i.values())[0].get('hex') for i in all_colors]
 
 def grid(root, row, column):
     "Defines rows and columns if grid method is used"
-    if column:
-        for y in range(column):
-            tk.Grid.columnconfigure(root, y, weight=1)
-    if row:
-        for x in range(row):
-            tk.Grid.rowconfigure(root, x, weight=1)
-    return
+    for y in range(column):
+        tk.Grid.columnconfigure(root, y, weight=1)
+    for x in range(row):
+        tk.Grid.rowconfigure(root, x, weight=1)
 
 
 def sort_random_values(fn):
