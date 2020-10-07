@@ -23,32 +23,7 @@ elif sys.version_info.major == 3:
     from tkinter import _cnfmerge
     import tkinter as _tk
 
-try:
-    import colour as C
-except ImportError as e:
-    import os
-    if sys.version_info.major == 2:
-        import tkMessageBox as ms
-    elif sys.version_info.major == 3:
-        import tkinter.messagebox as ms
-    error_win = _tk.Tk()
-    error_win.withdraw()
-    message = """
-    Module "tkmacosx" is dependent on
-    "colour" Module.
-
-    Do you want to install it with pip now?
-    Or install it manually later.
-
-    Link to the colour github:
-    https://github.com/vaab/colour"""
-    if ms._show(e, message, 'warning', 'yesno') == 'yes':
-        error_win.destroy()
-        os.system('pip install colour')
-        import colour as C
-    else:
-        sys.exit(0)
-
+import colour as C
 import tkmacosx.variables as tkv
 
 
@@ -62,14 +37,15 @@ def delta(evt):
 def _agsmerge(args):
     """Internal functions.\n
     Merges lists/tuples."""
+    if not isinstance(args, (tuple, list)):
+        return args
     a = []
-    if isinstance(args, (tuple, list)):
-        for i in args:
-            if isinstance(i, (tuple, list)):
-                a.extend(i)
-            else:
-                a.append(i)
-    return a or args
+    for i in args:
+        if isinstance(i, (tuple, list)):
+            a.extend(i)
+        else:
+            a.append(i)
+    return a
 
 
 def check_function_equality(func1, func2):
@@ -80,28 +56,21 @@ def check_function_equality(func1, func2):
 def _bind(cls=None, *ags, **kw):
     """Internal function.\n
     Binds and unbinds sequences with any name given as className."""
-    cls = kw.pop('cls', cls) or (
-        ags.pop(0) if ags and isinstance(ags[0], _tk.Misc) else None)
-    if not cls:
-        raise ValueError('Counld not refer to any class instance "cls".')
-    if len(kw) < 1 and len(ags) > 0:
+    cls = cls or kw.pop('cls', ags.pop(0))
+    if len(ags) > 0:
         return [_bind(cls=cls, **i) for i in ags]
-
     classname = kw['className'] + str(cls)
     bindtags = list(cls.bindtags())
+    if classname in bindtags:
+        bindtags.remove(classname) 
     if kw.get('func'):
-        if classname in bindtags:
-            bindtags.remove(classname)
-            _bind(cls, className=kw['className'], sequence=kw['sequence'])
+        _bind(cls, className=kw['className'], sequence=kw['sequence'])
         bindtags.append(classname)
         cls.bindtags(tuple(bindtags))
         return cls.bind_class(classname, sequence=kw['sequence'],
                               func=kw['func'], add=kw.get('add', '+'))
-    else:
-        if classname in bindtags:
-            bindtags.remove(classname)
-        cls.bindtags(tuple(bindtags))
-        cls.unbind_class(classname, kw['sequence'])
+    cls.bindtags(tuple(bindtags))
+    cls.unbind_class(classname, kw['sequence'])
 
 
 def _on_press_color(cls=None, cnf={}, **kw):
@@ -129,17 +98,15 @@ def _on_press_color(cls=None, cnf={}, **kw):
     cond3 = bool(kw.get('color', (False,)) == cls.cnf.get('activebackground'))
     if cond1 and cond2 and cond3 and not kw.get('force_create', False):
         return
-    cls.cnf['activebackground'] = kw.get('color', cls.cnf.get(
-        'activebackground', ("#4b91fe", "#055be5")))
+    cr = cls.cnf['activebackground'] = kw.get(
+        'color', cls.cnf.get('activebackground', 
+        ("#4b91fe", "#055be5"))) # This is the default color for mac
     cls.delete(tag)
     ids = []
-    # This is the default color for mac
-    cr = kw.get('color', ("#4b91fe", "#055be5"))
-    if isinstance(cr, (tuple, list)):
-        if None in cr:
-            cr = list(cr)
-            cr.remove(None)
-            cr = cr[0]
+    if isinstance(cr, (tuple, list)) and None in cr:
+        cr = list(cr)
+        cr.remove(None)
+        cr = cr[0]
     if not isinstance(cr, (tuple, list)):
         cr = (C.Color(cr), C.Color(cr))
     else:
@@ -160,28 +127,13 @@ def _info_button(master, cnf={}, **kw):
     and returns width and height of the ttk button, after taking
     width and height the button gets destroyed also the custom style."""
     kw = _tk._cnfmerge((cnf, kw))
-    cnf = dict(**kw)
-    kw.pop('height', None)
-    def _get_height(master, **kw):
-        """Creates temp tkinter button to get approximate 
-        height when -height parameter is given."""
-        y_dif = 2 if kw.get('pady') else 0
-        y_dif += -kw.get('pady', 1) + 2 if kw.get('image')\
-                    and kw.get('compound') in ('top', 'bottom') else -2
-        tmp = _tk.Button(master, **kw)
-        height = max(24, tmp.winfo_reqheight()+y_dif)
-        tmp.destroy()
-        return height
-    
+    cnf = dict(**kw)    
     name = '%s.TButton' % master
     _style_tmp = ttk.Style()
     _style_tmp.configure(name, font=kw.pop('font', None))
     _style_tmp.configure(name, padding=(kw.pop('padx', 0), kw.pop('pady', 0)))
     tmp = ttk.Button(master, style=name, **kw)
-    if cnf.get('height', None) and False:
-        geo = [tmp.winfo_reqwidth(), _get_height(master, **cnf)]
-    else:
-        geo = [tmp.winfo_reqwidth(), tmp.winfo_reqheight()]
+    geo = [tmp.winfo_reqwidth(), tmp.winfo_reqheight()]
     # [issue-2] Need fix --- doesn't really delete the custom style
     del _style_tmp
     tmp.destroy()
@@ -201,8 +153,7 @@ def check_appearance(cmd='defaults read -g AppleInterfaceStyle'):
                                 shell=True).communicate()
     if out:
         return True
-    elif err:
-        return False
+    return False
 
 
 def get_shade(color, shade, mode='auto'):
@@ -298,7 +249,7 @@ class _Canvas(_tk.Widget):
         self.tk.call((self._w, 'raise') + args)
 
     def rounded_rect(self, ags=(), *args, **kw):
-        'Internal function.'
+        """Internal function."""
         x, y, w, h, c = _agsmerge((ags, args))
         ids = []
         cnf = dict(kw)
@@ -317,15 +268,16 @@ class _Canvas(_tk.Widget):
             (x, y+c, x, y+h-c),
             (x+w, y+c, x+w, y+h-c))
 
-        for i in range(len(points)):
+        for i, point in enumerate(points):
             if i <= 3:
                 kw['start'] = 90*(i+1)
-                ids.append(self._create('arc', points[i], kw))
+                ids.append(self._create('arc', point, kw))
             else:
-                ids.append(self._create('polygon', points[i], cnf))
+                ids.append(self._create('polygon', point, cnf))
         return tuple(ids)
 
     def _rounded(self, ags=(), *args, **kw):
+        """Internal function."""
         x1, y1, x2, y2, c = _agsmerge((ags, args))
         ids = []
         points = (  # Arc points:-
@@ -338,14 +290,14 @@ class _Canvas(_tk.Widget):
             (x1, y1+c/2, x2, y2-c/2))
 
         kw['start'], kw['outline'] = 0, ''
-        for i in range(len(points)):
+        for i, point in enumerate(points):
             if i <= 3:
-                ids.append(self._create('arc', points[i], kw))
+                ids.append(self._create('arc', point, kw))
                 kw['start'] += 90
             else:
                 kw.pop('start', None)
                 kw['width'] = 0
-                ids.append(self._create('rectangle', points[i], kw))
+                ids.append(self._create('rectangle', point, kw))
         return tuple(ids)
 
 
@@ -424,10 +376,10 @@ class _BaseWidget(_Canvas):
             return cond1 and cond2
 
         ids = []
-        cond_image = bool(self.cnf.get('image',
-                        self.cnf.get('activeimage', '') != ''))
-        cond_bitmap = bool(self.cnf.get('bitmap',
-                        self.cnf.get('activebitmap', '') != ''))
+        cond_image = bool(
+            self.cnf.get('image', self.cnf.get('activeimage', '')) != '')
+        cond_bitmap = bool(
+            self.cnf.get('bitmap', self.cnf.get('activebitmap', '')) != '')
 
         # Text item.
         if check_tag('_txt') and self.cnf.get('text'):
@@ -443,81 +395,78 @@ class _BaseWidget(_Canvas):
             if self['state'] in ('pressed', 'active'):
                 img = self.cnf.get('activeimage', img)
             ids.append(self._create('image', (0, 0), {
-                       'image': None, 'tag': '_img', 'image': img}))
+                       'tag': '_img', 'image': img}))
         
         # Bitmap items (bitmap and activebitmap).
-        if check_tag('_bit') and cond_bitmap:
+        elif check_tag('_bit') and cond_bitmap:
             bit = self.cnf.get('image', '')
             if self['state'] in ('pressed', 'active'):
                 bit = self.cnf.get('activeimage', bit)
             ids.append(self._create('bitmap', (0, 0), {
-                       'bitmap': None, 'tag': '_bit', 'bitmap': bit}))
+                        'tag': '_bit', 'bitmap': bit}))
         
         # Border color item.
-        if check_tag('_bd_color'):
-            bd_color = self.cnf.get('bordercolor', get_shade(self['bg'], 0.04, 'auto-120'))
-            if self._type == 'circle':
-                pad = 2
-                width = r = int(self.cnf.get('width', 87)/2)  # radius = x = y (in pixels)
-                _bd_points = (pad-width, pad-width, r*2+width-pad, r*2+width-pad)
-                kw_bd_color = {
-                    'tag': '_bd_color', 
-                    'state': 'hidden' if self['state'] in ('pressed', 'active') else 'normal',
-                    'width': width*2,'outline': bd_color}
-                ids.append(self._create('oval', _bd_points, kw_bd_color))
-            else:
-                _bd_points = (0, -1, self.cnf.get('width', 87), self.cnf.get('height', 24)+3, 7)  # was 6
-                ids.append(self.rounded_rect(
-                    _bd_points, width=6, tag='_bd_color', style='arc', outline=bd_color))
+        bd_color = self.cnf.get('bordercolor', get_shade(self['bg'], 0.04, 'auto-120'))
+        if check_tag('_bd_color') and self._type == 'circle':
+            pad = 2
+            width = r = int(self.cnf.get('width', 87)/2)  # radius = x = y (in pixels)
+            _bd_points = (pad-width, pad-width, r*2+width-pad, r*2+width-pad)
+            kw_bd_color = {
+                'tag': '_bd_color', 
+                'state': 'hidden' if self['state'] in ('pressed', 'active') else 'normal',
+                'width': width*2,'outline': bd_color}
+            ids.append(self._create('oval', _bd_points, kw_bd_color))
+        elif check_tag('_bd_color'):
+            _bd_points = (0, -1, self.cnf.get('width', 87), self.cnf.get('height', 24)+3, 7)  # was 6
+            ids.append(self.rounded_rect(
+                _bd_points, width=6, tag='_bd_color', style='arc', outline=bd_color))
         
         # Border item.
-        if check_tag('_border'):
-            bo_color = get_shade(self['bg'], 0.1, 'auto-120')
-            if self._type == 'circle':
-                pad = 2
-                r = int(self.cnf.get('width', 87)/2)  # radius = x = y
-                _bo_points = (pad, pad, r*2-(pad+1), r*2-(pad+1))
-                ids.append(self._create('oval', _bo_points, {
-                    'tag': '_border', 'outline': self.cnf.get('bordercolor', bo_color) }))
-            else:
-                h = 4
-                if int(self['highlightthickness']):
-                    h += 1
-                _bo_points = (2, 2, self.cnf.get('width', 87)-5, self.cnf.get('height', 24)-h, 4)  # was 3
-                ids.append(self.rounded_rect(
-                    _bo_points, width=1, outline=bo_color, smooth=1, tag='_border', style='arc', 
-                    state='hidden' if self['state'] in ('pressed', 'active') else 'normal'))
+        bo_color = get_shade(self['bg'], 0.1, 'auto-120')
+        if check_tag('_border') and self._type == 'circle':   
+            pad = 2
+            r = int(self.cnf.get('width', 87)/2)  # radius = x = y
+            _bo_points = (pad, pad, r*2-(pad+1), r*2-(pad+1))
+            ids.append(self._create('oval', _bo_points, {
+                'tag': '_border', 'outline': self.cnf.get('bordercolor', bo_color) }))
+        elif check_tag('_border'):
+            h = 4
+            if int(self['highlightthickness']):
+                h += 1
+            _bo_points = (2, 2, self.cnf.get('width', 87)-5, self.cnf.get('height', 24)-h, 4)  # was 3
+            ids.append(self.rounded_rect(
+                _bo_points, width=1, outline=bo_color, smooth=1, tag='_border', style='arc', 
+                state='hidden' if self['state'] in ('pressed', 'active') else 'normal'))
         
         # Takefocus highlight ring.
-        if check_tag('_tf'):
-            if self._type == 'circle':
-                pad = 1
-                width = self.cnf.get('focusthickness', 2)
-                r = int(self.cnf.get('width', 87)/2)  # radius = x = y
-                _tk_points = (pad+width, pad+width, r*2-width-pad, r*2-width-pad)
-                ids.append(self._create('oval', _tk_points, {
-                    'tag': '_tf', 'width': width, 'outline': self.cnf.get('focuscolor', '#81b3f4')}))
-            else:
-                # takefocuswidth can be changed.
-                # Focus line is not on point the line is off when thickness is changed.
-                s = w = self.cnf.get('focusthickness', 2)
-                if s == 1:
-                    s = 2
-                    diff2 = (int(self['highlightthickness'])*2) + (s*2)
-                    diff1 = diff2 + 1
-                else:
-                    diff1 = diff2 = (int(self['highlightthickness'])*2) + (s*2)
-                    if diff2 == (s*2):
-                        diff2 -= 1
-                
-                _tk_points = (s+int(self['highlightthickness']),
-                              s+int(self['highlightthickness']),
-                              self.cnf.get('width',  87)-diff1,
-                              self.cnf.get('height', 24)-diff2, 4)
-                ids.append(self.rounded_rect(
-                    _tk_points, width=w, style='arc', 
-                    outline=self.cnf.get('focuscolor', '#81b3f4'), 
-                    tag='_tf', state='hidden'))
+        if check_tag('_tf') and self._type == 'circle':
+            pad = 1
+            width = self.cnf.get('focusthickness', 2)
+            r = int(self.cnf.get('width', 87)/2)  # radius = x = y
+            _tk_points = (pad+width, pad+width, r*2-width-pad, r*2-width-pad)
+            ids.append(self._create('oval', _tk_points, {
+                'tag': '_tf', 'width': width, 'outline': self.cnf.get('focuscolor', '#81b3f4')}))
+        elif check_tag('_tf'):
+            # takefocuswidth can be changed.
+            # Focus line is not on point the line is off when thickness is changed.
+            s = w = self.cnf.get('focusthickness', 2)
+            diff1 = diff2 = (int(self['highlightthickness'])*2) + (s*2)
+            if diff2 == (s*2):
+                diff2 -= 1
+            
+            if s == 1:
+                s = 2
+                diff2 = (int(self['highlightthickness'])*2) + (s*2)
+                diff1 = diff2 + 1
+            
+            _tk_points = (s+int(self['highlightthickness']),
+                            s+int(self['highlightthickness']),
+                            self.cnf.get('width',  87)-diff1,
+                            self.cnf.get('height', 24)-diff2, 4)
+            ids.append(self.rounded_rect(
+                _tk_points, width=w, style='arc', 
+                outline=self.cnf.get('focuscolor', '#81b3f4'), 
+                tag='_tf', state='hidden'))
         return tuple(ids)
 
     def _get_functions(self, cmds, kw={}):
@@ -621,8 +570,7 @@ class _BaseWidget(_Canvas):
             for i in cmds:
                 value = value.get(i, {})
             return value
-        else:
-            return funcs.get(cmds, {})
+        return funcs.get(cmds, {})
 
     def _get_options(self, cmd, cnf={}, **kw):
         """Internal function."""
@@ -926,8 +874,7 @@ class _BaseWidget(_Canvas):
                 elif options[1].get('tag') == '_activebg':
                     # _on_press_color
                     return _on_press_color(*options)
-                else:  # binds
-                    return _bind(*options)
+                return _bind(*options) # binds
 
     def _configure1(self, cnf={}, **kw):
         """Internal Function.
@@ -1050,7 +997,7 @@ class _BaseWidget(_Canvas):
         """Internal function.\n 
         Do not call directly. Changes appearance when active."""
         
-        if value in ('on_press', 'on_enter') or value == True:
+        if value in ('on_press', 'on_enter') or value is True:
             if self['state'] != 'pressed' :
                 if value == 'on_press': 
                     self.cnf['_state'] = self.cnf['state']
@@ -1066,13 +1013,14 @@ class _BaseWidget(_Canvas):
             _Canvas._configure(self, ('itemconfigure', '_bit'), 
                             {'bitmap': self.cnf.get('activebitmap', self.cnf.get('bitmap', ''))}, None)
 
-        elif value in ('on_leave', 'on_release') or value == False:  # When not active (False)
+        elif value in ('on_leave', 'on_release') or value is False:  # When not active (False)
             if self['state'] != 'pressed':
                 if self.cnf.get('_state'): 
                     self.cnf['state'] = self.cnf['_state']
                 if value == 'on_release':
                     self.cnf.pop('_state', None)
-                    if self['state'] == 'active': self['state'] = 'normal'
+                    if self['state'] == 'active': 
+                        self['state'] = 'normal'
                 _Canvas._configure(self, ('itemconfigure', '_activebg'), 
                                    {'state': 'hidden'}, None)
                 _Canvas._configure(self, ('itemconfigure', '_border'), 
@@ -1100,7 +1048,8 @@ class _BaseWidget(_Canvas):
             _bind(self, className='button_command', sequence='<ButtonRelease-1>')
             if self.cnf.get('repeatdelay', 0) and self.cnf.get('repeatinterval', 0) and self._rpinloop:
                 self._rpin = self.after(self.cnf.get('repeatinterval', 0), cmd)
-            self.cnf['command']() if self.cnf.get('command') else None
+            if self.cnf.get('command'):
+                self.cnf['command']() 
 
         def on_enter(*a):
             """Internal function.\n
@@ -1134,10 +1083,12 @@ class _BaseWidget(_Canvas):
 
     def _on_release(self, *ags):
         """Internal function. When button is released <ButtonRelease-1>"""
-        if self['state'] in 'disabled': return
+        if self['state'] in 'disabled': 
+            return
         self._active('on_release')
         self._rpinloop = False
-        if getattr(self, '_rpin', None): self.after_cancel(self._rpin)
+        if getattr(self, '_rpin', None): 
+            self.after_cancel(self._rpin)
         _bind(self, {'className': 'on_press_enter', 'sequence': '<Enter>'},
               {'className': 'on_press_leave', 'sequence': '<Leave>'},
               {'className': 'button_command', 'sequence': '<ButtonRelease-1>'})
@@ -1261,8 +1212,7 @@ class ButtonBase(_BaseWidget):
             return self.cnf.get('radius')
         if key in self._features:
             return self.cnf.get(key)
-        else:
-            return _Canvas.cget(self, key)
+        return _Canvas.cget(self, key)
     __getitem__ = cget
 
     def keys(self):
@@ -1483,7 +1433,8 @@ class MarqueeBase(_tk.Canvas):
     def _animate(self, evt=None):
         """Internal function.\n
         Process text and move text."""
-        if self._stop_state: return
+        if self._stop_state: 
+            return
         self._set_height()
         text_width = self.bbox('text')[2]   # TEXT WIDTH
         frame_width = self.winfo_width()    # FRAME WIDTH
