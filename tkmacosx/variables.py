@@ -53,7 +53,7 @@ def _colorvar_patch_destroy(fn):
                     var, cbname = value
                     try:
                         var.trace_vdelete('w', cbname)
-                    except Exception:
+                    except Exception as e:
                         pass
                     _all_traces_colorvar.pop(key)
         return fn(self)
@@ -125,14 +125,6 @@ def _colorvar_patch_options(fn):
                 else:
                     _all_traces_colorvar[(self, i)] = (var, cbname)
                 cnf[i] = var.get()
-            # [issue-1] once a ColorVar is assigned, it cannot be removed
-            #           untill the widget is destroyed or give another ColorVar
-            # [issue-1] (trial) the below doesn't work as excepted.
-            # elif (self, i) in _all_traces_colorvar:
-            #     if self[i] != _all_traces_colorvar[(self, i)][0].get():
-            #         print( self, i, self[i])
-            #         v, cb = _all_traces_colorvar.pop((self, i))
-            #         v.trace_vdelete('w', cb)
         return fn(self, cnf, None)
     return _patch
 
@@ -319,7 +311,7 @@ def SaveVar(var, master=None, value=None, name=None, filename='data.pkl'):
         if mode[0] == 'w' and update_val.__name__ in cbname:
             try:
                 var.trace_vdelete('w', cbname)
-            except Exception:
+            except Exception as e:
                 pass
     res = var.trace_variable('w',  update_val)
     return var
