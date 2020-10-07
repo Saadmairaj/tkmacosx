@@ -199,12 +199,25 @@ class Colorscale(tkb._Canvas):
 
     def _move_marker(self, evt, mw=None):
         """Internal function."""
-        if mw and self['orient'] == 'vertical':
-            evt.x = mw
-            evt.y = 10 
-        elif mw:
-            evt.x = 10
-            evt.y = mw
+        spacer, spacbg = 35, 25
+
+        def diff_orient_val():
+            """Internal function."""
+            if self['orient'] == 'vertical':
+                return dict(
+                    evtx=mw,
+                    evty=10,
+                    _xy=evt.x,
+                )
+            return dict(
+                evtx=10,
+                evty=mw,
+                _xy=evt.y,
+            )
+
+        if mw:
+            evt.x = diff_orient_val()['evtx']
+            evt.y = diff_orient_val()['evty']
 
         self.after_cancel(getattr(self, '_remove_id', ' '))
         self._remove_id = self.after(self.cnf['showinfodelay'], self._release)
@@ -216,22 +229,17 @@ class Colorscale(tkb._Canvas):
         if not (cond_x and cond_y and cond_state):
             return
         
-        if not mw and self['orient'] == 'vertical':
-            self._xy = evt.x
-        elif not mw:
-            self._xy = evt.y
+        if not mw:
+            self._xy = diff_orient_val()['_xy']
 
         c_id = self.find('overlapping', evt.x, evt.y, evt.x, evt.y)
-        hexcode = self.itemcget(c_id[0], 'fill')
+        text = hexcode = self.itemcget(c_id[0], 'fill')
         rgb = [int(i/65535.0*255.0) for i in self.winfo_rgb(hexcode)]
         self._marker_color = 'black' if (
             rgb[0]*0.299 + rgb[1]*0.587 + rgb[2]*0.114) > 110 else 'white'
 
         self._configure(('itemconfigure', 'borderline'),
                         {'outline': hexcode}, None)
-
-        spacer, spacbg = 35, 25
-        text = hexcode
         self._callback(hexcode)
 
         if self.cnf['value'] == "rgb":
@@ -244,7 +252,8 @@ class Colorscale(tkb._Canvas):
                         and self['orient'] == 'vertical'
         hor_cond = evt.y < self.winfo_height() - (spacbg+spacer) \
                         and self['orient'] == 'horizontal'
-        markerbg_points = info_points = ()
+        
+        markerbg_points, info_points = (), ()
 
         if bool(ver_cond or hor_cond) and self['showinfo']:
             markerbg_points = ( self.winfo_width()/2-6, evt.y+spacer - spacbg, 
@@ -257,15 +266,14 @@ class Colorscale(tkb._Canvas):
                 info_points = ((evt.x + spacer, self.winfo_height()/2))
 
         elif self['showinfo']:
-            markerbg_points = ( self.winfo_width()/2-6, evt.y-spacer-spacbg, 
-                                self.winfo_width()/2+7, evt.y-spacer+spacbg, 6)
-            info_points = (
-                (self.winfo_width()/2, evt.y-spacer))
+            markerbg_points = ( self.winfo_width()/2-6, evt.y-spacer - spacbg,
+                                self.winfo_width()/2+7, evt.y-spacer + spacbg, 6)
+            info_points = ((self.winfo_width()/2, evt.y-spacer))
 
             if self.cnf['orient'] == 'vertical':
-                markerbg_points = ( evt.x-spacer-spacbg, self.winfo_height()/2-6, 
-                                    evt.x-spacer+spacbg, self.winfo_height()/2+7, 6)
-                info_points = ((evt.x-spacer, self.winfo_height()/2))
+                markerbg_points = ( evt.x-spacer - spacbg, self.winfo_height()/2-6, 
+                                    evt.x-spacer + spacbg, self.winfo_height()/2+7, 6)
+                info_points = ((evt.x - spacer, self.winfo_height()/2))
 
         markerbg_cnf = {'fill': self._marker_color, 'tag': 'markerbg'}
         info_cnf = {'angle': 0 if 'ver' in self.cnf['orient'] else 90,
