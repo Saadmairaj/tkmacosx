@@ -238,6 +238,24 @@ class _Canvas(_tk.Widget):
         return self.tk.call(
             (self._w, 'itemcget') + (tagOrId, '-'+option))
 
+    def check_tag(self, cmd, tag, safe_create=False, avoid=[]):
+        """Internal function.\n
+        If `cmd="check"` and the tag does not exist then
+        the tag is created, but if `cmd="create"` and
+        safe_create=True this will delete the tag if exists
+        and creates a new tag  with same settings."""
+        c = True
+        if cmd == 'check':
+            c = False
+        if cmd not in ('create', 'check'):
+            raise ValueError(
+                '%s is not a valid command! Takes -create, -check' % cmd)
+        cond1 = bool(not self.find('withtag', tag) or c)
+        cond2 = bool(tag not in avoid)
+        if safe_create and cond1 and cond2:
+            self.delete(tag)
+        return cond1 and cond2
+    
     def tag_lower(self, *args):
         """Lower an item TAGORID given in ARGS
         (optional below another item)."""
@@ -247,6 +265,8 @@ class _Canvas(_tk.Widget):
         """Raise an item TAGORID given in ARGS
         (optional above another item)."""
         self.tk.call((self._w, 'raise') + args)
+
+
 
     def rounded_rect(self, ags=(), *args, **kw):
         """Internal function."""
@@ -357,23 +377,21 @@ class _BaseWidget(_Canvas):
         bordercolor, takefocus ring*) items."""
 
         def check_tag(tag):
-            """Internal function.\n
-            If `cmd="check"` and the tag does not exist then
-            the tag is created, but if `cmd="create"` and
-            safe_create=True this will delete the tag if exists
-            and creates a new tag  with same settings."""
-            if cmd == 'check':
-                c = False
-            elif cmd == 'create':
-                c = True
-            else:
-                raise ValueError(
-                    '%s is not a valid command! Takes -create, -check' % cmd)
-            cond1 = bool(not self.find('withtag', tag) or c)
-            cond2 = bool(tag not in kw.get('avoid', []))
-            if safe_create and cond1 and cond2:
-                self.delete(tag)
-            return cond1 and cond2
+            """Internal function."""
+            return self.check_tag(cmd, tag, safe_create, kw.get('avoid', []))
+        
+        def active_state():
+            """Internal function."""
+            _kw = dict( fill=self.cnf.get('foreground', 'black'),
+                        img=self.cnf.get('image', ''),
+                        bit=self.cnf.get('bitmap', ''),
+                        state='normal')
+            if self['state'] in ('pressed', 'active'):
+                return dict(fill=self.cnf.get('activeforeground', 'white'),
+                            img=self.cnf.get('activeimage', _kw['img']),
+                            bit=self.cnf.get('activebitmap', _kw['bit']),
+                            state='hidden')
+            return _kw
 
         ids = []
         cond_image = bool(
@@ -383,27 +401,18 @@ class _BaseWidget(_Canvas):
 
         # Text item.
         if check_tag('_txt') and self.cnf.get('text'):
-            fill = self.cnf.get('foreground', 'black')
-            if self['state'] in ('pressed', 'active'):
-                fill = self.cnf.get('activeforeground', 'white')
             ids.append(self._create('text', (0, 0), {
-                       'text': None, 'tag': '_txt', 'fill': fill}))
+                    'text': None, 'tag': '_txt', 'fill': active_state()['fill']}))
         
         # Image item (image and activeimage).
         if check_tag('_img') and cond_image:
-            img = self.cnf.get('image', '')
-            if self['state'] in ('pressed', 'active'):
-                img = self.cnf.get('activeimage', img)
             ids.append(self._create('image', (0, 0), {
-                       'tag': '_img', 'image': img}))
+                    'tag': '_img', 'image': active_state()['img']}))
         
         # Bitmap items (bitmap and activebitmap).
         elif check_tag('_bit') and cond_bitmap:
-            bit = self.cnf.get('image', '')
-            if self['state'] in ('pressed', 'active'):
-                bit = self.cnf.get('activeimage', bit)
             ids.append(self._create('bitmap', (0, 0), {
-                        'tag': '_bit', 'bitmap': bit}))
+                    'tag': '_bit', 'bitmap': active_state()['bit']}))
         
         # Border color item.
         bd_color = self.cnf.get('bordercolor', get_shade(self['bg'], 0.04, 'auto-120'))
@@ -413,7 +422,7 @@ class _BaseWidget(_Canvas):
             _bd_points = (pad-width, pad-width, r*2+width-pad, r*2+width-pad)
             kw_bd_color = {
                 'tag': '_bd_color', 
-                'state': 'hidden' if self['state'] in ('pressed', 'active') else 'normal',
+                'state': active_state()['state'],
                 'width': width*2,'outline': bd_color}
             ids.append(self._create('oval', _bd_points, kw_bd_color))
         elif check_tag('_bd_color'):
@@ -435,8 +444,8 @@ class _BaseWidget(_Canvas):
                 h += 1
             _bo_points = (2, 2, self.cnf.get('width', 87)-5, self.cnf.get('height', 24)-h, 4)  # was 3
             ids.append(self.rounded_rect(
-                _bo_points, width=1, outline=bo_color, smooth=1, tag='_border', style='arc', 
-                state='hidden' if self['state'] in ('pressed', 'active') else 'normal'))
+                _bo_points, width=1, outline=bo_color, smooth=1, tag='_border', 
+                style='arc', state=active_state()['state']))
         
         # Takefocus highlight ring.
         if check_tag('_tf') and self._type == 'circle':
@@ -446,6 +455,7 @@ class _BaseWidget(_Canvas):
             _tk_points = (pad+width, pad+width, r*2-width-pad, r*2-width-pad)
             ids.append(self._create('oval', _tk_points, {
                 'tag': '_tf', 'width': width, 'outline': self.cnf.get('focuscolor', '#81b3f4')}))
+                
         elif check_tag('_tf'):
             # takefocuswidth can be changed.
             # Focus line is not on point the line is off when thickness is changed.
@@ -871,10 +881,9 @@ class _BaseWidget(_Canvas):
                     binds, conf = options[:-2], options[-1]
                     _Canvas._configure(self, *conf)
                     return _bind(*binds)
-                elif options[1].get('tag') == '_activebg':
-                    # _on_press_color
-                    return _on_press_color(*options)
-                return _bind(*options) # binds
+                if options[1].get('tag') == '_activebg':
+                    return _on_press_color(*options)    # _on_press_color
+                return _bind(*options)  # binds
 
     def _configure1(self, cnf={}, **kw):
         """Internal Function.

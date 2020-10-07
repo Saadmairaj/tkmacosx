@@ -15,10 +15,10 @@
 '''
 Newer style colorchoosers for tkinter module.
 
-Version: 0.1.4
+Version: 0.1.5
 '''
 
-__version__ =  "0.1.4"
+__version__ =  "0.1.5"
 
 import re
 import sys
@@ -139,44 +139,26 @@ class Colorscale(tkb._Canvas):
         showinfo, gradient lines) items."""
 
         def check_tag(tag):
-            """Internal function.\n
-            If `cmd="check"` and the tag does not exist then
-            the tag is created, but if `cmd="create"` and
-            safe_create=True this will delete the tag if exists
-            and creates a new tag  with same settings."""
-            if cmd == 'check':
-                c = False
-            elif cmd == 'create':
-                c = True
-            else:
-                raise ValueError(
-                    '%s is not a valid command! Takes -create, -check' % cmd)
-            cond1 = bool(not self.find('withtag', tag) or c)
-            cond2 = bool(tag not in kw.get('avoid', []))
-            if safe_create and cond1 and cond2:
-                self.delete(tag)
-            return cond1 and cond2
+            return self.check_tag(cmd, tag, safe_create, kw.get('avoid', []))
 
         ids = []
 
         if check_tag('gradient'):
             w, h = self.winfo_width(), self.winfo_height()
             iteration = w if 'ver' in self.cnf['orient'] else h
-            # iteration -=
-            if self.cnf.get('gradient', 'default') == 'default':
-                color_list = gradient(iteration)
-            elif isinstance(self.cnf.get('gradient'), (list, tuple)):
+            color_list = gradient(iteration)
+            if isinstance(self.cnf.get('gradient'), (list, tuple)):
                 c1 = colour.Color(self.cnf.get('gradient')[0])
                 c2 = colour.Color(self.cnf.get('gradient')[1])
                 color_list = c1.range_to(c2, iteration)
-            elif isinstance(self.cnf.get('gradient'), str):
+            elif isinstance(self.cnf.get('gradient'), str) \
+                and self.cnf.get('gradient') != 'default':
                 c = colour.Color(self.cnf.get('gradient'))
                 color_list = c.range_to(c, iteration)
 
             for count, c in enumerate(color_list):
-                if self.cnf['orient'] == 'vertical':
-                    ags = (count, -1, count, h)
-                elif self.cnf['orient'] == 'horizontal':
+                ags = (count, -1, count, h)
+                if self.cnf['orient'] == 'horizontal':
                     ags = (-1, count, w, count)
                 ids.append(self._create('line', ags, {
                            'fill': c, 'tag': 'gradient'}))
@@ -191,28 +173,22 @@ class Colorscale(tkb._Canvas):
                                          style='arc'))
 
         if check_tag('marker'):
-            marker_points = kw.get('marker_points', (
-                self._xy if 'ver' in self.cnf['orient'] else 2,
-                2 if 'ver' in self.cnf['orient'] else self._xy,
-                5 if 'ver' in self.cnf['orient'] else self.winfo_width() - 4,
-                self.winfo_height() - 4 if 'ver' in self.cnf['orient'] else 5,
-                2))
+            _def_val = (2, self._xy, self.winfo_width()-4, 5, 2)
+            if self['orient'] == 'vertical':
+                _def_val = (self._xy, 2, 5, self.winfo_height()-4, 2)
+            marker_points = kw.get('marker_points', _def_val)
             ids.append(self.rounded_rect(marker_points, width=2,
                                          outline=self._marker_color, 
                                          tag="marker", style='arc'))
 
-        if check_tag('markerbg'):
+        if check_tag('markerbg') and kw.get('markerbg_points') is not None:
             markerbg_points = kw.get('markerbg_points')
             cnf = kw.get('markerbg_cnf')
-            if not markerbg_points:
-                return None
             ids.append(self._rounded(markerbg_points, **cnf))
 
-        if check_tag('info'):
+        if check_tag('info') and kw.get('info_points') is not None:
             info_points = kw.get('info_points')
             cnf = kw.get('info_cnf')
-            if not info_points:
-                return None
             ids.append(self._create('text', info_points, cnf))
 
         return ids
@@ -223,9 +199,12 @@ class Colorscale(tkb._Canvas):
 
     def _move_marker(self, evt, mw=None):
         """Internal function."""
-        if mw:
-            evt.x = mw if 'ver' in self.cnf['orient'] else 10
-            evt.y = 10 if 'ver' in self.cnf['orient'] else mw
+        if mw and self['orient'] == 'vertical':
+            evt.x = mw
+            evt.y = 10 
+        elif mw:
+            evt.x = 10
+            evt.y = mw
 
         self.after_cancel(getattr(self, '_remove_id', ' '))
         self._remove_id = self.after(self.cnf['showinfodelay'], self._release)
@@ -236,9 +215,11 @@ class Colorscale(tkb._Canvas):
 
         if not (cond_x and cond_y and cond_state):
             return
-
-        if not mw:
-            self._xy = evt.x if 'ver' in self.cnf['orient'] else evt.y
+        
+        if not mw and self['orient'] == 'vertical':
+            self._xy = evt.x
+        elif not mw:
+            self._xy = evt.y
 
         c_id = self.find('overlapping', evt.x, evt.y, evt.x, evt.y)
         hexcode = self.itemcget(c_id[0], 'fill')
@@ -249,45 +230,42 @@ class Colorscale(tkb._Canvas):
         self._configure(('itemconfigure', 'borderline'),
                         {'outline': hexcode}, None)
 
+        spacer, spacbg = 35, 25
+        text = hexcode
+        self._callback(hexcode)
+
         if self.cnf['value'] == "rgb":
             spacer, spacbg = 65, 55
             text = ' | '.join([v+':'+str(f)
                                for f, v in zip(rgb, ('R', 'G', 'B'))])
             self._callback(rgb)
-        elif self.cnf['value'] == "hex":
-            spacer, spacbg = 35, 25
-            text = hexcode
-            self._callback(hexcode)
 
-        ver_cond = evt.x < self.winfo_width() - (spacbg+spacer)\
+        ver_cond = evt.x < self.winfo_width() - (spacbg+spacer) \
                         and self['orient'] == 'vertical'
-        hor_cond = evt.y < self.winfo_height() - (spacbg+spacer)\
-                         and self['orient'] == 'horizontal'
+        hor_cond = evt.y < self.winfo_height() - (spacbg+spacer) \
+                        and self['orient'] == 'horizontal'
         markerbg_points = info_points = ()
 
         if bool(ver_cond or hor_cond) and self['showinfo']:
-            markerbg_points = (
-                evt.x+spacer - spacbg if 'ver' in self.cnf['orient'] else self.winfo_width()/2-6,
-                self.winfo_height()/2-6 if 'ver' in self.cnf['orient'] else evt.y+spacer-spacbg,
-                evt.x+spacer + spacbg if 'ver' in self.cnf['orient'] else self.winfo_width()/2+7,
-                self.winfo_height()/2+7 if 'ver' in self.cnf['orient'] else evt.y+spacer+spacbg,
-                6)
+            markerbg_points = ( self.winfo_width()/2-6, evt.y+spacer - spacbg, 
+                                self.winfo_width()/2+7, evt.y+spacer + spacbg, 6)
+            info_points = ((self.winfo_width()/2, evt.y+spacer))
 
-            info_points = (
-                (evt.x+spacer if 'ver' in self.cnf['orient'] else self.winfo_width()/2,
-                 self.winfo_height()/2 if 'ver' in self.cnf['orient'] else evt.y+spacer))
+            if self.cnf['orient'] == 'vertical':
+                markerbg_points = ( evt.x+spacer - spacbg, self.winfo_height()/2-6, 
+                                    evt.x+spacer + spacbg, self.winfo_height()/2+7, 6)
+                info_points = ((evt.x + spacer, self.winfo_height()/2))
 
         elif self['showinfo']:
-            markerbg_points = (
-                evt.x-spacer - spacbg if 'ver' in self.cnf['orient'] else self.winfo_width()/2-6,
-                self.winfo_height()/2-6 if 'ver' in self.cnf['orient'] else evt.y-spacer-spacbg,
-                evt.x-spacer +spacbg if 'ver' in self.cnf['orient'] else self.winfo_width()/2+7,
-                self.winfo_height()/2+7 if 'ver' in self.cnf['orient'] else evt.y-spacer+spacbg,
-                6)
-
+            markerbg_points = ( self.winfo_width()/2-6, evt.y-spacer-spacbg, 
+                                self.winfo_width()/2+7, evt.y-spacer+spacbg, 6)
             info_points = (
-                (evt.x-spacer if 'ver' in self.cnf['orient'] else self.winfo_width()/2,
-                 self.winfo_height()/2 if 'ver' in self.cnf['orient'] else evt.y-spacer))
+                (self.winfo_width()/2, evt.y-spacer))
+
+            if self.cnf['orient'] == 'vertical':
+                markerbg_points = ( evt.x-spacer-spacbg, self.winfo_height()/2-6, 
+                                    evt.x-spacer+spacbg, self.winfo_height()/2+7, 6)
+                info_points = ((evt.x-spacer, self.winfo_height()/2))
 
         markerbg_cnf = {'fill': self._marker_color, 'tag': 'markerbg'}
         info_cnf = {'angle': 0 if 'ver' in self.cnf['orient'] else 90,
@@ -296,7 +274,6 @@ class Colorscale(tkb._Canvas):
         self._create_items('create', safe_create=True, avoid=('gradient', 'borderline'),
                            info_points=info_points, markerbg_points=markerbg_points,
                            info_cnf=info_cnf, markerbg_cnf=markerbg_cnf)
-
         return True
 
     def _set_mousewheel(self, evt=None):

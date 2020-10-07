@@ -66,15 +66,20 @@ def get_random_colors(k=1):
 
 @sort_random_values
 def get_random_font(k=1):
-    def family(): return random.choice(font.families())
+    def family():
+        return random.choice(font.families())
 
-    def weight(): return random.choice(('bold', 'normal'))
+    def weight():
+        return random.choice(('bold', 'normal'))
 
-    def slant(): return random.choice(('italic', 'roman'))
+    def slant():
+        return random.choice(('italic', 'roman'))
 
-    def size(): return random.randrange(9, 30)
+    def size():
+        return random.randrange(15, 30)
 
-    def underline(): return random.choice((True, False))
+    def underline():
+        return random.choice((True, False))
 
     overstrike = underline
     return tuple(font.Font(family=family(), weight=weight(),
@@ -180,11 +185,13 @@ class Sample(tk.Tk):
         self.B3 = Button(self.sfr, text='Change Background Color',
                          bg='#d0c0ea', borderless=1)
         self.B3['command'] = lambda: self.B2.config(bg=askcolor()[1])
-        self.B3.grid(row=10, column=0, columnspan=5, sticky='w', pady=10, padx=10)
+        self.B3.grid(row=10, column=0, columnspan=5,
+                     sticky='w', pady=10, padx=10)
         self.B4 = Button(self.sfr, text='Change Foreground Color',
                          bg="#d0c0ea", borderless=1)
         self.B4['command'] = lambda: self.B2.config(fg=askcolor()[1])
-        self.B4.grid(row=10, column=0, columnspan=5, sticky='e', pady=10, padx=10)
+        self.B4.grid(row=10, column=0, columnspan=5,
+                     sticky='e', pady=10, padx=10)
 
         # ------------ Borderless ------------
 
@@ -254,15 +261,16 @@ class Sample(tk.Tk):
         self.B10 = Button(self.sfr, text='Button', borderless=1)
         self.B10.grid(row=25, columnspan=5, pady=20)
 
-        self.B11 =  Button(self.sfr, text='Change Style', borderless=1, fg='#21618C', 
-                           activebackground=('#B3B6B7', '#58D68D'), command=self.change_button_style)
+        self.B11 = Button(self.sfr, text='Change Style', borderless=1, fg='#21618C',
+                          activebackground=('#B3B6B7', '#58D68D'), command=self.change_button_style)
         self.B11.grid(row=26, columnspan=5, ipady=5)
 
         self.button_clicks = 1
-        self.Text1 = tk.Text(self.sfr, background=self.main_color, highlightthickness=0, 
+        self.Text1 = tk.Text(self.sfr, background=self.main_color, highlightthickness=0,
                              relief='sunken', height=20, bd=2, padx=10)
         self.Text1.grid(row=27, columnspan=5, pady=20, padx=20)
-        self.sfr._avoid_mousewheel((self.Text1, self.CS1, self.CS2, self.CS3, self.CS4))
+        self.sfr._avoid_mousewheel(
+            (self.Text1, self.CS1, self.CS2, self.CS3, self.CS4))
         self.change_button_style()
         self.update_idletasks()
 
@@ -299,14 +307,15 @@ class Sample(tk.Tk):
         )
         self.B10.config(**cnf)
 
-        self.Text1.insert('end', '\n\nBUTTON STYLE %s\n\n'%self.button_clicks)
-        for k,v in cnf.items():
+        self.Text1.insert('end', '\n\nBUTTON STYLE %s\n\n' %
+                          self.button_clicks)
+        for k, v in cnf.items():
             if k == 'font':
                 self.Text1.insert('end', 'font:\n')
                 for i, j in v.config().items():
-                    self.Text1.insert('end', '\t%s\t\t= %s\n' %(i,j))
+                    self.Text1.insert('end', '\t%s\t\t= %s\n' % (i, j))
             else:
-                self.Text1.insert('end', '%s\t\t\t= %s\n' %(k,v))
+                self.Text1.insert('end', '%s\t\t\t= %s\n' % (k, v))
         self.Text1.see('end')
         self.Text1.insert('end', '\n\n'+'-'*40)
         self.button_clicks += 1

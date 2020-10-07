@@ -15,7 +15,7 @@
 import re
 import sys
 import ast
-import pickle as pkl
+import pickle
 
 if sys.version_info.major == 2:
     import Tkinter as _tk
@@ -30,13 +30,14 @@ _all_traces_colorvar = {}
 
 def _colorvar_patch_cget(fn):
     """Internal function."""
+
     def _patch(self, key):
         """Return the resource value for a KEY given as string."""
         if (self, key) in _all_traces_colorvar:
             return _all_traces_colorvar[(self, key)][0]
         return fn(self, key)
     return _patch
-            
+
 
 def _colorvar_patch_destroy(fn):
     """Internal function.\n
@@ -45,13 +46,15 @@ def _colorvar_patch_destroy(fn):
     def _patch(self):
         """Interanl function."""
         if self._tclCommands is not None:
-            # Deletes the widget from the _all_traces_colorvar 
+            # Deletes the widget from the _all_traces_colorvar
             # and deletes the traces too.
             for key, value in dict(_all_traces_colorvar).items():
                 if self == key[0]:
                     var, cbname = value
-                    try: var.trace_vdelete('w', cbname)
-                    except: pass
+                    try:
+                        var.trace_vdelete('w', cbname)
+                    except Exception:
+                        pass
                     _all_traces_colorvar.pop(key)
         return fn(self)
     return _patch
@@ -81,14 +84,16 @@ def _colorvar_patch_configure(fn):
                         cbname = var.trace_variable('w', lambda a, b, c,
                                                     cls=self, opt=i,
                                                     tagId=tag, var=var:
-                                                    cls._configure(('itemconfigure',tagId), 
-                                                            {opt: var.get()}, None))
+                                                    cls._configure(('itemconfigure', tagId),
+                                                                   {opt: var.get()}, None))
                         if (self, (i, tag)) in _all_traces_colorvar:
                             v, cb = _all_traces_colorvar.get((self, (i, tag)))
                             v.trace_vdelete('w', cb)
-                            _all_traces_colorvar[(self, (i, tag))] = (var, cbname)
+                            _all_traces_colorvar[(self, (i, tag))] = (
+                                var, cbname)
                         else:
-                            _all_traces_colorvar[(self, (i, tag))] = (var, cbname)
+                            _all_traces_colorvar[(self, (i, tag))] = (
+                                var, cbname)
                         cnf[i] = var.get()
         return fn(self, cmd, cnf, None)
     return _patch
@@ -97,19 +102,18 @@ def _colorvar_patch_configure(fn):
 def _colorvar_patch_options(fn):
     """Internal function.\n
     Patch for ColorVar to work with tkinter widgets."""
-    
+
     def _patch(self, cnf, kw=None):
         """Internal function."""
+        cnf = _tk._cnfmerge(cnf)
         if kw:
             cnf = _tk._cnfmerge((cnf, kw))
-        else:
-            cnf = _tk._cnfmerge(cnf)
-            
+
         for i in ('fg', 'foreground', 'bg', 'background',
-                'activebackground', 'activeforeground', 'disabledforeground',
-                'highlightbackground', 'highlightcolor', 'selectforeground',
-                'readonlybackground', 'selectbackground', 'insertbackground',
-                'disabledbackground'):
+                  'activebackground', 'activeforeground', 'disabledforeground',
+                  'highlightbackground', 'highlightcolor', 'selectforeground',
+                  'readonlybackground', 'selectbackground', 'insertbackground',
+                  'disabledbackground'):
             if isinstance(cnf.get(i), _tk.Variable):
                 var = cnf[i]
                 cbname = var.trace_variable('w', lambda a, b, c, i=i, var=var,
@@ -121,7 +125,7 @@ def _colorvar_patch_options(fn):
                 else:
                     _all_traces_colorvar[(self, i)] = (var, cbname)
                 cnf[i] = var.get()
-            # [issue-1] once a ColorVar is assigned, it cannot be removed 
+            # [issue-1] once a ColorVar is assigned, it cannot be removed
             #           untill the widget is destroyed or give another ColorVar
             # [issue-1] (trial) the below doesn't work as excepted.
             # elif (self, i) in _all_traces_colorvar:
@@ -160,8 +164,8 @@ def _create(self, itemType, args, kw):  # Args: (val, val, ..., cnf={})
     # ---------------------------------------------------------------
 
     tagId = self.tk.getint(self.tk.call(
-                self._w, 'create', itemType,
-                *(args + self._options(cnf, kw))))
+        self._w, 'create', itemType,
+        *(args + self._options(cnf, kw))))
 
     for key, value in dict(_all_traces_colorvar).items():
         if isinstance(key[1], (tuple, list)):
@@ -171,8 +175,8 @@ def _create(self, itemType, args, kw):  # Args: (val, val, ..., cnf={})
                 cbname = var.trace_variable('w', lambda a, b, c,
                                             cls=self, opt=opt,
                                             tagId=tagId, var=var:
-                                            cls._configure(('itemconfigure',tagId), 
-                                                    {opt: var.get()}, None))
+                                            cls._configure(('itemconfigure', tagId),
+                                                           {opt: var.get()}, None))
                 _all_traces_colorvar[(self, (opt, tagId))] = (var, cbname)
                 _all_traces_colorvar.pop((self, (opt, None)))
     return tagId
@@ -204,17 +208,11 @@ class ColorVar(_tk.Variable):
 
     def set(self, value=''):
         """Set the variable to VALUE."""
-        if value.startswith('#'):
-            if not bool(self._rgbstring.match(value)):
-                raise ValueError('"{}" is not a valid HEX.'.format(value))
-        elif isinstance(value, str):
-            try:
-                r, g, b = self._root.winfo_rgb(value)
-                c = (r/257, g/257, b/257)
-                value = '#%02x%02x%02x' % (int(c[0]), int(c[1]), int(c[2]))
-            except:
-                raise ValueError(
-                    'Could not find right HEX for "{}".'.format(value))
+        if value.startswith('#') and not bool(self._rgbstring.match(value)):
+            raise _tk.TclError('"{}" is not a valid HEX.'.format(value))
+        r, g, b = self._root.winfo_rgb(value)
+        c = (r/257, g/257, b/257)
+        value = '#%02x%02x%02x' % (int(c[0]), int(c[1]), int(c[2]))
         return self._tk.globalsetvar(self._name, value)
     initialize = set
 
@@ -254,8 +252,7 @@ class DictVar(_tk.Variable):
             value = ast.literal_eval(value)
         if key:
             return value.get(key, d)
-        else:
-            return value
+        return value
 
 
 def SaveVar(var, master=None, value=None, name=None, filename='data.pkl'):
@@ -289,7 +286,7 @@ def SaveVar(var, master=None, value=None, name=None, filename='data.pkl'):
         """Internal function for updating the value for variable"""
         try:    # try/except , if the file doesn't exists.
             open1 = open(filename, 'rb')
-            tmpdict = pkl.load(open1)  # load saved dictionary data.
+            tmpdict = pickle.load(open1)  # load saved dictionary data.
             # Block of code to check for the right value.
             if tmpdict.get(str(var)):
                 old, default = tmpdict.get(str(var))
@@ -307,7 +304,7 @@ def SaveVar(var, master=None, value=None, name=None, filename='data.pkl'):
             tmpdict[str(var)] = (var.get(), defaultval)
 
         open2 = open(filename, 'wb')
-        pkl.dump(tmpdict, open2)
+        pickle.dump(tmpdict, open2)
         startup[0] = False
         open2.close()
 
@@ -322,7 +319,7 @@ def SaveVar(var, master=None, value=None, name=None, filename='data.pkl'):
         if mode[0] == 'w' and update_val.__name__ in cbname:
             try:
                 var.trace_vdelete('w', cbname)
-            except:
+            except Exception:
                 pass
     res = var.trace_variable('w',  update_val)
     return var
