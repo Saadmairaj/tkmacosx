@@ -266,8 +266,6 @@ class _Canvas(_tk.Widget):
         (optional above another item)."""
         self.tk.call((self._w, 'raise') + args)
 
-
-
     def rounded_rect(self, ags=(), *args, **kw):
         """Internal function."""
         x, y, w, h, c = _agsmerge((ags, args))
@@ -599,7 +597,7 @@ class _BaseWidget(_Canvas):
                 return ags, cnf
             return ags or cnf
 
-        elif cmd == 'activebackground':
+        if cmd == 'activebackground':
             color = None
             if kw.get(cmd, '') != '':
                 color = kw.get(cmd, self.cnf.get(cmd))
@@ -859,9 +857,13 @@ class _BaseWidget(_Canvas):
         """Internal function.\n
         Set Coordinates of the items."""
         kw = _cnfmerge((cnf, kw))
-        return [self.coords(tag, *kw[tag]) for tag in
+        r = [self.coords(tag, *kw[tag]) for tag in
                 ('_txt', '_img', '_bit', '_bd_color',
                  '_border', '_tf') if kw.get(tag)]
+        for i in ('_txt', '_bit', '_img'):
+            if self.coords(i):
+                self._set_anchor(self.cnf['anchor'], i)
+        return r
 
     def _set_configure(self, options):
         """Internal function.\n
@@ -874,11 +876,17 @@ class _BaseWidget(_Canvas):
             con1 = bool(isinstance(options[0], tuple))
             if options[0] == 'configure' or (con1 and len(options[0]) > 1):
                 # itemconfigure and configure
+                for i in ('_txt', '_bit', '_img'):
+                    if self.coords(i) and options[1].get('anchor'):
+                        self._set_anchor(options[1].pop('anchor', 'center'), i)
                 _Canvas._configure(self, *options)
             if isinstance(options[0], _tk.Misc):
                 if isinstance(options[-1], (tuple, list)):
                     # binds, itemconfigure and configure
                     binds, conf = options[:-2], options[-1]
+                    for i in ('_txt', '_bit', '_img'):
+                        if i in self.find('all') and conf.get('anchor'):
+                            self._set_anchor(conf.pop('anchor', 'center'), i)
                     _Canvas._configure(self, *conf)
                     return _bind(*binds)
                 if options[1].get('tag') == '_activebg':
@@ -1139,6 +1147,61 @@ class _BaseWidget(_Canvas):
                 return {'_txt': (width[0], height[0]),
                             _PiTag: (width[1], height[1])}
         return None
+
+    def _set_anchor(self, anchor, item):
+        """Internal function.\n
+        Sets the anchor position from (n, ne, e, se, s, sw, w, nw, or center)."""
+        bbox = self.bbox(item)
+        item_width = bbox[2] - bbox[0]
+        item_height = bbox[3] - bbox[1]
+
+        default_padx = 2 + int(item_width/2)
+        default_pady = 0 + int(item_height/2)
+
+        width = self.cnf['width']
+        height = self.cnf['height']
+
+        # Center
+        x = width / 2
+        y = height / 2
+
+        if anchor in ('n', 'nw', 'ne'):
+            # North
+            x = int(width/2)
+            y = default_pady + 0
+            if anchor == 'nw':
+                # North-West
+                x = default_padx + 0
+            elif anchor == 'ne':
+                # North-East
+                x = default_padx + (width - item_width) - 4
+        
+        elif anchor in ('s', 'sw', 'se'):
+            # South
+            x = int(width/2)
+            y = default_pady + (height - item_height)
+            if anchor == 'sw':
+                # South-West
+                x = default_padx + 0
+            elif anchor == 'se':
+                # South-East
+                x = default_padx + (width - item_width) - 4
+        
+        elif anchor == 'e':
+            # West
+            x = default_padx + (width - item_width) - 4
+                
+        elif anchor == 'w':
+            # East
+            x = default_padx + 0
+            
+        elif anchor != 'center':
+            raise _tk.TclError(
+                'bad anchor position "{}": must be n, ne, e, se, s, sw, w, nw, or center'.format(anchor))
+
+        return self.coords(item, x, y)
+
+
 
 
 class ButtonBase(_BaseWidget):
