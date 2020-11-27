@@ -16,7 +16,6 @@ import re
 import sys
 import ast
 import pickle
-import tkinter
 
 if sys.version_info.major == 2:
     import Tkinter as _tk
@@ -54,7 +53,7 @@ def _colorvar_patch_destroy(fn):
                     var, cbname = value
                     try:
                         var.trace_vdelete('w', cbname)
-                    except tkinter.TclError:
+                    except _tk.TclError:
                         pass
                     _all_traces_colorvar.pop(key)
         return fn(self)
@@ -321,7 +320,7 @@ def SaveVar(var, master=None, value=None, name=None, filename='data.pkl'):
         if mode[0] == 'w' and update_val.__name__ in cbname:
             try:
                 var.trace_vdelete('w', cbname)
-            except tkinter.TclError:
+            except _tk.TclError:
                 pass
     res = var.trace_variable('w',  update_val)
     return var
