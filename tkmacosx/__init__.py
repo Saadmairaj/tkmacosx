@@ -1,4 +1,4 @@
-#                       Copyright 2020 Saad Mairaj
+#                       Copyright 2021 Saad Mairaj
 # 
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ Read more about tkmacosx in detail on
 https://github.com/Saadmairaj/tkmacosx/tree/master/tkmacosx.
 """
 
-__version__ = '0.1.4'
+__version__ = '0.1.6b2'
 
 from tkmacosx.basewidget import check_appearance, get_shade, delta
 from tkmacosx.variables import ColorVar, DictVar, SaveVar, demo_colorvar, demo_savevar
