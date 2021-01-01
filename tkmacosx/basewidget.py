@@ -1,4 +1,4 @@
-#                       Copyright 2020 Saad Mairaj
+#                       Copyright 2021 Saad Mairaj
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -147,13 +147,10 @@ def check_appearance(cmd='defaults read -g AppleInterfaceStyle'):
             the command is `'defaults read -g AppleInterfaceStyle'` .
     """
     import subprocess
-    out, err = subprocess.Popen(cmd, stdout=subprocess.PIPE, 
-                                stderr=subprocess.PIPE,
-                                universal_newlines=True, 
-                                shell=True).communicate()
-    if out:
-        return True
-    return False
+    cmd = 'defaults read -g AppleInterfaceStyle'
+    p = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                         stderr=subprocess.PIPE, shell=True)
+    return bool(p.communicate()[0])
 
 
 def get_shade(color, shade, mode='auto'):
@@ -378,7 +375,7 @@ class _BaseWidget(_Canvas):
             """Internal function."""
             return self.check_tag(cmd, tag, safe_create, kw.get('avoid', []))
         
-        def active_state():
+        def active_state(val):
             """Internal function."""
             _kw = dict( fill=self.cnf.get('foreground', 'black'),
                         img=self.cnf.get('image', ''),
@@ -388,8 +385,8 @@ class _BaseWidget(_Canvas):
                 return dict(fill=self.cnf.get('activeforeground', 'white'),
                             img=self.cnf.get('activeimage', _kw['img']),
                             bit=self.cnf.get('activebitmap', _kw['bit']),
-                            state='hidden')
-            return _kw
+                            state='hidden')[val]
+            return _kw[val]
 
         ids = []
         cond_image = bool(
@@ -400,17 +397,17 @@ class _BaseWidget(_Canvas):
         # Text item.
         if check_tag('_txt') and self.cnf.get('text'):
             ids.append(self._create('text', (0, 0), {
-                    'text': None, 'tag': '_txt', 'fill': active_state()['fill']}))
+                    'text': None, 'tag': '_txt', 'fill': active_state('fill')}))
         
         # Image item (image and activeimage).
         if check_tag('_img') and cond_image:
             ids.append(self._create('image', (0, 0), {
-                    'tag': '_img', 'image': active_state()['img']}))
+                    'tag': '_img', 'image': active_state('img')}))
         
         # Bitmap items (bitmap and activebitmap).
         elif check_tag('_bit') and cond_bitmap:
             ids.append(self._create('bitmap', (0, 0), {
-                    'tag': '_bit', 'bitmap': active_state()['bit']}))
+                    'tag': '_bit', 'bitmap': active_state('bit')}))
         
         # Border color item.
         bd_color = self.cnf.get('bordercolor', get_shade(self['bg'], 0.04, 'auto-120'))
@@ -420,7 +417,7 @@ class _BaseWidget(_Canvas):
             _bd_points = (pad-width, pad-width, r*2+width-pad, r*2+width-pad)
             kw_bd_color = {
                 'tag': '_bd_color', 
-                'state': active_state()['state'],
+                'state': active_state('state'),
                 'width': width*2,'outline': bd_color}
             ids.append(self._create('oval', _bd_points, kw_bd_color))
         elif check_tag('_bd_color'):
@@ -443,7 +440,7 @@ class _BaseWidget(_Canvas):
             _bo_points = (2, 2, self.cnf.get('width', 87)-5, self.cnf.get('height', 24)-h, 4)  # was 3
             ids.append(self.rounded_rect(
                 _bo_points, width=1, outline=bo_color, smooth=1, tag='_border', 
-                style='arc', state=active_state()['state']))
+                style='arc', state=active_state('state')))
         
         # Takefocus highlight ring.
         if check_tag('_tf') and self._type == 'circle':
@@ -596,26 +593,28 @@ class _BaseWidget(_Canvas):
             if isinstance(opts, (list, tuple)) and isinstance(opts, dict):
                 return ags, cnf
             return ags or cnf
+        
+        _opt = None
 
         if cmd == 'activebackground':
             color = None
             if kw.get(cmd, '') != '':
                 color = kw.get(cmd, self.cnf.get(cmd))
-            return [self, {'tag': '_activebg',
+            _opt = [self, {'tag': '_activebg',
                            'width':  self.winfo_width(),
                            'height': self.winfo_height(),
                            'color': color}]
         
         elif cmd == 'activeforeground':
             if self['state'] in ('pressed', 'active'):
-                return (('itemconfigure', '_txt'), {
+                _opt = (('itemconfigure', '_txt'), {
                         'fill': self.cnf.get(cmd, 'white')}, None)
 
         elif cmd == 'activebitmap' or cmd == 'activeimage':
             tag = '_bit' if cmd == 'activebitmap' else '_img'
             name = cmd.rsplit('active')[-1]
             if self['state'] in ('pressed', 'active'):
-                return (('itemconfigure', tag), {
+                _opt = (('itemconfigure', tag), {
                         name: self.cnf.get(cmd, '')}, None)
 
         elif cmd == 'bitmap' or cmd == 'image':
@@ -623,22 +622,21 @@ class _BaseWidget(_Canvas):
             if kw.get(cmd, '') != '':
                 state = 'disabled' if self.cnf.get('state') in (
                     'disabled', 'disable') else 'normal'
-                cnf = dict(state=state, **{i: kw.get(i, self.cnf.get(i))
+                tmp = dict(state=state, **{i: kw.get(i, self.cnf.get(i))
                                            for i in ('anchor', cmd)})
-                return (('itemconfigure', tag), cnf, None)
+                _opt = (('itemconfigure', tag), tmp, None)
             elif kw.get(cmd) == '':
                 self.delete(tag)
 
         elif cmd == 'borderless' or cmd == 'bordercolor' or cmd == 'highlightbackground':
-            cnf = {}
+            _opt = {}
             if bool(kw.get('borderless')) or self.cnf.get('borderless'):
                 if not check_function_equality(self.master.config, self._get_functions('borderless', kw)):
                     self.master.config = self.master.configure = self._get_functions(
                         'borderless', kw)
                 self.cnf['highlightbackground'] = self.cnf['bordercolor'] = self.master['bg']
-                cnf[1] = [('itemconfigure', '_bd_color'), {'outline': self.master['bg']}, None]
-                cnf[2] = ['configure', {'highlightbackground': self.master['bg']}, None]
-                return cnf
+                _opt[1] = [('itemconfigure', '_bd_color'), {'outline': self.master['bg']}, None]
+                _opt[2] = ['configure', {'highlightbackground': self.master['bg']}, None]
             elif not bool(kw.get('borderless', True)) or not self.cnf.get('borderless'):
                 if self.cnf.get('bordercolor') == self.master['bg']:
                     self.cnf.pop('bordercolor', None)
@@ -652,27 +650,25 @@ class _BaseWidget(_Canvas):
                 self.cnf.update({'bordercolor': bd_color})
                 self.cnf['highlightbackground'] = self.cnf['bordercolor'] = bd_color
                 if self.itemcget('_bd_color', 'outline') != bd_color:
-                    cnf[1] = [('itemconfigure', '_bd_color'), {'outline': bd_color}, None]
-                    cnf[2] = ['configure', {'highlightbackground': bd_color}, None]
-                    return cnf
+                    _opt[1] = [('itemconfigure', '_bd_color'), {'outline': bd_color}, None]
+                    _opt[2] = ['configure', {'highlightbackground': bd_color}, None]
 
         elif cmd == 'foreground' or cmd == 'fg':
-            return (('itemconfigure', '_txt'),
+            _opt = (('itemconfigure', '_txt'),
                     {'fill': kw.get(cmd, self.cnf.get(cmd))}, None)
         
         elif cmd == 'focuscolor':
-            return (('itemconfigure', '_tf'),
+            _opt = (('itemconfigure', '_tf'),
                     {'outline': kw.get(cmd, self.cnf.get(cmd))}, None)
         
         elif cmd == 'focusthickness':
-            self._create_items('create', True, avoid=(
+            _opt = self._create_items('create', True, avoid=(
                     '_txt', '_img', '_bit', '_bd_color', '_border'))
         
         elif cmd == 'overbackground':
-            cnf = []
             if kw.get(cmd, '') != '':
                 fn = self._get_functions(cmd, kw)
-                cnf = [self,
+                _opt = [self,
                        {'className': cmd, 'sequence': '<Enter>',
                         'func': fn.get('<Enter>')},
                        {'className': cmd, 'sequence': '<Leave>',
@@ -682,19 +678,17 @@ class _BaseWidget(_Canvas):
                     _Canvas._configure(self, ('itemconfigure', '_border'), 
                         {'outline': get_shade(kw.get('overbackground'), 0.1, 'auto-120')}, None)
             elif kw.get(cmd) == '':
-                cnf = [self,
+                _opt = [self,
                         {'className': cmd, 'sequence': '<Enter>'},
                         {'className': cmd, 'sequence': '<Leave>'}, 
                         ('configure', {'bg': self._org_bg}, None), 
                         (('itemconfigure', '_border'), {'outline': 
                         get_shade(self._org_bg, 0.1, 'auto-120')}, None)]
-            return cnf
 
         elif cmd == 'overforeground':
-            cnf = []
             if kw.get(cmd, '') != '':
                 fn = self._get_functions(cmd, kw)
-                cnf = [self,
+                _opt = [self,
                        {'className': cmd, 'sequence': '<Enter>',
                         'func': fn.get('<Enter>')},
                        {'className': cmd, 'sequence': '<Leave>',
@@ -706,13 +700,11 @@ class _BaseWidget(_Canvas):
                     self.after(1, lambda: _Canvas._configure(self,
                         ('itemconfigure', '_txt'), {'fill': kw.get(cmd)}, None))
             elif kw.get(cmd) == '':
-                cnf = [self,
+                _opt = [self,
                        {'className': cmd, 'sequence': '<Enter>'},
-                       {'className': cmd, 'sequence': '<Leave>'}]
-                cnf.append((('itemconfigure', '_txt'),
-                            {'fill': self.cnf.get('fg', 'black')}, None))
-            return cnf
-
+                       {'className': cmd, 'sequence': '<Leave>'},
+                       (('itemconfigure', '_txt'), {'fill': self.cnf.get('fg', 'black')}, None)]
+    
         elif cmd == 'overrelief':
             if kw.get(cmd, '') != '':
                 if not self._rel[1]:
@@ -721,32 +713,32 @@ class _BaseWidget(_Canvas):
                     self._configure(
                         'configure', {'_relief': kw.get(cmd)}, None)
                 fn = self._get_functions(cmd, kw)
-                return (self,
+                _opt = (self,
                         {'className': cmd, 'sequence': '<Enter>',
                          'func': fn.get('<Enter>')},
                         {'className': cmd, 'sequence': '<Leave>',
                          'func': fn.get('<Leave>')})
 
             elif kw.get(cmd) == '':
-                return (self,
+                _opt = (self,
                         {'className': cmd, 'sequence': '<Enter>'},
                         {'className': cmd, 'sequence': '<Leave>'},
                         ('configure', {'relief': self._rel[0]}, None))
 
         elif cmd == 'size':
-            cnf = {}
+            tmp = {}
             for i in ('text', 'font', 'textvariable', 'image', 'bitmap',
                       'compound', 'padx', 'pady', 'activeimage',
                       'activebitmap'): # 'width', 'height'}:
                 if self.cnf.get(i, '') != '':
                     if i == 'activeimage':
-                        cnf['image'] = self.cnf[i]
+                        tmp['image'] = self.cnf[i]
                     elif i == 'activebitmap':
-                        cnf['bitmap'] = self.cnf[i]
+                        tmp['bitmap'] = self.cnf[i]
                     elif i in ('width', 'height'):
-                        cnf[i] = str(self.cnf[i]) + 'c'
+                        tmp[i] = str(self.cnf[i]) + 'c'
                     else:
-                        cnf[i] = self.cnf.get(i)
+                        tmp[i] = self.cnf.get(i)
             if self._type == 'circle' and kw.get('radius'):
                 self.cnf['width'] = self.cnf['height'] = kw.get(
                     'width', kw.get('height', int(kw['radius']*2)))
@@ -756,62 +748,61 @@ class _BaseWidget(_Canvas):
                 kw['height'] = self.cnf['height']
             self._fixed_size['w'] = True if kw.get('width', kw.get('radius')) else False
             self._fixed_size['h'] = True if kw.get('height', kw.get('radius')) else False
-            W, H = _info_button(self, **cnf)
+            W, H = _info_button(self, **tmp)
             self.cnf['width'] = self.cnf.get('width') if self._fixed_size['w'] else W
             self.cnf['height'] = self.cnf.get('height') if self._fixed_size['h'] else H
-            return ('configure', {'width': self.cnf['width'],
+            _opt = ('configure', {'width': self.cnf['width'],
                                   'height': self.cnf['height']}, None)
 
         elif cmd == 'state':
-            cnf = {}
+            _opt = {}
             if kw.get(cmd) in 'disabled':
-                cnf[1] = ('configure', {'bg': self.cnf.get('disabledbackground'),
+                _opt[1] = ('configure', {'bg': self.cnf.get('disabledbackground'),
                                         'state': 'disabled'}, None)
-                cnf[2] = (('itemconfigure', '_txt'), {
+                _opt[2] = (('itemconfigure', '_txt'), {
                                 'disabledfill': kw.get('disabledforeground', 
                                 self.cnf.get('disabledforeground')), 
                                 'state': 'disabled'}, None)
-                cnf[3] = (('itemconfigure', '_activebg'), {'state': 'hidden'}, None)
-                cnf[5] = (('itemconfigure', '_img'), {'state': 'disabled'}, None)
-                cnf[6] = (('itemconfigure', '_bit'), {'state': 'disabled'}, None)
+                _opt[3] = (('itemconfigure', '_activebg'), {'state': 'hidden'}, None)
+                _opt[5] = (('itemconfigure', '_img'), {'state': 'disabled'}, None)
+                _opt[6] = (('itemconfigure', '_bit'), {'state': 'disabled'}, None)
             elif kw.get(cmd) == 'normal':
                 _bg = self._org_bg
                 if self._mouse_state_condition() and self.cnf.get('overbackground'):
                     _bg = self.cnf['overbackground']
-                cnf[1] = ('configure', {'bg': _bg, 'state': 'normal'}, None)
-                cnf[2] = (('itemconfigure', '_txt'), {'state': 'normal', 
+                _opt[1] = ('configure', {'bg': _bg, 'state': 'normal'}, None)
+                _opt[2] = (('itemconfigure', '_txt'), {'state': 'normal', 
                                 'fill': self.cnf.get('foreground', 'black')}, None)
-                cnf[3] = (('itemconfigure', '_activebg'), {'state': 'hidden'}, None)
-                cnf[4] = (('itemconfigure', '_border'), {'state': 'normal'}, None)
-                cnf[5] = (('itemconfigure', '_img'), {
+                _opt[3] = (('itemconfigure', '_activebg'), {'state': 'hidden'}, None)
+                _opt[4] = (('itemconfigure', '_border'), {'state': 'normal'}, None)
+                _opt[5] = (('itemconfigure', '_img'), {
                                 'image': self.cnf.get('image', '')}, None)
-                cnf[6] = (('itemconfigure', '_bit'), {
+                _opt[6] = (('itemconfigure', '_bit'), {
                                 'bitmap': self.cnf.get('bitmap', '')}, None)
             elif kw.get(cmd) in ('active', 'pressed'):
                 _bg = self._org_bg
                 if self._mouse_state_condition() and self.cnf.get('overbackground'):
                     _bg = self.cnf['overbackground']
-                cnf[1] = ('configure', {'bg': _bg, 'state': 'normal'}, None)
-                cnf[2] = (('itemconfigure', '_txt'), {'state': 'normal', 
+                _opt[1] = ('configure', {'bg': _bg, 'state': 'normal'}, None)
+                _opt[2] = (('itemconfigure', '_txt'), {'state': 'normal', 
                                 'fill': self.cnf.get('activeforeground', 'white')}, None)
-                cnf[3] = (('itemconfigure', '_activebg'), {'state': 'normal'}, None)
-                cnf[4] = (('itemconfigure', '_border'), {'state': 'hidden'}, None)
-                cnf[5] = (('itemconfigure', '_img'), {
+                _opt[3] = (('itemconfigure', '_activebg'), {'state': 'normal'}, None)
+                _opt[4] = (('itemconfigure', '_border'), {'state': 'hidden'}, None)
+                _opt[5] = (('itemconfigure', '_img'), {
                                 'image': self.cnf.get('activeimage', '')}, None)
-                cnf[6] = (('itemconfigure', '_bit'), {
+                _opt[6] = (('itemconfigure', '_bit'), {
                                 'bitmap': self.cnf.get('activebitmap', '')}, None)
-            return cnf
 
         elif cmd == 'takefocus':
             if int(self[cmd]) and self['state'] in ('normal', 'active', 'pressed'):
                 fn = self._get_functions(cmd, kw)
-                return [self, {'className': cmd, 'sequence':
+                _opt = [self, {'className': cmd, 'sequence':
                                '<FocusIn>', 'func': fn.get('<FocusIn>')},
                               {'className': cmd, 'sequence':
                                '<FocusOut>', 'func': fn.get('<FocusOut>')}]
 
             elif not int(self[cmd]) or self['state'] in 'disabled':
-                return [self,
+                _opt = [self,
                         {'className': cmd, 'sequence': '<FocusIn>'},
                         {'className': cmd, 'sequence': '<FocusOut>'},
                         (('itemconfigure', '_tf'), {'state': 'hidden'}, None)]
@@ -834,14 +825,14 @@ class _BaseWidget(_Canvas):
             fill = kw.get('fg', self.cnf.get('fg'))
             if self['state'] in ('pressed', 'active'):
                 fill = self.cnf.get('activeforeground', 'white')
-            cnf = dict(state=state, fill=fill,
+            tmp = dict(state=state, fill=fill,
                        disabledfill=kw.get(
                            'disabledforeground', self.cnf.get('disabledforeground')),
                        **{i: kw.get(i, self.cnf.get(i)) for i in ('text', 'anchor', 'font', 'justify')})
-            return (('itemconfigure', '_txt'), cnf, None)
+            _opt = (('itemconfigure', '_txt'), tmp, None)
 
         elif cmd == '_border':
-            return [('itemconfigure', '_border'),
+            _opt = [('itemconfigure', '_border'),
                     {'outline': get_shade(self['bg'], 0.1, 'auto-120')}, None]
 
         elif cmd == '_txt' or cmd == '_img' or cmd == '_bit':
@@ -851,7 +842,9 @@ class _BaseWidget(_Canvas):
                 self.cnf['height'] = self.winfo_height()
             r1 = self._compound(self.cnf.get('compound'), self.cnf.get('width'), self.cnf.get('height'))
             r2 = {cmd: ((self.cnf['width']/2), self.cnf['height']/2)}
-            return r1 or r2
+            _opt = r1 or r2
+        
+        return _opt
 
     def _set_coords(self, cnf={}, **kw):
         """Internal function.\n
@@ -909,10 +902,9 @@ class _BaseWidget(_Canvas):
                     'activeforeground', 'compound'):
             if kw.get(opt) is not None:
                 self._set_configure(self._get_options(opt, kw))
-                if (opt == 'state' and kw.get('compound', self.cnf.get('compound'))) \
-                        or opt == 'compound':
-                    self._set_coords(**self._get_options(
-                                     ('_txt', '_img', '_bit'), kw))
+                if ((opt == 'state' and kw.get('compound', self.cnf.get('compound'))) 
+                    or opt == 'compound'):
+                    self._set_coords(**self._get_options(('_txt', '_img', '_bit'), kw))
         # Size
         if bool({'text', 'font', 'textvariable', 'image', 'bitmap', 'compound',
                  'padx', 'pady', 'width', 'height', 'activeimage', 'radius',
@@ -960,10 +952,9 @@ class _BaseWidget(_Canvas):
                'sequence': '<FocusOut>', 'func': _chngIn})
         return main_win
 
-    def _relief(self, cnf, kw={}):  # check
+    def _relief(self, cnf, kw={}):
         """Internal function.\n
         Make overrelief and Relief work together."""
-        # [issue-5] (Fixed) overrelief and Relief not working together properly.
         kw = _cnfmerge((cnf, kw))
         cond1 = kw.get('overrelief', self.cnf.get('overrelief', '')) != ''
         if kw.get('relief') is not None and cond1:
@@ -985,16 +976,19 @@ class _BaseWidget(_Canvas):
         if self._type == 'circle' and evt.width != evt.height:
             if evt.width > evt.height:
                 evt.width = evt.height
+                # self._configure1(width=evt.width)
+                # _tk.Canvas.config(self, width=evt.width)
             else:
                 evt.height = evt.width
-            return
+                # self._configure1(height=evt.width)
+                # _tk.Canvas.config(self, height=evt.width)
+            self.cnf['radius'] = evt.width
         self._size = (self.cnf['width'], self.cnf['height']) = (evt.width, evt.height)
         self.delete('_activebg')
         # [issue-6] (Fixed) Need fix (laggy on resizing) --> workaround: cancel if still resizing
         for i in self._after_IDs:
             self.after_cancel(self._after_IDs[i])
-        self._create_items('create', avoid=(
-            '_txt', '_img', '_bit'), safe_create=True)
+        self._create_items('create', avoid=('_txt', '_img', '_bit'), safe_create=True)
         self._set_coords(self._get_options(('_txt', '_img', '_bit'), self.cnf))
         self._after_IDs[1] = self.after(1, self._get_functions('_activebg'))
         for t in ('_txt', '_img', '_bit', '_bd_color', '_border', '_tf'):
@@ -1051,9 +1045,7 @@ class _BaseWidget(_Canvas):
                                 {'image': self.cnf.get('image', '')}, None)
                 _Canvas._configure(self, ('itemconfigure', '_bit'), 
                                 {'bitmap': self.cnf.get('bitmap', '')}, None)
-        # if self.cnf.get('compound'):
-        self._set_coords(self._get_options(
-                            ('_txt', '_img', '_bit'), self.cnf))
+        self._set_coords(self._get_options(('_txt', '_img', '_bit'), self.cnf))
 
     def _on_press(self, *ags):
         """Internal function. When button is pressed <Button-1>"""
@@ -1146,7 +1138,6 @@ class _BaseWidget(_Canvas):
                     return {'_txt': (width[0], height[0])}
                 return {'_txt': (width[0], height[0]),
                             _PiTag: (width[1], height[1])}
-        return None
 
     def _set_anchor(self, anchor, item):
         """Internal function.\n
@@ -1154,10 +1145,8 @@ class _BaseWidget(_Canvas):
         bbox = self.bbox(item)
         item_width = bbox[2] - bbox[0]
         item_height = bbox[3] - bbox[1]
-
         default_padx = 2 + int(item_width/2)
         default_pady = 0 + int(item_height/2)
-
         width = self.cnf['width']
         height = self.cnf['height']
 
@@ -1166,33 +1155,25 @@ class _BaseWidget(_Canvas):
         y = height / 2
 
         if anchor in ('n', 'nw', 'ne'):
-            # North
             x = int(width/2)
             y = default_pady + 0
             if anchor == 'nw':
-                # North-West
                 x = default_padx + 0
             elif anchor == 'ne':
-                # North-East
                 x = default_padx + (width - item_width) - 4
         
         elif anchor in ('s', 'sw', 'se'):
-            # South
             x = int(width/2)
             y = default_pady + (height - item_height)
             if anchor == 'sw':
-                # South-West
                 x = default_padx + 0
             elif anchor == 'se':
-                # South-East
                 x = default_padx + (width - item_width) - 4
         
         elif anchor == 'e':
-            # West
             x = default_padx + (width - item_width) - 4
                 
         elif anchor == 'w':
-            # East
             x = default_padx + 0
             
         elif anchor != 'center':
@@ -1200,8 +1181,6 @@ class _BaseWidget(_Canvas):
                 'bad anchor position "{}": must be n, ne, e, se, s, sw, w, nw, or center'.format(anchor))
 
         return self.coords(item, x, y)
-
-
 
 
 class ButtonBase(_BaseWidget):
