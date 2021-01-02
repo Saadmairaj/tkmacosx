@@ -14,11 +14,7 @@
 
 '''
 Newer style colorchoosers for tkinter module.
-
-Version: 0.1.5
 '''
-
-__version__ =  "0.1.5"
 
 import re
 import sys
