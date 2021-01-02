@@ -324,11 +324,10 @@ class _button_properties:
         if kw.get(cmd, '') != '':
             state = 'disabled' if self.cnf.get('state') in (
                 'disabled', 'disable') else 'normal'
-            cnf = dict(state=state, **{i: kw.get(i, self.cnf.get(i))
+            _opt = dict(state=state, **{i: kw.get(i, self.cnf.get(i))
                                     for i in ('anchor', cmd)})
-            return (('itemconfigure', tag), cnf, None)
-        elif kw.get(cmd) == '':
-            self.delete(tag)
+            return (('itemconfigure', tag), _opt, None)
+        self.delete(tag)
     
     def _active_bit_img(self, cmd, kw):
         tag = '_bit' if cmd == 'activebitmap' else '_img'
@@ -383,15 +382,14 @@ class _button_properties:
         return _button_properties._bit_img(self, 'bitmap', kw)
 
     def borderless(self, kw):
-        cnf = {}
+        _opt = {}
         if bool(kw.get('borderless')) or self.cnf.get('borderless'):
             if not check_function_equality(self.master.config, self._get_functions('borderless', kw)):
                 self.master.config = self.master.configure = self._get_functions(
                     'borderless', kw)
             self.cnf['highlightbackground'] = self.cnf['bordercolor'] = self.master['bg']
-            cnf[1] = [('itemconfigure', '_bd_color'), {'outline': self.master['bg']}, None]
-            cnf[2] = ['configure', {'highlightbackground': self.master['bg']}, None]
-            return cnf
+            _opt[1] = [('itemconfigure', '_bd_color'), {'outline': self.master['bg']}, None]
+            _opt[2] = ['configure', {'highlightbackground': self.master['bg']}, None]
         elif not bool(kw.get('borderless', True)) or not self.cnf.get('borderless'):
             if self.cnf.get('bordercolor') == self.master['bg']:
                 self.cnf.pop('bordercolor', None)
@@ -405,9 +403,9 @@ class _button_properties:
             self.cnf.update({'bordercolor': bd_color})
             self.cnf['highlightbackground'] = self.cnf['bordercolor'] = bd_color
             if self.itemcget('_bd_color', 'outline') != bd_color:
-                cnf[1] = [('itemconfigure', '_bd_color'), {'outline': bd_color}, None]
-                cnf[2] = ['configure', {'highlightbackground': bd_color}, None]
-                return cnf
+                _opt[1] = [('itemconfigure', '_bd_color'), {'outline': bd_color}, None]
+                _opt[2] = ['configure', {'highlightbackground': bd_color}, None]
+        return _opt
     bordercolor = highlightbackground = borderless
 
     def foreground(self, kw):
@@ -427,10 +425,10 @@ class _button_properties:
         return _button_properties._bit_img(self, 'image', kw)
     
     def overbackground(self, kw):
-        cnf = []
+        _opt = []
         if kw.get('overbackground', '') != '':
             fn = self._get_functions('overbackground', kw)
-            cnf = [self,
+            _opt = [self,
                     {'className': 'overbackground', 'sequence': '<Enter>',
                     'func': fn.get('<Enter>')},
                     {'className': 'overbackground', 'sequence': '<Leave>',
@@ -440,19 +438,19 @@ class _button_properties:
                 _Canvas._configure(self, ('itemconfigure', '_border'), 
                     {'outline': get_shade(kw.get('overbackground'), 0.1, 'auto-120')}, None)
         elif kw.get('overbackground') == '':
-            cnf = [self,
+            _opt = [self,
                     {'className': 'overbackground', 'sequence': '<Enter>'},
                     {'className': 'overbackground', 'sequence': '<Leave>'}, 
                     ('configure', {'bg': self._org_bg}, None), 
                     (('itemconfigure', '_border'), {'outline': 
                     get_shade(self._org_bg, 0.1, 'auto-120')}, None)]
-        return cnf
+        return _opt
 
     def overforeground(self, kw):
-        cnf = []
+        _opt = []
         if kw.get('overforeground', '') != '':
             fn = self._get_functions('overforeground', kw)
-            cnf = [self,
+            _opt = [self,
                     {'className': 'overforeground', 'sequence': '<Enter>',
                     'func': fn.get('<Enter>')},
                     {'className': 'overforeground', 'sequence': '<Leave>',
@@ -464,14 +462,15 @@ class _button_properties:
                 self.after(1, lambda: _Canvas._configure(self,
                     ('itemconfigure', '_txt'), {'fill': kw.get('overforeground')}, None))
         elif kw.get('overforeground') == '':
-            cnf = [self,
+            _opt = [self,
                     {'className': 'overforeground', 'sequence': '<Enter>'},
                     {'className': 'overforeground', 'sequence': '<Leave>'}]
-            cnf.append((('itemconfigure', '_txt'),
+            _opt.append((('itemconfigure', '_txt'),
                         {'fill': self.cnf.get('fg', 'black')}, None))
-        return cnf
+        return _opt
 
     def overrelief(self, kw):
+        _opt = None
         if kw.get('overrelief', '') != '':
             if not self._rel[1]:
                 self._rel = ('flat', False)
@@ -479,32 +478,33 @@ class _button_properties:
                 self._configure(
                     'configure', {'_relief': kw.get('overrelief')}, None)
             fn = self._get_functions('overrelief', kw)
-            return (self,
+            _opt = (self,
                     {'className': 'overrelief', 'sequence': '<Enter>',
                         'func': fn.get('<Enter>')},
                     {'className': 'overrelief', 'sequence': '<Leave>',
                         'func': fn.get('<Leave>')})
 
         elif kw.get('overrelief') == '':
-            return (self,
+            _opt = (self,
                     {'className': 'overrelief', 'sequence': '<Enter>'},
                     {'className': 'overrelief', 'sequence': '<Leave>'},
                     ('configure', {'relief': self._rel[0]}, None))
+        return _opt
     
     def size(self, kw):
-        cnf = {}
+        _opt = {}
         for i in ('text', 'font', 'textvariable', 'image', 'bitmap',
                     'compound', 'padx', 'pady', 'activeimage',
                     'activebitmap'): # 'width', 'height'}:
-            if self.cnf.get(i, '') != '':
-                if i == 'activeimage':
-                    cnf['image'] = self.cnf[i]
-                elif i == 'activebitmap':
-                    cnf['bitmap'] = self.cnf[i]
-                elif i in ('width', 'height'):
-                    cnf[i] = str(self.cnf[i]) + 'c'
-                else:
-                    cnf[i] = self.cnf.get(i)
+            cond1 = self.cnf.get(i, '') != ''
+            if cond1 and i == 'activeimage':
+                _opt['image'] = self.cnf[i]
+            elif cond1 and i == 'activebitmap':
+                _opt['bitmap'] = self.cnf[i]
+            elif cond1 and i in ('width', 'height'):
+                _opt[i] = str(self.cnf[i]) + 'c'
+            elif cond1:
+                _opt[i] = self.cnf.get(i)
         if self._type == 'circle' and kw.get('radius'):
             self.cnf['width'] = self.cnf['height'] = kw.get(
                 'width', kw.get('height', int(kw['radius']*2)))
@@ -518,61 +518,63 @@ class _button_properties:
         self.cnf['width'] = self.cnf.get('width') if self._fixed_size['w'] else W
         self.cnf['height'] = self.cnf.get('height') if self._fixed_size['h'] else H
         return ('configure', {'width': self.cnf['width'],
-                                'height': self.cnf['height']}, None)
+                              'height': self.cnf['height']}, None)
         
     def state(self, kw):
-        cnf = {}
+        _opt = {}
         if kw.get('state') in 'disabled':
-            cnf[1] = ('configure', {'bg': self.cnf.get('disabledbackground'),
+            _opt[1] = ('configure', {'bg': self.cnf.get('disabledbackground'),
                                     'state': 'disabled'}, None)
-            cnf[2] = (('itemconfigure', '_txt'), {
+            _opt[2] = (('itemconfigure', '_txt'), {
                             'disabledfill': kw.get('disabledforeground', 
                             self.cnf.get('disabledforeground')), 
                             'state': 'disabled'}, None)
-            cnf[3] = (('itemconfigure', '_activebg'), {'state': 'hidden'}, None)
-            cnf[5] = (('itemconfigure', '_img'), {'state': 'disabled'}, None)
-            cnf[6] = (('itemconfigure', '_bit'), {'state': 'disabled'}, None)
+            _opt[3] = (('itemconfigure', '_activebg'), {'state': 'hidden'}, None)
+            _opt[5] = (('itemconfigure', '_img'), {'state': 'disabled'}, None)
+            _opt[6] = (('itemconfigure', '_bit'), {'state': 'disabled'}, None)
         elif kw.get('state') == 'normal':
             _bg = self._org_bg
             if self._mouse_state_condition() and self.cnf.get('overbackground'):
                 _bg = self.cnf['overbackground']
-            cnf[1] = ('configure', {'bg': _bg, 'state': 'normal'}, None)
-            cnf[2] = (('itemconfigure', '_txt'), {'state': 'normal', 
+            _opt[1] = ('configure', {'bg': _bg, 'state': 'normal'}, None)
+            _opt[2] = (('itemconfigure', '_txt'), {'state': 'normal', 
                             'fill': self.cnf.get('foreground', 'black')}, None)
-            cnf[3] = (('itemconfigure', '_activebg'), {'state': 'hidden'}, None)
-            cnf[4] = (('itemconfigure', '_border'), {'state': 'normal'}, None)
-            cnf[5] = (('itemconfigure', '_img'), {
+            _opt[3] = (('itemconfigure', '_activebg'), {'state': 'hidden'}, None)
+            _opt[4] = (('itemconfigure', '_border'), {'state': 'normal'}, None)
+            _opt[5] = (('itemconfigure', '_img'), {
                             'image': self.cnf.get('image', '')}, None)
-            cnf[6] = (('itemconfigure', '_bit'), {
+            _opt[6] = (('itemconfigure', '_bit'), {
                             'bitmap': self.cnf.get('bitmap', '')}, None)
         elif kw.get('state') in ('active', 'pressed'):
             _bg = self._org_bg
             if self._mouse_state_condition() and self.cnf.get('overbackground'):
                 _bg = self.cnf['overbackground']
-            cnf[1] = ('configure', {'bg': _bg, 'state': 'normal'}, None)
-            cnf[2] = (('itemconfigure', '_txt'), {'state': 'normal', 
+            _opt[1] = ('configure', {'bg': _bg, 'state': 'normal'}, None)
+            _opt[2] = (('itemconfigure', '_txt'), {'state': 'normal', 
                             'fill': self.cnf.get('activeforeground', 'white')}, None)
-            cnf[3] = (('itemconfigure', '_activebg'), {'state': 'normal'}, None)
-            cnf[4] = (('itemconfigure', '_border'), {'state': 'hidden'}, None)
-            cnf[5] = (('itemconfigure', '_img'), {
+            _opt[3] = (('itemconfigure', '_activebg'), {'state': 'normal'}, None)
+            _opt[4] = (('itemconfigure', '_border'), {'state': 'hidden'}, None)
+            _opt[5] = (('itemconfigure', '_img'), {
                             'image': self.cnf.get('activeimage', '')}, None)
-            cnf[6] = (('itemconfigure', '_bit'), {
+            _opt[6] = (('itemconfigure', '_bit'), {
                             'bitmap': self.cnf.get('activebitmap', '')}, None)
-        return cnf
+        return _opt
 
     def takefocus(self, kw):
+        _opt = None
         if int(self['takefocus']) and self['state'] in ('normal', 'active', 'pressed'):
             fn = self._get_functions('takefocus', kw)
-            return [self, {'className': 'takefocus', 'sequence':
+            _opt = [self, {'className': 'takefocus', 'sequence':
                             '<FocusIn>', 'func': fn.get('<FocusIn>')},
                             {'className': 'takefocus', 'sequence':
                             '<FocusOut>', 'func': fn.get('<FocusOut>')}]
 
         elif not int(self['takefocus']) or self['state'] in 'disabled':
-            return [self,
+            _opt = [self,
                     {'className': 'takefocus', 'sequence': '<FocusIn>'},
                     {'className': 'takefocus', 'sequence': '<FocusOut>'},
                     (('itemconfigure', '_tf'), {'state': 'hidden'}, None)]
+        return _opt
 
     def text(self, kw):
         if kw.get('textvariable', '') != '':
@@ -592,11 +594,11 @@ class _button_properties:
         fill = kw.get('fg', self.cnf.get('fg'))
         if self['state'] in ('pressed', 'active'):
             fill = self.cnf.get('activeforeground', 'white')
-        cnf = dict(state=state, fill=fill,
+        _opt = dict(state=state, fill=fill,
                     disabledfill=kw.get(
                         'disabledforeground', self.cnf.get('disabledforeground')),
                     **{i: kw.get(i, self.cnf.get(i)) for i in ('text', 'anchor', 'font', 'justify')})
-        return (('itemconfigure', '_txt'), cnf, None)
+        return (('itemconfigure', '_txt'), _opt, None)
 
 
 class _button_functions:
