@@ -319,6 +319,7 @@ class _Canvas(_tk.Widget):
 class _button_properties:
     """Internal class.\n
     Contains modified properties of Button widget. Do not call directly."""
+    
     def _bit_img(self, cmd, kw):
         tag = '_bit' if cmd == 'bitmap' else '_img'
         if kw.get(cmd, '') != '':
@@ -456,8 +457,8 @@ class _button_properties:
                     {'className': 'overforeground', 'sequence': '<Leave>',
                     'func': fn.get('<Leave>')}]
             if self._mouse_state_condition():
-                # [issue-4] doesn't change if overrelief is on.
-                # [issue-4] (FIXED) using after with 0ms delay
+                # [issue-3] doesn't change if overrelief is on.
+                # [issue-3] (FIXED) using after with 0ms delay
                 #           fixes the issue. To be safe delay is 1ms.
                 self.after(1, lambda: _Canvas._configure(self,
                     ('itemconfigure', '_txt'), {'fill': kw.get('overforeground')}, None))
@@ -495,7 +496,7 @@ class _button_properties:
         _opt = {}
         for i in ('text', 'font', 'textvariable', 'image', 'bitmap',
                     'compound', 'padx', 'pady', 'activeimage',
-                    'activebitmap'): # 'width', 'height'}:
+                    'activebitmap'):
             cond1 = self.cnf.get(i, '') != ''
             if cond1 and i == 'activeimage':
                 _opt['image'] = self.cnf[i]
@@ -514,7 +515,7 @@ class _button_properties:
             kw['height'] = self.cnf['height']
         self._fixed_size['w'] = True if kw.get('width', kw.get('radius')) else False
         self._fixed_size['h'] = True if kw.get('height', kw.get('radius')) else False
-        W, H = _info_button(self, **cnf)
+        W, H = _info_button(self, **_opt)
         self.cnf['width'] = self.cnf.get('width') if self._fixed_size['w'] else W
         self.cnf['height'] = self.cnf.get('height') if self._fixed_size['h'] else H
         return ('configure', {'width': self.cnf['width'],
@@ -1007,7 +1008,7 @@ class _button_functions:
         This will resize everything that is in the button"""
         if evt.width == self._size[0] and evt.height == self._size[1]:
             return
-        # [issue-8] On resizing the window the circlebutton doesn't resize properly, 
+        # [issue-9] (NOT FIXED) On resizing the window the circlebutton doesn't resize properly, 
         #           current fix doesn't work properly.
         if self._type == 'circle' and evt.width != evt.height:
             if evt.width > evt.height:
@@ -1185,8 +1186,8 @@ class _button_functions:
         item_height = bbox[3] - bbox[1]
         default_padx = 2 + int(item_width/2)
         default_pady = 0 + int(item_height/2)
-        width = self.cnf.get('width', self.winfo_reqwidth()) # self.cnf['width']
-        height = self.cnf.get('height', self.winfo_reqheight()) # self.cnf['height']
+        width = self.cnf.get('width', self.winfo_reqwidth())
+        height = self.cnf.get('height', self.winfo_reqheight())
 
         # Center
         x = width / 2
