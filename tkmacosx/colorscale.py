@@ -64,6 +64,43 @@ def gradient(iteration):
     return _list
 
 
+def hex_to_rgb(hx, hsl=False):
+    """Converts a HEX code into RGB or HSL.
+    Args:
+        hx (str): Takes both short as well as long HEX codes.
+        hsl (bool): Converts the given HEX code into HSL value if True.
+    Return:
+        Tuple of length 3 consisting of either int or float values.
+    Raise:
+        ValueError: If given value is not a valid HEX code."""
+    if re.compile(r'#[a-fA-F0-9]{3}(?:[a-fA-F0-9]{3})?$').match(hx):
+        div = 255.0 if hsl else 0
+        if len(hx) <= 4:
+            return tuple(int(hx[i]*2, 16) / div if div else
+                         int(hx[i]*2, 16) for i in (1, 2, 3))
+        else:
+            return tuple(int(hx[i:i+2], 16) / div if div else
+                         int(hx[i:i+2], 16) for i in (1, 3, 5))
+    else:
+        raise ValueError(f'"{hx}" is not a valid HEX code.')
+
+
+def check_light_dark(value, intensity=110):
+    """Tells if the given RGB or HEX code is lighter or darker color.
+
+    Args:
+        value [str, tuple]: Give sequence of RBG values and hexcode.
+        intensity (int): The measurable amount of a brightness.
+    
+    Return:
+        str('white') / str('black')"""
+    if isinstance(value, str) and value.startswith('#'):
+        value = hex_to_rgb(value)
+    if (value[0]*0.299 + value[1]*0.587 + value[2]*0.114) > intensity:
+        return 'black'
+    return 'white'
+
+
 class Colorscale(tkb._Canvas):
     """
     ## Color Scale.
@@ -105,8 +142,8 @@ class Colorscale(tkb._Canvas):
         # Protected members of the class
         self._size = (0, 0)
         self._marker_color = 'black'
-        self._xy = int((self.winfo_reqwidth() if 'ver' in \
-                    self['orient'] else self.winfo_reqheight()) / 3)
+        self._xy = int((self.winfo_reqwidth() if 'ver' in
+                        self['orient'] else self.winfo_reqheight()) / 3)
 
         binds = [{'className': 'set_size', 'sequence': '<Configure>', 'func': self._set_size},
                  {'className': 'b1_on_motion', 'sequence': '<B1-Motion>',
@@ -231,8 +268,7 @@ class Colorscale(tkb._Canvas):
         c_id = self.find('overlapping', evt.x, evt.y, evt.x, evt.y)
         text = hexcode = self.itemcget(c_id[0], 'fill')
         rgb = [int(i/65535.0*255.0) for i in self.winfo_rgb(hexcode)]
-        self._marker_color = 'black' if (
-            rgb[0]*0.299 + rgb[1]*0.587 + rgb[2]*0.114) > 110 else 'white'
+        self._marker_color = check_light_dark(rgb)
 
         self._configure(('itemconfigure', 'borderline'),
                         {'outline': hexcode}, None)
