@@ -9,7 +9,7 @@ def long_description():
 
 setup(
     name="tkmacosx",
-    version="0.1.6b1",
+    version="0.1.6b2",
     description="Tkmacosx is a Python library extension to the Tkinter module that let you change background color of the button on macOS.",
     long_description=long_description(),
     long_description_content_type="text/markdown",
