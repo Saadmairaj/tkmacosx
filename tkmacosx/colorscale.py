@@ -71,9 +71,8 @@ def hex_to_rgb(hx, hsl=False):
         if len(hx) <= 4:
             return tuple(int(hx[i]*2, 16) / div if div else
                          int(hx[i]*2, 16) for i in (1, 2, 3))
-        else:
-            return tuple(int(hx[i:i+2], 16) / div if div else
-                         int(hx[i:i+2], 16) for i in (1, 3, 5))
+        return tuple(int(hx[i:i+2], 16) / div if div else
+                     int(hx[i:i+2], 16) for i in (1, 3, 5))
     else:
         raise ValueError(f'"{hx}" is not a valid HEX code.')
 
@@ -109,7 +108,7 @@ class Colorscale(tkb._Canvas):
     - `gradient`: Take tuple of two colors or default.
     - `showinfodelay`: Delay before the showinfo disappears (in ms).
     """
-    
+
     _features = ('value', 'command', 'orient', 'mousewheel', 'variable', 'showinfo',
                  'showinfodelay', 'gradient',)  # add more features
 
