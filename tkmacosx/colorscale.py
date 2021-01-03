@@ -345,38 +345,3 @@ class Colorscale(tkb._Canvas):
         """Destroy this widget."""
         self.after_cancel(getattr(self, '_remove_id', ' '))
         return tkb._Canvas.destroy(self)
-
-
-# ------------------------------------ #
-#           Testing and demo           #
-# ------------------------------------ #
-
-def demo_colorscale():
-    from tkmacosx.variables import ColorVar
-
-    root = _tk.Tk()
-    root.title("Tkinter Color Bar")
-    var = ColorVar()
-    _tk.Label(root, text="I am a Label, Hello! :-)",
-              bg=var).pack(padx=10, pady=10)
-    Colorscale(root, value='hex', variable=var, mousewheel=1,
-               gradient=('pink', 'purple')).pack(padx=10, pady=10)
-    Colorscale(root, value='hex', variable=var, mousewheel=1,
-               gradient=('green', 'yellow')).pack(padx=10, pady=10)
-    Colorscale(root, value='hex', variable=var, mousewheel=1,
-               gradient=('purple', 'cyan')).pack(padx=10, pady=10)
-    Colorscale(root, value='hex', variable=var, mousewheel=1,
-               gradient=('white', '#89ABE3')).pack(padx=10, pady=10)
-    Colorscale(root, value='hex', variable=var, mousewheel=1, 
-               gradient=('#5F4B8B', '#E69A8D'), orient='horizontal'
-               ).pack(padx=10, pady=10, side='left')
-    Colorscale(root, value='hex', variable=var, mousewheel=1, 
-               gradient=('#990011', '#FCF6F5'), orient='horizontal'
-               ).pack(padx=60, pady=10, side='left')
-    Colorscale(root, value='hex', variable=var, mousewheel=1, 
-               orient='horizontal').pack(padx=10, pady=10, side='left')
-    root.mainloop()
-
-
-if __name__ == "__main__":
-    demo_colorscale()
