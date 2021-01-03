@@ -166,7 +166,6 @@ class Sample(tk.Tk):
 
         # ------------ Background Color ------------
 
-        # ttk.Separator(self.sfr, orient='vertical').grid(row=6, column=2, columnspan=1, sticky='ew')
         self.L7 = tk.Label(self.sfr, text='2. Change Background color', bg=self.main_color,
                            font=('', 15, 'bold'))
         self.L7.grid(row=7, column=0, columnspan=5,
@@ -176,19 +175,22 @@ class Sample(tk.Tk):
         self.L8.grid(row=8, column=0, columnspan=5, sticky='new', pady=10)
 
         self.B2 = Button(self.sfr, text='Color me',
-                         font=('', 30,), pady=10, padx=10)
+                         font=('', 30,), pady=10)
         self.B2.grid(row=9, column=0, columnspan=5, sticky='', pady=20)
 
-        self.B3 = Button(self.sfr, text='Change Background Color',
+        button_container = tk.Frame(self.sfr, bg=self.main_color)
+        button_container.grid(row=10, column=0, columnspan=5,
+                              sticky='ew', pady=10, padx=10)
+        button_container.columnconfigure(0, weight=1)
+        button_container.columnconfigure(1, weight=1)
+        self.B3 = Button(button_container, text='Change Background Color',
                          bg='#d0c0ea', borderless=1)
         self.B3['command'] = lambda: self.B2.config(bg=askcolor()[1])
-        self.B3.grid(row=10, column=0, columnspan=5,
-                     sticky='w', pady=10, padx=10)
-        self.B4 = Button(self.sfr, text='Change Foreground Color',
+        self.B3.grid(row=0, column=0, padx=(0, 2))
+        self.B4 = Button(button_container, text='Change Foreground Color',
                          bg="#d0c0ea", borderless=1)
         self.B4['command'] = lambda: self.B2.config(fg=askcolor()[1])
-        self.B4.grid(row=10, column=0, columnspan=5,
-                     sticky='e', pady=10, padx=10)
+        self.B4.grid(row=0, column=1)
 
         # ------------ Borderless ------------
 
