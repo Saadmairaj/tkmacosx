@@ -1,4 +1,4 @@
-#                       Copyright 2020 Saad Mairaj
+#                       Copyright 2021 Saad Mairaj
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -12,11 +12,6 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-import sys
-if sys.version_info.major == 2:
-    import Tkinter as _TK
-elif sys.version_info.major == 3:
-    import tkinter as _TK
 import tkmacosx.basewidget as tkb
 
 
@@ -124,6 +119,7 @@ class CircleButton(tkb.ButtonBase):
     root.mainloop()
     ```
     """
+
     def __init__(self, master=None, cnf={}, **kw):
         tkb.ButtonBase.__init__(self, 'circle', master, cnf, **kw)
 

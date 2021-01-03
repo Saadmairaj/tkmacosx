@@ -12,19 +12,13 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-import sys
-
-if sys.version_info.major == 2:
-    import ttk
-    import Tkinter as _tk
-    from Tkinter import _cnfmerge
-elif sys.version_info.major == 3:
-    from tkinter import ttk
-    from tkinter import _cnfmerge
-    import tkinter as _tk
+import tkinter as _tk
 
 import colour as C
 import tkmacosx.variables as tkv
+
+from tkinter import ttk
+from tkinter import _cnfmerge
 
 
 def delta(evt):
@@ -319,7 +313,7 @@ class _Canvas(_tk.Widget):
 class _button_properties:
     """Internal class.\n
     Contains modified properties of Button widget. Do not call directly."""
-    
+
     def _bit_img(self, cmd, kw):
         tag = '_bit' if cmd == 'bitmap' else '_img'
         if kw.get(cmd, '') != '':
@@ -1463,8 +1457,7 @@ class SFrameBase(_tk.Frame):
         return _tk.Frame.cget(self, key)
     __getitem__ = cget
 
-
-class MarqueeBase(_tk.Canvas):
+class MarqueeBase(_Canvas, _tk.XView):
     """Base class for Marquee."""
 
     def __init__(self, master=None, cnf={}, **kw):
@@ -1483,12 +1476,13 @@ class MarqueeBase(_tk.Canvas):
         )
         kw['height'] = kw.get('height', 24)
         kw['highlightthickness'] = kw.get('highlightthickness', 0)
-        _tk.Canvas.__init__(self, master=master, **kw)
+        _Canvas.__init__(self, master=master, **kw)
         self._create('text', (3, 1), dict(anchor='w', tag='text', text=self.cnf.get('text'),
                                           font=self.cnf.get('font'), fill=self.cnf.get('fg')))
         _bind(self, className='configure',
                   sequence='<Configure>', func=self._check)
         self.after_id = ' '
+        self._num = 0
     
     def _set_height(self, evt=None):
         """Internal function."""
@@ -1496,7 +1490,7 @@ class MarqueeBase(_tk.Canvas):
         height = bbox[3] - bbox[1] + 8
         if int(self['height']) == height: 
             return
-        _tk.Canvas._configure(self, 'configure', {'height': height}, None)
+        _Canvas._configure(self, 'configure', {'height': height}, None)
 
     def _reset(self, force_reset=False):
         """Internal function.\n
@@ -1555,19 +1549,19 @@ class MarqueeBase(_tk.Canvas):
             end_delay=kw.pop('end_delay', self.cnf.get('end_delay')),
             smoothness=kw.pop('smoothness', self.cnf.get('smoothness')),
         )
-        _tk.Canvas._configure(self, ('itemconfigure','text'), dict(text=self.cnf.get('text'),
+        _Canvas._configure(self, ('itemconfigure','text'), dict(text=self.cnf.get('text'),
                         font=self.cnf.get('font'), fill=self.cnf.get('fg')), None)
         self._set_height()
-        return _tk.Canvas._configure(self, cmd, kw, None)
+        return _Canvas._configure(self, cmd, kw, None)
 
     def cget(self, key):
         """Return the resource value for a KEY given as string."""
         if key in self.cnf.keys():
             return self.cnf[key]
-        return _tk.Canvas.cget(self, key)
+        return _Canvas.cget(self, key)
     __getitem__ = cget
 
     def destroy(self):
         """Destroy this widget."""
         self.after_cancel(self.after_id)
-        return _tk.Canvas.destroy(self)
+        return _Canvas.destroy(self)

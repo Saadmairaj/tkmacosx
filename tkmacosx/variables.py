@@ -1,4 +1,4 @@
-#                       Copyright 2020 Saad Mairaj
+#                       Copyright 2021 Saad Mairaj
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -13,14 +13,10 @@
 #    limitations under the License.
 
 import re
-import sys
 import ast
 import pickle
 
-if sys.version_info.major == 2:
-    import Tkinter as _tk
-elif sys.version_info.major == 3:
-    import tkinter as _tk
+import tkinter as _tk
 
 
 # Modified Misc._options(...) to make ColorVar work with tkinter

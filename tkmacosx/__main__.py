@@ -1,4 +1,4 @@
-#                       Copyright 2020 Saad Mairaj
+#                       Copyright 2021 Saad Mairaj
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -12,18 +12,12 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-import sys
 import random
-if sys.version_info.major == 2:
-    import ttk
-    import Tkinter as tk
-    import tkFont as font
-    from tkColorChooser import askcolor
-elif sys.version_info.major == 3:
-    from tkinter import ttk
-    import tkinter as tk
-    import tkinter.font as font
-    from tkinter.colorchooser import askcolor
+import tkinter as tk
+
+from tkinter import font
+from tkinter import ttk
+from tkinter.colorchooser import askcolor
 
 from tkmacosx.widget import SFrame, Button
 from tkmacosx.variables import ColorVar

@@ -1,4 +1,4 @@
-#                       Copyright 2020 Saad Mairaj
+#                       Copyright 2021 Saad Mairaj
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -17,19 +17,12 @@ Newer style colorchoosers for tkinter module.
 '''
 
 import re
-import sys
-
-if sys.version_info.major == 2:  # For python 2.x
-    import Tkinter as _tk
-    from tkFont import Font
-    import tkFont as font
-elif sys.version_info.major == 3:  # For python 3.x
-    import tkinter as _tk
-    from tkinter import font
-    from tkinter.font import Font
-
 import colour
+import tkinter as _tk
 import tkmacosx.basewidget as tkb
+
+from tkinter import font
+from tkinter.font import Font
 
 
 HEX = 'hex'
@@ -116,7 +109,7 @@ class Colorscale(tkb._Canvas):
     - `gradient`: Take tuple of two colors or default.
     - `showinfodelay`: Delay before the showinfo disappears (in ms).
     """
-
+    
     _features = ('value', 'command', 'orient', 'mousewheel', 'variable', 'showinfo',
                  'showinfodelay', 'gradient',)  # add more features
 
@@ -185,7 +178,7 @@ class Colorscale(tkb._Canvas):
                 c2 = colour.Color(self.cnf.get('gradient')[1])
                 color_list = c1.range_to(c2, iteration)
             elif isinstance(self.cnf.get('gradient'), str) \
-                and self.cnf.get('gradient') != 'default':
+                    and self.cnf.get('gradient') != 'default':
                 c = colour.Color(self.cnf.get('gradient'))
                 color_list = c.range_to(c, iteration)
 
@@ -202,7 +195,7 @@ class Colorscale(tkb._Canvas):
                                        (1, 1, self.winfo_width()-2,
                                         self.winfo_height()-2, 0))
             ids.append(self.rounded_rect(borderline_points, width=2,
-                                         outline='#81b3f4', tag='borderline', 
+                                         outline='#81b3f4', tag='borderline',
                                          style='arc'))
 
         if check_tag('marker'):
@@ -211,7 +204,7 @@ class Colorscale(tkb._Canvas):
                 _def_val = (self._xy, 2, 5, self.winfo_height()-4, 2)
             marker_points = kw.get('marker_points', _def_val)
             ids.append(self.rounded_rect(marker_points, width=2,
-                                         outline=self._marker_color, 
+                                         outline=self._marker_color,
                                          tag="marker", style='arc'))
 
         if check_tag('markerbg') and kw.get('markerbg_points') is not None:
@@ -261,7 +254,7 @@ class Colorscale(tkb._Canvas):
 
         if not (cond_x and cond_y and cond_state):
             return
-        
+
         if not mw:
             self._xy = diff_orient_val()['_xy']
 
@@ -281,30 +274,30 @@ class Colorscale(tkb._Canvas):
             self._callback(rgb)
 
         ver_cond = evt.x < self.winfo_width() - (spacbg+spacer) \
-                        and self['orient'] == 'vertical'
+            and self['orient'] == 'vertical'
         hor_cond = evt.y < self.winfo_height() - (spacbg+spacer) \
-                        and self['orient'] == 'horizontal'
-        
+            and self['orient'] == 'horizontal'
+
         markerbg_points, info_points = (), ()
 
         if bool(ver_cond or hor_cond) and self['showinfo']:
-            markerbg_points = ( self.winfo_width()/2-6, evt.y+spacer - spacbg, 
-                                self.winfo_width()/2+7, evt.y+spacer + spacbg, 6)
+            markerbg_points = (self.winfo_width()/2-6, evt.y+spacer - spacbg,
+                               self.winfo_width()/2+7, evt.y+spacer + spacbg, 6)
             info_points = ((self.winfo_width()/2, evt.y+spacer))
 
             if self.cnf['orient'] == 'vertical':
-                markerbg_points = ( evt.x+spacer - spacbg, self.winfo_height()/2-6, 
-                                    evt.x+spacer + spacbg, self.winfo_height()/2+7, 6)
+                markerbg_points = (evt.x+spacer - spacbg, self.winfo_height()/2-6,
+                                   evt.x+spacer + spacbg, self.winfo_height()/2+7, 6)
                 info_points = ((evt.x + spacer, self.winfo_height()/2))
 
         elif self['showinfo']:
-            markerbg_points = ( self.winfo_width()/2-6, evt.y-spacer - spacbg,
-                                self.winfo_width()/2+7, evt.y-spacer + spacbg, 6)
+            markerbg_points = (self.winfo_width()/2-6, evt.y-spacer - spacbg,
+                               self.winfo_width()/2+7, evt.y-spacer + spacbg, 6)
             info_points = ((self.winfo_width()/2, evt.y-spacer))
 
             if self.cnf['orient'] == 'vertical':
-                markerbg_points = ( evt.x-spacer - spacbg, self.winfo_height()/2-6, 
-                                    evt.x-spacer + spacbg, self.winfo_height()/2+7, 6)
+                markerbg_points = (evt.x-spacer - spacbg, self.winfo_height()/2-6,
+                                   evt.x-spacer + spacbg, self.winfo_height()/2+7, 6)
                 info_points = ((evt.x - spacer, self.winfo_height()/2))
 
         markerbg_cnf = {'fill': self._marker_color, 'tag': 'markerbg'}
@@ -323,9 +316,9 @@ class Colorscale(tkb._Canvas):
         def on_mousewheel(evt=None):
             "Internal function."
             ver_cond = self._xy < self.winfo_width() \
-                        and self['orient'] == 'vertical'
+                and self['orient'] == 'vertical'
             hor_cond = self._xy < self.winfo_height() \
-                        and self['orient'] == 'horizontal'
+                and self['orient'] == 'horizontal'
             if tkb.delta(evt) <= -1 and (ver_cond or hor_cond):
                 self._xy += 1
                 if not self._move_marker(evt, mw=self._xy):
@@ -337,18 +330,18 @@ class Colorscale(tkb._Canvas):
 
         if self.cnf.get('mousewheel'):
             tkb._bind(self, className='mousewheel',
-                        sequence='<MouseWheel>', func=on_mousewheel)
+                      sequence='<MouseWheel>', func=on_mousewheel)
             tkb._bind(self, className='mousewheel_x11',
-                        sequence='<Button-4>', func=on_mousewheel)
+                      sequence='<Button-4>', func=on_mousewheel)
             tkb._bind(self, className='mousewheel_x11',
-                        sequence='<Button-5>', func=on_mousewheel)
+                      sequence='<Button-5>', func=on_mousewheel)
         else:
-            tkb._bind(self, className='mousewheel', 
-                        sequence='<MouseWheel>')
+            tkb._bind(self, className='mousewheel',
+                      sequence='<MouseWheel>')
             tkb._bind(self, className='mousewheel_x11',
-                        sequence='<Button-4>')
+                      sequence='<Button-4>')
             tkb._bind(self, className='mousewheel_x11',
-                        sequence='<Button-5>')
+                      sequence='<Button-5>')
 
     def _configure(self, cmd, cnf=None, kw=None):
         """Internal function."""
@@ -359,7 +352,7 @@ class Colorscale(tkb._Canvas):
         _return = tkb._Canvas._configure(self, cmd, None, kw1)
         if _tk._cnfmerge((cnf, kw)).get('gradient'):
             self._create_items('create', safe_create=True,
-                               avoid=('borderline', 'marker', 
+                               avoid=('borderline', 'marker',
                                       'markerbg', 'info'))
         self._set_mousewheel()
         if _return and isinstance(_return, dict):
