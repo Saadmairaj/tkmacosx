@@ -27,11 +27,7 @@ elif sys.version_info.major == 3:
 
 from tkmacosx.widget import SFrame, Button
 from tkmacosx.variables import ColorVar
-from tkmacosx.colorscale import Colorscale
-from tkmacosx.colors import Hex as C_dict, all_colors
-
-
-color_list = [list(i.values())[0].get('hex') for i in all_colors]
+from tkmacosx.colorscale import Colorscale, check_light_dark
 
 
 def grid(root, row, column):
@@ -58,7 +54,7 @@ def choices(seq, k):
 
 @sort_random_values
 def get_random_colors(k=1):
-    return choices(color_list, k=k)
+    return ["#%06x" % random.randint(0, 0xFFFFFF) for n in range(k)]
 
 
 @sort_random_values
@@ -146,23 +142,25 @@ class Sample(tk.Tk):
         self.C1 = tk.StringVar(value='Select')
         self.L5 = tk.Label(self.sfr, text='From',
                            bg=self.main_color, font=('', 12))
-        self.L5.grid(row=5, column=1, sticky='nwe')
-        self.Om1 = tk.OptionMenu(self.sfr, self.C1, *C_dict.keys(),
-                                 command=self.change_active_color)
-        self.Om1.config(bg=self.main_color, width=15)
-        self.Om1.grid(row=6, column=1, sticky='s', pady=(0, 10))
-        for i in range(self.Om1['menu'].index('end')+1):
-            self.Om1['menu'].entryconfig(i, foreground=list(C_dict)[i])
-        self.C2 = tk.StringVar(value='Select')
+        self.L5.grid(row=5, column=1, sticky='ew')
+
         self.L6 = tk.Label(self.sfr, text='To',
                            bg=self.main_color, font=('', 12))
-        self.L6.grid(row=5, column=3, sticky='nwe')
-        self.Om2 = tk.OptionMenu(self.sfr, self.C2, *C_dict.keys(),
-                                 command=self.change_active_color)
-        self.Om2.config(bg=self.main_color, width=15)
-        self.Om2.grid(row=6, column=3, sticky='s', pady=(0, 10))
-        for i in range(self.Om2['menu'].index('end')+1):
-            self.Om2['menu'].entryconfig(i, foreground=list(C_dict)[i])
+        self.L6.grid(row=5, column=3, sticky='ew')
+        
+        button_container1 = tk.Frame(self.sfr, bg=self.main_color)
+        button_container1.grid(row=6, column=0, columnspan=5,
+                              sticky='ew', pady=10, padx=10)
+        button_container1.columnconfigure(0, weight=1)
+        button_container1.columnconfigure(1, weight=1)
+        self.Om1_b = Button(button_container1, text='Change Color',
+                         bg='#d0c0ea', borderless=1)
+        self.Om1_b.grid(row=0, column=0, padx=(0, 2), sticky='ew')
+        self.Om2_b = Button(button_container1, text='Change Color',
+                         bg="#d0c0ea", borderless=1)
+        self.Om2_b.grid(row=0, column=1, sticky='ew')
+        self.Om1_b['command'] = lambda: self.change_active_color(1)
+        self.Om2_b['command'] = lambda: self.change_active_color(2)
 
         # ------------ Background Color ------------
 
@@ -178,16 +176,16 @@ class Sample(tk.Tk):
                          font=('', 30,), pady=10)
         self.B2.grid(row=9, column=0, columnspan=5, sticky='', pady=20)
 
-        button_container = tk.Frame(self.sfr, bg=self.main_color)
-        button_container.grid(row=10, column=0, columnspan=5,
+        button_container2 = tk.Frame(self.sfr, bg=self.main_color)
+        button_container2.grid(row=10, column=0, columnspan=5,
                               sticky='ew', pady=10, padx=10)
-        button_container.columnconfigure(0, weight=1)
-        button_container.columnconfigure(1, weight=1)
-        self.B3 = Button(button_container, text='Change Background Color',
+        button_container2.columnconfigure(0, weight=1)
+        button_container2.columnconfigure(1, weight=1)
+        self.B3 = Button(button_container2, text='Change Background Color',
                          bg='#d0c0ea', borderless=1)
         self.B3['command'] = lambda: self.B2.config(bg=askcolor()[1])
         self.B3.grid(row=0, column=0, padx=(0, 2))
-        self.B4 = Button(button_container, text='Change Foreground Color',
+        self.B4 = Button(button_container2, text='Change Foreground Color',
                          bg="#d0c0ea", borderless=1)
         self.B4['command'] = lambda: self.B2.config(fg=askcolor()[1])
         self.B4.grid(row=0, column=1)
@@ -273,12 +271,15 @@ class Sample(tk.Tk):
         self.change_button_style()
         self.update_idletasks()
 
-    def change_active_color(self, *ags):
-        c1 = self.C1.get() if not self.C1.get() == 'Select' else None
-        c2 = self.C2.get() if not self.C2.get() == 'Select' else None
-        self.Om1.config(bg=c1)
-        self.Om2.config(bg=c2)
-        self.B1['activebackground'] = (c1, c2)
+    def change_active_color(self, num):
+        hexcode = askcolor()[1]
+        if num == 1:
+            self.Om1_b['bg'] = self.Om1_b['text'] = hexcode
+            self.Om1_b['fg'] = check_light_dark(hexcode)
+        else:
+            self.Om2_b['bg'] = self.Om2_b['text'] = hexcode
+            self.Om2_b['fg'] = check_light_dark(hexcode)
+        self.B1['activebackground'] = (self.Om1_b['bg'], self.Om2_b['bg'])
 
     def change_borderless_state(self):
         if self.var1.get():
