@@ -729,7 +729,9 @@ class _button_functions:
             r = int(self.cnf.get('width', 87)/2)  # radius = x = y
             _tk_points = (pad+width, pad+width, r*2-width-pad, r*2-width-pad)
             ids.append(self._create('oval', _tk_points, {
-                'tag': '_tf', 'width': width, 'outline': self.cnf.get('focuscolor', '#81b3f4')}))
+                'tag': '_tf', 'width': width, 
+                'outline': self.cnf.get('focuscolor', '#81b3f4'), 
+                'state': 'hidden'}))
                 
         elif check_tag('_tf'):
             # takefocuswidth can be changed.
