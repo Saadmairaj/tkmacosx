@@ -73,8 +73,7 @@ def hex_to_rgb(hx, hsl=False):
                          int(hx[i]*2, 16) for i in (1, 2, 3))
         return tuple(int(hx[i:i+2], 16) / div if div else
                      int(hx[i:i+2], 16) for i in (1, 3, 5))
-    else:
-        raise ValueError(f'"{hx}" is not a valid HEX code.')
+    raise ValueError(f'"{hx}" is not a valid HEX code.')
 
 
 def check_light_dark(value, intensity=110):
