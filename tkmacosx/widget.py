@@ -194,4 +194,15 @@ class Marquee(tkb.MarqueeBase):
 
 class Radiobutton(tkb.RadiobuttonBase):
     """Radiobutton widget which shows only one of several buttons in on-state."""
-    pass
+
+    def __init__(self, master, cnf={}, **kw):
+        """Construct a radiobutton widget with the parent MASTER.
+
+        Valid resource names: activebackground, activeforeground, anchor,
+        background, bd, bg, bitmap, borderwidth, command, cursor,
+        disabledforeground, fg, font, foreground, height,
+        highlightbackground, highlightcolor, highlightthickness, image,
+        indicatoron, justify, padx, pady, relief, selectcolor, selectimage,
+        state, takefocus, text, textvariable, underline, value, variable,
+        width, wraplength."""
+        tkb.RadiobuttonBase.__init__(self, master=master, cnf=cnf, **kw)
