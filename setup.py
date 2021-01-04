@@ -1,54 +1,75 @@
 from setuptools import setup
 
 
-def long_description():
-    with open('Information.md') as f:
-        longdis = f.read()
-    return longdis
+def get_long_description(path):
+    """Opens and fetches text of long descrition file."""
+    with open(path, 'r') as f:
+        text = f.read()
+    return text
 
 
-setup(
-    name="tkmacosx",
-    version="0.1.6b2",
-    description="Tkmacosx is a Python library extension to the Tkinter module that let you change background color of the button on macOS.",
-    long_description=long_description(),
-    long_description_content_type="text/markdown",
-    url="https://github.com/Saadmairaj/tkmacosx",
-    author="Saad Mairaj",
-    author_email="Saadmairaj@yahoo.in",
-    license="Apache",
-    classifiers=[
-        "Intended Audience :: Developers",
-        "Intended Audience :: End Users/Desktop",
-        "License :: OSI Approved :: Apache Software License",
-        "Programming Language :: Python :: 2",
-        "Programming Language :: Python :: 2.3",
-        "Programming Language :: Python :: 2.4",
-        "Programming Language :: Python :: 2.5",
-        "Programming Language :: Python :: 2.6",
-        "Programming Language :: Python :: 2.7",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.4",
-        "Programming Language :: Python :: 3.5",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
-        "Topic :: Software Development",
-        "Topic :: Software Development :: Libraries",
-        "Topic :: Software Development :: Build Tools",
-        'Topic :: Software Development :: Widget Sets',
-        "Topic :: Software Development :: Libraries :: Python Modules",
-        "Environment :: MacOS X",
+attrs = dict(
+    name='tkmacosx',
+    version='0.1.6b2',
+    packages=['tkmacosx'],
+    long_description=get_long_description('Information.md'),
+    description='Tkmacosx is a Python library extension to the Tkinter module that let you change background color of the button on macOS.',
+    long_description_content_type='text/markdown',
+    author='Saad Mairaj',
+    author_email='Saadmairaj@yahoo.in',
+    url='https://github.com/Saadmairaj/tkmacosx',
+    license='Apache',
+    python_requires='>=3',
+    install_requires=[
+        'colour',
     ],
-    keywords=['tkinter', 'macos', 'variable', 'widgets', 'colorscale', 'tk', 'color',
-              'button', 'circlebutton', 'marquee', 'tkinter-widgets', 'tkinter-scrollableframe',
-              'scrollableframe'],
-    packages=["tkmacosx"],
-    include_package_data=True,
-    install_requires=['colour'],
-    project_urls={  # Optional
+    keywords=[
+        'tkinter',
+        'macos',
+        'variable',
+        'widgets',
+        'colorscale',
+        'tk',
+        'color',
+        'button',
+        'circlebutton',
+        'marquee',
+        'tkinter-widgets',
+        'tkinter-scrollableframe',
+        'scrollableframe',
+    ],
+    classifiers=[
+        'Development Status :: 6 - Mature',
+        'Environment :: MacOS X',
+        'Environment :: Win32 (MS Windows)',
+        'Environment :: X11 Applications',
+        'Intended Audience :: Developers',
+        'Intended Audience :: Education',
+        'Intended Audience :: End Users/Desktop',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python :: 3 :: Only',
+        'Programming Language :: Python :: 3.0',
+        'Programming Language :: Python :: 3.1',
+        'Programming Language :: Python :: 3.2',
+        'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Topic :: Software Development',
+        'Topic :: Software Development :: Build Tools',
+        'Topic :: Software Development :: Libraries :: Python Modules',
+        'Topic :: Software Development :: Widget Sets',
+        'License :: OSI Approved :: Apache Software License',
+    ],
+    project_urls={
         'Bug Reports': 'https://github.com/Saadmairaj/tkmacosx/issues',
         'Source': 'https://github.com/Saadmairaj/tkmacosx',
         'Documentation': 'https://github.com/Saadmairaj/tkmacosx/tree/master/tkmacosx#documentation-of-tkmacosx',
     },
+    include_package_data=True,
 )
+
+setup(**attrs)
