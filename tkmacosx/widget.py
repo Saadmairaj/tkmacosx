@@ -190,3 +190,8 @@ class Marquee(tkb.MarqueeBase):
         if reset:
             self.reset()
         self._animate()
+
+
+class Radiobutton(tkb.RadiobuttonBase):
+    """Radiobutton widget which shows only one of several buttons in on-state."""
+    pass
