@@ -339,7 +339,22 @@ class _button_properties:
         r1 = self._compound(self.cnf.get('compound'), self.cnf.get('width'), self.cnf.get('height'))
         r2 = {cmd: ((self.cnf['width']/2), self.cnf['height']/2)}
         return r1 or r2
-
+    
+    def _size_opts(self):
+        _opt = {}
+        for i in ('text', 'font', 'textvariable', 'image', 'bitmap',
+                    'compound', 'padx', 'pady', 'activeimage',
+                    'activebitmap'):
+            cond1 = self.cnf.get(i, '') != ''
+            if cond1 and i == 'activeimage':
+                _opt['image'] = self.cnf[i]
+            elif cond1 and i == 'activebitmap':
+                _opt['bitmap'] = self.cnf[i]
+            elif cond1:
+                _opt[i] = self.cnf.get(i)
+        return _opt
+        
+    # These are properties of button widget:
     def _border(self, kw):
         return [('itemconfigure', '_border'),
                 {'outline': get_shade(self['bg'], 0.1, 'auto-120')}, None]
@@ -485,21 +500,8 @@ class _button_properties:
                     {'className': 'overrelief', 'sequence': '<Leave>'},
                     ('configure', {'relief': self._rel[0]}, None))
         return _opt
-    
+
     def size(self, kw):
-        _opt = {}
-        for i in ('text', 'font', 'textvariable', 'image', 'bitmap',
-                    'compound', 'padx', 'pady', 'activeimage',
-                    'activebitmap'):
-            cond1 = self.cnf.get(i, '') != ''
-            if cond1 and i == 'activeimage':
-                _opt['image'] = self.cnf[i]
-            elif cond1 and i == 'activebitmap':
-                _opt['bitmap'] = self.cnf[i]
-            elif cond1 and i in ('width', 'height'):
-                _opt[i] = str(self.cnf[i]) + 'c'
-            elif cond1:
-                _opt[i] = self.cnf.get(i)
         if self._type == 'circle' and kw.get('radius'):
             self.cnf['width'] = self.cnf['height'] = kw.get(
                 'width', kw.get('height', int(kw['radius']*2)))
@@ -509,7 +511,7 @@ class _button_properties:
             kw['height'] = self.cnf['height']
         self._fixed_size['w'] = True if kw.get('width', kw.get('radius')) else False
         self._fixed_size['h'] = True if kw.get('height', kw.get('radius')) else False
-        W, H = _info_button(self, **_opt)
+        W, H = _info_button(self, **_button_properties._size_opts(self))
         self.cnf['width'] = self.cnf.get('width') if self._fixed_size['w'] else W
         self.cnf['height'] = self.cnf.get('height') if self._fixed_size['h'] else H
         return ('configure', {'width': self.cnf['width'],
@@ -1628,10 +1630,12 @@ class _radiobutton_functions:
         When widget is pressed <Button-1>."""
 
         def cmd(evt):
+            self._bind_handler(className='button_command', sequence='<ButtonRelease-1>')
             self._clear_unchecked()
             self._change_selector_color(evt.widget, 'checked')
             self.tk.call(self._w, 'select')
-            self._bind_handler(className='button_command', sequence='<ButtonRelease-1>')
+            if evt.widget != self:
+                self.invoke()
             
         def on_enter(evt):
             """Internal function.\n
