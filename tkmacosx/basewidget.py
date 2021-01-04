@@ -353,7 +353,7 @@ class _button_properties:
             elif cond1:
                 _opt[i] = self.cnf.get(i)
         return _opt
-        
+
     # These are properties of button widget:
     def _border(self, kw):
         return [('itemconfigure', '_border'),
@@ -1602,7 +1602,12 @@ class _radiobutton_functions:
     def _if_selected(self):
         """Internal function.\n
         Checks if the radiobutton is selected or not."""
-        return self._variable.get() == self['value']
+        if self._variable is not None:
+            if (isinstance(self._variable, _tk.StringVar) 
+                    and isinstance(self['value'], int)):
+                return self._variable.get() == str(self['value'])
+            return self._variable.get() == self['value']
+        return True
     
     def _change_selector_color(self, wid, mode):
         """Internal function."""
@@ -1689,9 +1694,7 @@ class _radiobutton_functions:
             self._indi_lb[i] = self[i]
         self._indi_lb.pack(expand=1, fill='both')
 
-        cond1 = not self._variable
-        cond2 = self._variable and self._if_selected()
-        if cond1 or cond2:
+        if self._if_selected():
             self._indi_lb['bg'] = self['selectcolor']
         
         self._bind_handler(
