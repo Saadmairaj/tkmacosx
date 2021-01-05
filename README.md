@@ -1,6 +1,6 @@
 # tkmacosx
 
-[![CodeFactor](https://www.codefactor.io/repository/github/saadmairaj/tkmacosx/badge)](https://www.codefactor.io/repository/github/saadmairaj/tkmacosx)
+<!-- [![CodeFactor](https://www.codefactor.io/repository/github/saadmairaj/tkmacosx/badge)](https://www.codefactor.io/repository/github/saadmairaj/tkmacosx) -->
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Saadmairaj/tkmacosx/graphs/commit-activity)
 [![PyPI version shields.io](https://img.shields.io/pypi/v/tkmacosx)](https://pypi.org/project/tkmacosx/)
 [![Downloads](https://pepy.tech/badge/tkmacosx)](https://pepy.tech/project/tkmacosx)
@@ -77,7 +77,7 @@ Also if you want to style your button to stand out, scroll down to bottom of the
 
 The tkmacosx `Button` widget is alternative to tkinter's Button that supports all features on a macos that were not possible with tkinter Button like background, relief, overrelief, activebackground, and some other features can be set. There is a blue focus ring that tells if the button has the focus or not to disable or hide the focus ring, either set `takefocus=0` or `focuscolor=''`.
 
-- Configurable options for a button widget. For example `Button(root, options=value, ...)`
+- Configurable options for a button widget. Syntax: `Button(root, options=value, ...)`
 
     | Options               	| Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            	|
     |-----------------------	|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|
@@ -156,21 +156,21 @@ The tkmacosx `Button` widget is alternative to tkinter's Button that supports al
 </p>
 
 ```python
-# Options to get buttton in the first image.
+# Options to get button in the first image.
 b1 = Button(root, text='Button', activeforeground= '#EE3B3B', overrelief='flat', relief='flat', borderwidth=2,
     highlightthickness=1, font=font.Font(family='SignPainter', size=30, weight='bold', slant='roman'),
     focuscolor='#556B2F',highlightbackground='#CD5555', foreground='#1F1F1F', background='#7A7A7A',
     overbackground='#000000', overforeground='#00C78C', activebackground=('#BA55D3', '#D4D4D4'), borderless=1)
 
-# Options to get buttton in the second image.
+# Options to get button in the second image.
 b2 = Button(root, text='Button', activeforeground= '#B5B5B5', overrelief='raised', relief='sunken', borderwidth=2,
     highlightthickness=4, font=font.Font(family='Brush Script MT', size=30, weight='bold', slant='roman'),
     focuscolor='#CD3700', highlightbackground='#AAAAAA', foreground='#6B6B6B', background='#BDBDBD',
     overbackground='#7A67EE', overforeground='#404040', activebackground=('#FF34B3', '#C1CDC1'), borderless=1)
 
-# Options to get buttton in the third image.
+# Options to get button in the third image.
 b3 = Button(root, text='Button', activeforeground= '#FFDAB9', overrelief='flat', relief='raised', borderwidth=1,
-    highlightthickness=3, font=font.Font(family='Helvetica', size=30,weight='bold', slant='roman', underline=1),
+    highlightthickness=3, font=font.Font(family='Helvetica', size=30, weight='bold', slant='roman', underline=1),
     focuscolor='#F5DEB3', highlightbackground='#8A360F',foreground='#FFC0CB', background='#708090',
     overbackground='#53868B', overforeground='#CCCCCC', activebackground=('#808069', '#C67171'), borderless=1)
 ```
@@ -181,10 +181,10 @@ b3 = Button(root, text='Button', activeforeground= '#FFDAB9', overrelief='flat',
 
 ***BETA-Disclaimer:*** *Please note that this is a BETA version. Issues can be reported [here](https://github.com/Saadmairaj/tkmacosx/issues/new/choose).*
 
-Circle shaped tkinter Button can contain text or images, and you can associate a Python function or method with each button. There is a blue focus ring that tells if the button has the focus or not to disable or hide the focus ring, either set `takefocus=0` or `focuscolor=''`. The CircleButton widget supports all the configurable options of tkmacosx [Button](https://github.com/Saadmairaj/tkmacosx/tree/master/tkmacosx#button-widget).
+Circle shaped tkinter Button can contain text or images, and you can associate a Python function or method with each button. There is a blue focus ring that tells if the button has the focus or not to disable or hide the focus ring, either set `takefocus=0` or `focuscolor=''`. The CircleButton widget supports all the configurable options of tkmacosx [Button](#button-widget).
 
-- Configurable options for a button widget. For example `CircleButton(root, options=value, ...)`
-    All the options are pretty much the same as tkmaocsx [Button](https://github.com/Saadmairaj/tkmacosx/tree/master/tkmacosx#button-widget). Other options:
+- Configurable options for a button widget. Syntax: `CircleButton(root, options=value, ...)`
+    All the options are pretty much the same as tkmacosx [Button](#button-widget). Other options:
     
     | Options  	| Description                                                                                                               	|
     |----------	|---------------------------------------------------------------------------------------------------------------------------	|
@@ -227,7 +227,7 @@ root.mainloop()
 
 The tkmacosx `SFrame` widget is just like a tkinter Frame but can be vertically scrolled. The SFrame supports intelligent mousewheel scrolling where it let you use mousewheel with other children widgets also having mousewheel scrolling without interfering with other widgets scrolling, a list of widgets having mousewheel scrolling can be passed to `avoidmousewheel` argument *(ex: `avoidmousewheel=(text1, text2, sframe)` or just one `avoidmousewheel=text2`).*
 
-- Configurable options for a sframe widget. For example `SFrame(root, options=value, ...)`
+- Configurable options for a sframe widget. Syntax: `SFrame(root, options=value, ...)`
 
     | Options               	| Description                                                                                                                                                                                                                                    	|
     |-----------------------	|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|
@@ -282,7 +282,7 @@ The tkmacosx `SFrame` widget is just like a tkinter Frame but can be vertically 
 
 Colorscale is a new style color selector which is an alternate to tkinter's colorchooser.
 
-- Configurable options for a Colorscale widget. For example `Colorscale(root, options=value, ...)`
+- Configurable options for a Colorscale widget. Syntax: `Colorscale(root, options=value, ...)`
 
     | Options               	| Description                                                                                                                                                                                                                                                                                       	|
     |-----------------------	|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|
@@ -336,7 +336,7 @@ Colorscale is a new style color selector which is an alternate to tkinter's colo
 
 Use `Marquee` for creating scrolling text which moves from right to left only if the text does not fit completely on the window.
 
-- Configurable options for a Marquee widget. For example `Marquee(root, options=value, ...)`
+- Configurable options for a Marquee widget. Syntax: `Marquee(root, options=value, ...)`
 
     | Options               	| Description                                                                                                                                                                           	|
     |-----------------------	|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|
@@ -397,7 +397,7 @@ Use `Marquee` for creating scrolling text which moves from right to left only if
 
 Radiobutton of tkmacosx are fixed from multiple issues i.e. background color not showing properly when `indicator=0`, *activebackground*, *activeforeground* options not working, few other issues are fixed in tkmacosx Radiobutton. Radiobuttons are sets of related widgets that allow the user to select only one of a set of choices. Each radiobutton consists of two parts, the *indicator* and the *label*.
 
-- Configurable options for a Colorscale widget. For example `Radiobutton(root, options=value, ...)`
+- Configurable options for a Colorscale widget. Syntax: `Radiobutton(root, options=value, ...)`
 
     | Options               	| Description                                                                                                                                                                                                                                                                                                                                                                                                                          	|
     |-----------------------	|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|
@@ -479,7 +479,7 @@ Radiobutton of tkmacosx are fixed from multiple issues i.e. background color not
 
 ColorVar of tkmacosx set same color to each widget it is assigned to. As ColorVar is a tkinter variable wrapper so it will change the color of widgets whenever the change is made to ColorVar instances. ColorVar takes HEX values and all the color names which tkinter supports but the `get()` method returns only the HEX value. It will work with all of the following keyword arguments of different widgets *(eg:- `Canvas`, `Frame`, `Button`, `Label`, Canvas items, ...)*. ***'fg', 'foreground', 'bg', 'background', 'activebackground', 'activeforeground', 'disabledforeground', 'highlightbackground', 'highlightcolor', 'selectforeground', 'readonlybackground', 'selectbackground', 'insertbackground', 'disabledbackground', 'activefill', 'activeoutline', 'disabledfill','disabledoutline', 'fill', 'outline'*** *(might work with more but have not tested).*
 
-- Configurable options for a ColorVar variable. For example `ColorVar(root, options=value, ...)`
+- Configurable options for a ColorVar variable. Syntax: `ColorVar(root, options=value, ...)`
 
     | Options 	| Description                                                                                                                                                  	|
     |---------	|--------------------------------------------------------------------------------------------------------------------------------------------------------------	|
@@ -528,7 +528,7 @@ ColorVar of tkmacosx set same color to each widget it is assigned to. As ColorVa
 
 DictVar of tkmacosx stores python dictionary. It is very similar to tkinter `StringVar` with few modifications to it. `DictVar.get()` returns an instance of `dict` type whereas StringVar returns `str` type also DictVar method `get()` is a bit different `get(key=None, d=None)` get a key from `get()` method if `key=None` it will return the complete dictionary.
 
-- Configurable options for a DictVar variable. For example `DictVar(root, options=value, ...)`
+- Configurable options for a DictVar variable. Syntax: `DictVar(root, options=value, ...)`
 
     | Options 	| Description                                                                                                                                                  	|
     |---------	|--------------------------------------------------------------------------------------------------------------------------------------------------------------	|
@@ -562,7 +562,7 @@ DictVar of tkmacosx stores python dictionary. It is very similar to tkinter `Str
 
 SaveVar of tkmacosx will let you save and load values of tkinter variables (`StringVar`, `IntVar`, ..). SaveVar uses pickle module to save values of variables into a file and when the program is executed next time, it will load the same values as they were last time. If the content of the .py file changes, it might not load correct values to the assigned variables. To avoid this issue use `name` argument to refer to the exact assigned values later.
 
-- Configurable options for a SaveVar function. Synax: `SaveVar(var, master=None, value=None, name=None, filename='data.pkl')`
+- Configurable options for a SaveVar function. Syntax: `SaveVar(var, master=None, value=None, name=None, filename='data.pkl')`
 
     | Parameters 	| Description                                                                                                                            	|
     |------------	|----------------------------------------------------------------------------------------------------------------------------------------	|
@@ -590,7 +590,7 @@ SaveVar of tkmacosx will let you save and load values of tkinter variables (`Str
 
 ### get_shade
 
-- Configurable options for a get_shade function. Synax: `get_shade(color, shade, mode='auto')`
+- Configurable options for a get_shade function. Syntax: `get_shade(color, shade, mode='auto')`
 
     | Parameters 	| Description                                                                                                                                                                                                                                                                               	|
     |------------	|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|
@@ -604,7 +604,7 @@ SaveVar of tkmacosx will let you save and load values of tkinter variables (`Str
 
 Checks DARK/LIGHT mode of macOS and returns boolean value. Other settings can also be checked with this function just by passing a different command line argument to check a particular setting to `cmd` parameter of `check_appearance`.
 
-- Configurable options for a check_appearance function. Synax: `check_appearance(cmd='defaults read -g AppleInterfaceStyle')`.
+- Configurable options for a check_appearance function. Syntax: `check_appearance(cmd='defaults read -g AppleInterfaceStyle')`.
 
     | Parameters 	| Description                                                                                                    	|
     |------------	|----------------------------------------------------------------------------------------------------------------	|
@@ -612,9 +612,9 @@ Checks DARK/LIGHT mode of macOS and returns boolean value. Other settings can al
 
 ## Changelog
 
-- **0.1.5**
+- [**v0.1.5**](https://github.com/Saadmairaj/tkmacosx/releases/tag/v0.1.5)
   - Add new [CircleButton Widget](#circlebutton-widget) widget.
-  - Fix ["key"] to [key] in Marquee.
+  - Fix `["key"]` to `[key]` in Marquee.
   - Fix Colorvar not working with item of canvas in 0.1.4.
   - Fix Marquee.play(reset=True) to reset and play the text from beginning.
   - Fix focusthickness of button not working when set to 1.
@@ -622,7 +622,7 @@ Checks DARK/LIGHT mode of macOS and returns boolean value. Other settings can al
   - Fix Text/Image/Bitmap bleed off the button widget.
   - Fix width or height of button widget not working with compound argument.
 
-- **0.1.4**
+- [**v0.1.4**](https://github.com/Saadmairaj/tkmacosx/releases/tag/v0.1.4)
   - Add new feature `"gradient"` to `Colorscale` widget.
   - Add new features to `Button` widget.
   - Add new `stop`, `play` and `reset` methods to Marquee.
@@ -635,14 +635,14 @@ Checks DARK/LIGHT mode of macOS and returns boolean value. Other settings can al
   - Remove numpy and PIL dependencies.
   - Some other fixes and improvements.
 
-- **0.1.3**
-  - Fix `can't invoke "bindtags" command` error.
+- [**v0.1.3**](https://github.com/Saadmairaj/tkmacosx/releases/tag/v0.1.3)
+  - Fix `can't invoke "bindtags" command` error. ([#3](https://github.com/Saadmairaj/tkmacosx/issues/3))
 
-- **0.1.2**
+- [**v0.1.2**](https://github.com/Saadmairaj/tkmacosx/releases/tag/v0.1.2)
   - Add python 2.x support.
-  - Fix half HEX issues.
+  - Fix half HEX issues. ([#6](https://github.com/Saadmairaj/tkmacosx/issues/6))
 
-- **0.1.1**
+- [**v0.1.1**](https://github.com/Saadmairaj/tkmacosx/releases/tag/v0.1.1)
   - Add `Marquee` widget.
   - `ColorVar` now works with `Canvas` items as well.
   - Fix `ColorVar` not working with the foreground of `tkmacosx.Button`.
@@ -650,35 +650,38 @@ Checks DARK/LIGHT mode of macOS and returns boolean value. Other settings can al
   - Fix issues with __main__.py file.
   - Fix issues with `SaveVar()`.
 
-- **0.1.0**
+- [**v0.1.0**](https://github.com/Saadmairaj/tkmacosx/releases/tag/v0.1.0)
   - Add `SaveVar()` function to save and load tkinter variable.
   - Fix colors import issue.
 
-- **0.0.8 & 0.0.9**
+- [**v0.0.9**](https://github.com/Saadmairaj/tkmacosx/releases/tag/v0.0.9)
   - Fix installation issues.
 
-- **0.0.7**
+- **v0.0.8**
+  - Fix installation issues.
+
+- [**v0.0.7**](https://github.com/Saadmairaj/tkmacosx/releases/tag/v0.0.7)
   - Change `eval()` with `ast.literal_eval()` in DictVar Variable
   - Fix colorscale issues.
 
-- **0.0.6**
+- [**v0.0.6**](https://github.com/Saadmairaj/tkmacosx/releases/tag/v0.0.6)
   - Add new style tkinter colorscale.
 
-- **0.0.5**
+- [**v0.0.5**](https://github.com/Saadmairaj/tkmacosx/releases/tag/v0.0.5)
   - Fix a bug where `borderless` for multiple buttons does not work properly.
   - Improve __init__.py file.
 
-- **0.0.4**
+- [**v0.0.4**](https://github.com/Saadmairaj/tkmacosx/releases/tag/v0.0.4)
   - Fix an import error.
 
-- **0.0.3**
+- [**v0.0.3**](https://github.com/Saadmairaj/tkmacosx/releases/tag/v0.0.3)
   - Add docstring.
 
-- **0.0.2**
-  - Fix an error running command `python -m tkmacosx` .
+- [**v0.0.2**](https://github.com/Saadmairaj/tkmacosx/releases/tag/v0.0.2)
+  - Fix an error running command `python -m tkmacosx`.
 
-- **0.0.1**
-  - First import.
+- [**v0.0.1**](https://github.com/Saadmairaj/tkmacosx/releases/tag/v0.0.1)
+  - Initial release.
 
 ## Contributing
 
