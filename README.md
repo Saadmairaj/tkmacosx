@@ -3,8 +3,8 @@
 <!-- [![CodeFactor](https://www.codefactor.io/repository/github/saadmairaj/tkmacosx/badge)](https://www.codefactor.io/repository/github/saadmairaj/tkmacosx) -->
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Saadmairaj/tkmacosx/graphs/commit-activity)
 [![PyPI version shields.io](https://img.shields.io/pypi/v/tkmacosx)](https://pypi.org/project/tkmacosx/)
-[![Downloads](https://pepy.tech/badge/tkmacosx)](https://pepy.tech/project/tkmacosx)
-[![Downloads](https://pepy.tech/badge/tkmacosx/month)](https://pepy.tech/project/tkmacosx/month)
+[![Downloads](https://static.pepy.tech/personalized-badge/tkmacosx?period=total&units=international_system&left_color=red&right_color=lightgrey&left_text=Downloads)](https://pepy.tech/project/tkmacosx)
+[![Downloads](https://static.pepy.tech/personalized-badge/tkmacosx?period=month&units=none&left_color=orange&right_color=grey&left_text=Downloads%20%E2%80%A2%20Month)](https://pepy.tech/project/tkmacosx)
 [![GitHub issues-closed](https://img.shields.io/github/issues-closed/Saadmairaj/tkmacosx.svg)](https://github.com/Saadmairaj/tkmacosx/issues?q=is%3Aissue+is%3Aclosed)
 [![GitHub license](https://img.shields.io/github/license/Saadmairaj/tkmacosx.svg)](https://github.com/Saadmairaj/tkmacosx/blob/master/LICENSE)
 [![Documentation Status](https://readthedocs.org/projects/ansicolortags/badge/?version=latest)](https://github.com/Saadmairaj/tkmacosx#documentation)
