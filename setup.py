@@ -10,9 +10,9 @@ def get_long_description(path):
 
 attrs = dict(
     name='tkmacosx',
-    version='0.1.6b2',
+    version='0.1.6',
     packages=['tkmacosx'],
-    long_description=get_long_description('Information.md'),
+    long_description=get_long_description('README.md'),
     description='Tkmacosx is a Python library extension to the Tkinter module that let you change background color of the button on macOS.',
     long_description_content_type='text/markdown',
     author='Saad Mairaj',
@@ -67,7 +67,7 @@ attrs = dict(
     project_urls={
         'Bug Reports': 'https://github.com/Saadmairaj/tkmacosx/issues',
         'Source': 'https://github.com/Saadmairaj/tkmacosx',
-        'Documentation': 'https://github.com/Saadmairaj/tkmacosx/tree/master/tkmacosx#documentation-of-tkmacosx',
+        'Documentation': 'https://github.com/Saadmairaj/tkmacosx#documentation',
     },
     include_package_data=True,
 )
