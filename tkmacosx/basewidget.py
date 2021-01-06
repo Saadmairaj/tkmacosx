@@ -12,7 +12,6 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-from os import pathconf_names
 import colour as C
 import tkinter as _tk
 import tkmacosx.variables as tkv
@@ -867,6 +866,7 @@ class _button_functions:
         # If more than one commands are given.
         # returns Union[list, dict, tuple(list, dict)]
         if isinstance(cmd, (list, tuple)):
+            opts = None
             ags, cnf = [], {}
             for i in cmd:
                 opts = self._get_options(i, kw)
