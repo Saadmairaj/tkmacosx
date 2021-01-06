@@ -1,8 +1,8 @@
 # tkmacosx
 
-<!-- [![CodeFactor](https://www.codefactor.io/repository/github/saadmairaj/tkmacosx/badge)](https://www.codefactor.io/repository/github/saadmairaj/tkmacosx) -->
-[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Saadmairaj/tkmacosx/graphs/commit-activity)
 [![PyPI version shields.io](https://img.shields.io/pypi/v/tkmacosx)](https://pypi.org/project/tkmacosx/)
+[![CodeFactor](https://www.codefactor.io/repository/github/saadmairaj/tkmacosx/badge)](https://www.codefactor.io/repository/github/saadmairaj/tkmacosx)
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Saadmairaj/tkmacosx/graphs/commit-activity)
 [![Downloads](https://static.pepy.tech/personalized-badge/tkmacosx?period=total&units=international_system&left_color=red&right_color=lightgrey&left_text=Downloads)](https://pepy.tech/project/tkmacosx)
 [![Downloads](https://static.pepy.tech/personalized-badge/tkmacosx?period=month&units=none&left_color=orange&right_color=grey&left_text=Downloads%20%E2%80%A2%20Month)](https://pepy.tech/project/tkmacosx)
 [![GitHub issues-closed](https://img.shields.io/github/issues-closed/Saadmairaj/tkmacosx.svg)](https://github.com/Saadmairaj/tkmacosx/issues?q=is%3Aissue+is%3Aclosed)
@@ -33,6 +33,8 @@ Table of Contents
    - [4.9. SaveVar](#savevar)
    - [4.10. get_shade](#get_shade)
    - [4.11. check_appearance](#check_appearance)
+   - [4.12. check_light_dark](#check_light_dark)
+   - [4.13. gradient](#gradient)
 5. [Changelog](#changelog)
 6. [License](#license)
 
@@ -65,9 +67,9 @@ pip install git+https://github.com/Saadmairaj/tkmacosx#egg=tkmacosx
 python -m tkmacosx
 ```
 
-Run the above command in the terminal or command line after installing tkmacosx to see working and almost all the configurable options of different widgets of tkmacosx. 
+Run the above command in the terminal or command line after installing tkmacosx to see working and almost all the configurable options of different widgets of tkmacosx.
 
-<p align='center'><img src="https://raw.githubusercontent.com/Saadmairaj/tkmacosx/master/assets/demonstration.gif" height="600"></p>
+<p align='center'><img src="https://raw.githubusercontent.com/Saadmairaj/tkmacosx/master/assets/demonstration.gif" height="500"></p>
 
 Also if you want to style your button to stand out, scroll down to bottom of the window opened from the above command and randomise or configure button to different styles.
 
@@ -487,6 +489,7 @@ ColorVar of tkmacosx set same color to each widget it is assigned to. As ColorVa
     | *name*  	| The name is an optional Tcl name (defaults to PY_VARnum). If *name* matches an existing variable and *value* is omitted then the existing value is retained. 	|
 
 - Methods on `ColorVar` variable objects:
+
     | Methods           	| Description                                                                                                                                                	|
     |-------------------	|------------------------------------------------------------------------------------------------------------------------------------------------------------	|
     | *.get()*          	| Returns the current value of the variable.                                                                                                                 	|
@@ -610,7 +613,48 @@ Checks DARK/LIGHT mode of macOS and returns boolean value. Other settings can al
     |------------	|----------------------------------------------------------------------------------------------------------------	|
     | *cmd*      	| Give commands. *For example: To check DARK/LIGHT mode the command is `'defaults read -g AppleInterfaceStyle'.`* 	|
 
+---
+
+### check_light_dark
+
+Tells if the given RGB or HEX code is lighter or darker shade of color. Returns `"black"` for darker shade and `"white"` for lighter shade.
+
+- Configurable options for a check_light_dark function. Syntax: `check_light_dark(value, intensity=110)`.
+
+    | Parameters 	| Description                                                                                                    	|
+    |------------	|----------------------------------------------------------------------------------------------------------------	|
+    | *value*     | Give sequence of RBG values or hexcode.                                                                      	  |
+    | *intensity* | The measurable amount of a brightness. By deafult it is 110.                                                    |
+
+---
+
+### gradient
+
+This function returns sequences of rainbow colors hexcodes in order.
+
+- Configurable options for a gradient function. Syntax: `gradient(iteration)`.
+
+    | Parameters 	| Description                                                                                                    	|
+    |------------	|----------------------------------------------------------------------------------------------------------------	|
+    | *iteration* | Length of the sequences.                                                                                        |
+
 ## Changelog
+
+- [**v0.1.6**](https://github.com/Saadmairaj/tkmacosx/releases/tag/v0.1.6)
+  - Add new feature, *set image as background* in Button widget.
+  - Add new functions (*hex_to_rgb, check_light_dark*).
+  - Add XView to Marquee widget.
+  - Add Radiobutton widget and fix selectcolor issue. ([#11](https://github.com/Saadmairaj/tkmacosx/issues/11))
+  - Reorganize properties of BaseButton class.
+  - Fix broken links.
+  - Fix anchor of Button widget. ([#7](https://github.com/Saadmairaj/tkmacosx/issues/7))
+  - Fix focusring appearing for all CircleButton.
+  - Fix activebackground and activeforeground of Radiobutton.
+  - Remove colors.py file
+  - Remove support for python 2.x.
+  - Remove unnecessary code from multiple files.
+  - Remove Information.md file.
+  - Remove tkmacosx/README.md file.
 
 - [**v0.1.5**](https://github.com/Saadmairaj/tkmacosx/releases/tag/v0.1.5)
   - Add new [CircleButton Widget](#circlebutton-widget) widget.
