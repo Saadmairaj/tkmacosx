@@ -1570,7 +1570,7 @@ class MarqueeBase(_Canvas, _tk.XView):
 
 
 class _radiobutton_functions:
-    _properties = [
+    _properties = (
         'activebackground',
         'activeforeground',
         'anchor',
@@ -1583,11 +1583,12 @@ class _radiobutton_functions:
         'font',
         'foreground',
         'justify',
+        'state',
         'text',
         'textvariable',
         'underline',
         'wraplength',
-    ]
+    )
 
     def _check_setit(self, kw={}):
         """Internal function.\n
@@ -1602,40 +1603,52 @@ class _radiobutton_functions:
     def _if_selected(self):
         """Internal function.\n
         Checks if the radiobutton is selected or not."""
-        if self._variable is not None:
-            if (isinstance(self._variable, _tk.StringVar) 
+        if self._cnf['variable'] is not None:
+            if (isinstance(self._cnf['variable'], _tk.StringVar) 
                     and isinstance(self['value'], int)):
-                return self._variable.get() == str(self['value'])
-            return self._variable.get() == self['value']
+                return self._cnf['variable'].get() == str(self['value'])
+            return self._cnf['variable'].get() == self['value']
         return True
     
     def _change_selector_color(self, wid, mode):
         """Internal function."""
-        if not self._indi_lb.winfo_exists():
+        lb = getattr(self, '_indi_lb', False)
+        if not lb or not lb.winfo_exists():
             return
         if mode == 'checked':
-            self._indi_lb['bg'] = self._selectcolor
+            self._indi_lb['bg'] = self._cnf['selectcolor']
             if wid != self:
                 _tk.Radiobutton._configure(
-                    self, 'configure', {'selectcolor': self._selectcolor}, None)
+                    self, 'configure', {'selectcolor': self._cnf['selectcolor']}, None)
             return
         self._indi_lb['bg'] = self['bg']
         if wid != self:
             _tk.Radiobutton._configure(
-                    self, 'configure', {'selectcolor': self['bg']}, None)
+                self, 'configure', {'selectcolor': self['bg']}, None)
     
     def _bind_handler(self, *ags, **kw):
-        """Internet function."""
+        """Internet function.\n
+        Don't call this function directly."""
         _bind(self, *ags, **kw)
-        if self._indi_lb.winfo_exists():
-            _bind(self._indi_lb, *ags, **kw)
+        lb = getattr(self, '_indi_lb', False)
+        if lb and lb.winfo_exists():
+            _bind(lb, *ags, **kw)
+    
+    def _internal_configure(self, **kw):
+        """Internal function.\n
+        Don't call this function directly. 
+        Configure both radiobutton and the label."""
+        _tk.Radiobutton._configure(self, 'configure', kw, None)
+        lb = getattr(self, '_indi_lb', False)
+        if lb and lb.winfo_exists():
+            lb._configure('configure', kw, None)
 
     def _on_press(self, evt=None):
         """Internal function. \n
         When widget is pressed <Button-1>."""
-
         def cmd(evt):
             self._bind_handler(className='button_command', sequence='<ButtonRelease-1>')
+            self._state('on_release')
             self._clear_unchecked()
             self._change_selector_color(evt.widget, 'checked')
             self.tk.call(self._w, 'select')
@@ -1646,6 +1659,7 @@ class _radiobutton_functions:
             """Internal function.\n
             Enables when pressed and cursor
             is moved back on widget."""
+            self._state('on_enter')
             if self._if_selected():
                 self._change_selector_color(evt.widget, 'unchecked')
             self._bind_handler(className='button_command', sequence='<ButtonRelease-1>', func=cmd)
@@ -1655,36 +1669,54 @@ class _radiobutton_functions:
             Disables/Cancels when pressed 
             and cursor is moved away from 
             the widget."""
+            self._state('on_leave')
             if self._if_selected():
                 self._change_selector_color(evt.widget, 'checked')
             self._bind_handler(className='button_command', sequence='<ButtonRelease-1>')
         
-        self._change_selector_color(evt.widget, 'unchecked')
-
-        self._bind_handler(
-            {'className': 'on_press_enter', 'sequence': '<Enter>', 'func': on_enter},
-            {'className': 'on_press_leave', 'sequence': '<Leave>', 'func': on_leave},
-            {'className': 'button_command', 'sequence': '<ButtonRelease-1>', 'func': cmd}
-        )
+        if self['state'] not in 'disabled':
+            self._state('on_press')
+            self._change_selector_color(evt.widget, 'unchecked')
+            self._bind_handler(
+                {'className': 'on_press_enter', 'sequence': '<Enter>', 'func': on_enter},
+                {'className': 'on_press_leave', 'sequence': '<Leave>', 'func': on_leave},
+                {'className': 'button_command', 'sequence': '<ButtonRelease-1>', 'func': cmd}
+            )
 
     def _on_release(self, evt):
         """Internal function. \n
         When button is released <ButtonRelease-1>."""
-        self._bind_handler(
-            {'className': 'on_press_enter', 'sequence': '<Enter>'},
-            {'className': 'on_press_leave', 'sequence': '<Leave>'},
-            {'className': 'button_command', 'sequence': '<ButtonRelease-1>'}
-        )
+        if self['state'] not in 'disabled':
+            self._bind_handler(
+                {'className': 'on_press_enter', 'sequence': '<Enter>'},
+                {'className': 'on_press_leave', 'sequence': '<Leave>'},
+                {'className': 'button_command', 'sequence': '<ButtonRelease-1>'}
+            )
 
     def _clear_unchecked(self, evt=None):
         """Internal function."""
         for i in self._radiobuttons:
             lb = getattr(i, '_indi_lb', False)
             if (lb and lb.winfo_exists()
-                and i._variable == self._variable
-                    and i != self and self._variable):
+                and i._cnf['variable'] == self._cnf['variable']
+                    and i != self and self._cnf['variable']):
                 lb['bg'] = i['bg']
     
+    def _state(self, mode):
+        """Internal function."""
+        if mode in ('on_enter', 'on_press'):
+            self._internal_configure(
+                state='active',
+                background=self['activebackground'],
+                foreground=self['activeforeground'],
+            )
+        elif mode in ('on_leave', 'on_release'):
+            self._internal_configure(
+                state='normal', 
+                background=self._cnf['background'], 
+                foreground=self._cnf['foreground']
+            )
+
     def _setit(self):
         """Internal function.
         Sets the radio button with the patch."""
@@ -1698,6 +1730,8 @@ class _radiobutton_functions:
             self._indi_lb['bg'] = self['selectcolor']
         
         self._bind_handler(
+            {'className': "on_press", "sequence": "<Button-1>"}, # Unbinds if any
+            {'className': "on_release", "sequence": "<ButtonRelease-1>"}, # Unbinds if any
             {'className': "on_press", "sequence": "<Button-1>", "func": self._on_press},
             {'className': "on_release", "sequence": "<ButtonRelease-1>", "func": self._on_release},
         )
@@ -1709,18 +1743,18 @@ class _radiobutton_functions:
         self.propagate(1)
 
     def _set_configure(self, cnf={}):
-        """Internal function."""
-        self._variable = cnf.get('variable', self._variable)
-        self._selectcolor = cnf.get('selectcolor', self._selectcolor)
+        """Internal function."""        
+        for p in list(self._cnf): 
+            self._cnf[p] = cnf.get(p, self._cnf[p])
+        lb = getattr(self, '_indi_lb', False)
         if self._check_setit(cnf):
-            lb = getattr(self, '_indi_lb', False)
             if lb and lb.winfo_exists():
                 for i in cnf:
                     if i in self._properties:
                         self._indi_lb[i] = cnf[i]
             else:
                 self._setit()
-        else: 
+        elif lb:
             self._revert() 
 
 
@@ -1740,12 +1774,21 @@ class RadiobuttonBase(_tk.Radiobutton, _radiobutton_functions):
         kw = _cnfmerge((kw, cnf))
         _tk.Radiobutton.__init__(self, master, kw)
         self._radiobuttons.append(self)
-
-        self._variable = kw.get('variable')
-        self._selectcolor = self['selectcolor']
-
+        self._cnf = dict(
+            variable = kw.get('variable'),
+            selectcolor = self['selectcolor'],
+            foreground = self['foreground'],
+            background = self['background'],
+        )
+        
+        # Set the patch if indicatoron is set to 0.
         if self._check_setit():
             self._setit()
+        
+        self._bind_handler(
+            {'className': "on_press", "sequence": "<Button-1>", "func": self._on_press},
+            {'className': "on_release", "sequence": "<ButtonRelease-1>", "func": self._on_release},
+        )
     
     def _configure(self, cmd, cnf, kw):
         """Internal function."""
