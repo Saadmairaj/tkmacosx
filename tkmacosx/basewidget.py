@@ -917,7 +917,7 @@ class _button_functions:
                             self._set_anchor(conf.pop('anchor', 'center'), i)
                     _Canvas._configure(self, *conf)
                     return _bind(*binds)
-                elif options[1].get('tag') == '_activebg':
+                if options[1].get('tag') == '_activebg':
                     return _on_press_color(*options)    # _on_press_color
                 return _bind(*options)  # binds
 
