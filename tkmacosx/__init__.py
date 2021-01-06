@@ -19,7 +19,7 @@ looks and feels exactly like a native tkinter button can change its background
 and foreground colors.
 
 Read more about tkmacosx in detail on
-https://github.com/Saadmairaj/tkmacosx/tree/master/tkmacosx.
+https://github.com/Saadmairaj/tkmacosx#tkmacosx
 """
 
 __version__ = '0.1.6'
