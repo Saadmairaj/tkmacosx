@@ -113,3 +113,8 @@ tkmacosx/images(delete)/B2.png
 tkmacosx/images(delete)/colorscale.npy
 tkmacosx/images(delete)/images.txt
 extra.py
+releases
+demos.py
+tkmacosx/colors(delete).py
+tkmacosx/README(deleted).md
+Information(deleted).md
