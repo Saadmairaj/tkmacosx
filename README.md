@@ -3,14 +3,12 @@
 [![PyPI version shields.io](https://img.shields.io/pypi/v/tkmacosx)](https://pypi.org/project/tkmacosx/)
 [![CodeFactor](https://www.codefactor.io/repository/github/saadmairaj/tkmacosx/badge)](https://www.codefactor.io/repository/github/saadmairaj/tkmacosx)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Saadmairaj/tkmacosx/graphs/commit-activity)
-[![Downloads](https://static.pepy.tech/personalized-badge/tkmacosx?period=total&units=international_system&left_color=red&right_color=lightgrey&left_text=Downloads)](https://pepy.tech/project/tkmacosx)
-[![Downloads](https://static.pepy.tech/personalized-badge/tkmacosx?period=month&units=none&left_color=orange&right_color=grey&left_text=Downloads%20%E2%80%A2%20Month)](https://pepy.tech/project/tkmacosx)
-[![GitHub issues-closed](https://img.shields.io/github/issues-closed/Saadmairaj/tkmacosx.svg)](https://github.com/Saadmairaj/tkmacosx/issues?q=is%3Aissue+is%3Aclosed)
+[![Downloads](https://static.pepy.tech/personalized-badge/tkmacosx?period=total&units=international_system&left_color=lightgrey&right_color=blue&left_text=Downloads)](https://pepy.tech/project/tkmacosx)
+[![Downloads](https://static.pepy.tech/personalized-badge/tkmacosx?period=month&units=none&left_color=grey&right_color=blue&left_text=Downloads/Month)](https://pepy.tech/project/tkmacosx)
 [![GitHub license](https://img.shields.io/github/license/Saadmairaj/tkmacosx.svg)](https://github.com/Saadmairaj/tkmacosx/blob/master/LICENSE)
-[![Documentation Status](https://readthedocs.org/projects/ansicolortags/badge/?version=latest)](https://github.com/Saadmairaj/tkmacosx#documentation)
-![Platform macos](https://camo.githubusercontent.com/88b2a6b3c5b17c76a81f26679c90eb0e35d58a20/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f706c6174666f726d2d4d61632d626c75652e737667)
-![Platform linux](https://camo.githubusercontent.com/d770098cca195092547eb2141c36b0b37abe70c2/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f706c6174666f726d2d4c696e75782d626c75652e737667)
-![Platform windows](https://camo.githubusercontent.com/237ee2d8b515525d5b003c578459830c94de3285/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f706c6174666f726d2d57696e646f77732d626c75652e737667)
+[![GitHub issues-closed](https://img.shields.io/github/issues-closed/Saadmairaj/tkmacosx.svg)](https://github.com/Saadmairaj/tkmacosx/issues?q=is%3Aissue+is%3Aclosed)
+[![Anaconda-Server Badge](https://anaconda.org/saad_7/tkmacosx/badges/installer/conda.svg)](https://conda.anaconda.org/saad_7)
+![PowerShell Gallery](https://img.shields.io/powershellgallery/p/Pester?color=blue)
 
 This module provides some modified widgets of Tkinter which fixes many issues with widgets not working properly on macOS platform. For example Button of tkmacosx which looks and feels exactly like a native Tkinter button can change its _background_ and _foreground_ color and has a lot more functionality, Issues with Radiobutton are also fixed with this library. The library also offers some more useful functionality.
 
@@ -49,16 +47,34 @@ Python packages:
 
 ## Installation
 
-Use the package manager [pip](https://pip.pypa.io/en/stable/) to install [tkmacosx](https://pypi.org/project/tkmacosx/).
+Use the package manager [pip](https://pip.pypa.io/en/stable/) to install [tkmacosx](https://pypi.org/project/tkmacosx/) with the following command:
 
 ```bash
 pip install tkmacosx
 ```
 
-Or install the latest repo
+If you would like to get the latest master or branch from github, you could also:
 
 ```bash
-pip install git+https://github.com/Saadmairaj/tkmacosx#egg=tkmacosx
+pip install git+https://github.com/Saadmairaj/tkmacosx
+```
+
+Or even select a specific revision *(branch/tag/commit)*:
+
+```bash
+pip install git+https://github.com/Saadmairaj/tkmacosx@master
+```
+
+Similarly, for tag specify [tag](https://github.com/Saadmairaj/tkmacosx/tags) with `@v0.x.x`. For example to download tag v0.1.0 from Git use:
+
+```bash
+pip install git+https://github.com/Saadmairaj/tkmacosx@v0.1.0
+```
+
+If you use [Anaconda](https://www.anaconda.com/products/individual) environment then you could run:
+
+```bash
+conda install -c saad_7 tkmacosx 
 ```
 
 ## Demonstration
