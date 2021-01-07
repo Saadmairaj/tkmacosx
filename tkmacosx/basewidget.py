@@ -119,8 +119,7 @@ def _info_button(master, cnf={}, **kw):
     It creates a ttk button and use all the resources given
     and returns width and height of the ttk button, after taking
     width and height the button gets destroyed also the custom style."""
-    kw = _tk._cnfmerge((cnf, kw))
-    cnf = dict(**kw)    
+    kw = _tk._cnfmerge((cnf, kw))  
     name = '%s.TButton' % master
     _style_tmp = ttk.Style()
     _style_tmp.configure(name, font=kw.pop('font', None))
@@ -313,6 +312,15 @@ class _button_properties:
     """Internal class.\n
     Contains modified properties of Button widget. Do not call directly."""
 
+    _features = ('overbackground', 'overforeground', 'activeimage', 'activebitmap', 
+                 'anchor', 'bitmap', 'bordercolor', 'borderless', 'command', 'compound', 
+                 'disabledforeground', 'justify', 'disabledbackground', 'fg', 'font', 
+                 'foreground', 'height', 'image', 'overrelief', 'padx', 'pady', 'repeatdelay', 
+                 'repeatinterval', 'text', 'textvariable', 'underline', 'width', 'state', 
+                 'focusthickness', 'focuscolor', 'highlightbackground', 'activebackground', 
+                 'activeforeground')
+
+    # Utils
     def _bit_img(self, cmd, kw):
         tag = '_bit' if cmd == 'bitmap' else '_img'
         if kw.get(cmd, '') != '':
@@ -427,7 +435,7 @@ class _button_properties:
                 {'outline': kw.get('focuscolor', self.cnf.get('focuscolor'))}, None)
     
     def focusthickness(self, kw):
-        self._create_items('create', True, avoid=(
+        _button_items.create_items(self, 'create', True, avoid=(
             '_txt', '_img', '_bit', '_bd_color', '_border'))
     
     def image(self, kw):
@@ -597,18 +605,137 @@ class _button_properties:
         return (('itemconfigure', '_txt'), _opt, None)
 
 
+class _button_items:
+    """Internal class.
+
+    Checks and creates (text, image, bitmap, border, 
+    bordercolor, takefocus ring*) items."""
+
+    _items = ('_txt', '_bit', '_img', '_bd_color', '_border', '_tf')
+
+    # Utils
+    def _active_state(self, val):
+        """Internal function."""
+        _kw = dict( fill=self.cnf.get('foreground', 'black'),
+                    img=self.cnf.get('image', ''),
+                    bit=self.cnf.get('bitmap', ''),
+                    state='normal')
+        if self['state'] in ('pressed', 'active'):
+            return dict(fill=self.cnf.get('activeforeground', 'white'),
+                        img=self.cnf.get('activeimage', _kw['img']),
+                        bit=self.cnf.get('activebitmap', _kw['bit']),
+                        state='hidden')[val]
+        return _kw[val]
+    
+    def _bit_img_main(self, opt, *ags, **kw):
+        kw['tag'] = '_img' if opt == 'image' else '_bit'
+        if (self.cnf.get(opt, self.cnf.get(str('active'+opt), '')) != ''):
+            return self._create(
+                opt, (0, 0), {'tag': kw['tag'], 
+                opt: _button_items._active_state(self, kw['tag'][1:])})
+
+    # These are main items (function names = item tag name.)
+    def _txt(self, *ags, **kw):
+        "Text item."
+        if self.cnf.get('text'):
+            return self._create(
+                'text', (0, 0), {'text': None, 'tag': '_txt', 
+                'fill': _button_items._active_state(self, 'fill')})
+    
+    def _bit(self, *ags, **kw):
+        "Bitmap items (bitmap and activebitmap)."
+        return _button_items._bit_img_main(self,'bitmap', *ags, **kw)
+    
+    def _img(self, *ags, **kw):
+        "Image item (image and activeimage)."
+        return _button_items._bit_img_main(self, 'image', *ags, **kw)
+    
+    def _bd_color(self, *ags, **kw):
+        "Border color item."
+        bd_color = self.cnf.get('bordercolor', get_shade(self['bg'], 0.04, 'auto-120'))
+        if self._type == 'circle':
+            pad = 2
+            width = r = int(self.cnf.get('width', 87)/2)  # radius = x = y (in pixels)
+            _bd_points = (pad-width, pad-width, r*2+width-pad, r*2+width-pad)
+            kw_bd_color = {
+                'tag': '_bd_color', 
+                'state': _button_items._active_state(self, 'state'),
+                'width': width*2,'outline': bd_color}
+            return self._create('oval', _bd_points, kw_bd_color)
+        _bd_points = (0, -1, self.cnf.get('width', 87), 
+                        self.cnf.get('height', 24)+3, 7)  # was 6
+        return self.rounded_rect(
+            _bd_points, width=6, tag='_bd_color', 
+            style='arc', outline=bd_color)
+    
+    def _border(self, *ags, **kw):
+        "Border item."
+        bo_color = get_shade(self['bg'], 0.1, 'auto-120')
+        if self._type == 'circle':
+            pad = 2
+            r = int(self.cnf.get('width', 87)/2)  # radius = x = y
+            _bo_points = (pad, pad, r*2-(pad+1), r*2-(pad+1))
+            return self._create('oval', _bo_points, {
+                'tag': '_border', 'outline': self.cnf.get('bordercolor', bo_color) })
+        h = 4
+        if int(self['highlightthickness']):
+            h += 1
+        _bo_points = (2, 2, self.cnf.get('width', 87)-5, self.cnf.get('height', 24)-h, 4)  # was 3
+        return self.rounded_rect(
+            _bo_points, width=1, outline=bo_color, smooth=1, 
+            tag='_border', style='arc', 
+            state=_button_items._active_state(self,'state'))
+    
+    def _tf(self, *ags, **kw):
+        "Takefocus highlight ring."
+        if self._type == 'circle':
+            pad = 1
+            width = self.cnf.get('focusthickness', 2)
+            r = int(self.cnf.get('width', 87)/2)  # radius = x = y
+            _tk_points = (pad+width, pad+width, r*2-width-pad, r*2-width-pad)
+            return self._create('oval', _tk_points, {
+                    'tag': '_tf', 'width': width, 
+                    'outline': self.cnf.get('focuscolor', '#81b3f4'), 
+            'outline': self.cnf.get('focuscolor', '#81b3f4'), 
+                    'outline': self.cnf.get('focuscolor', '#81b3f4'), 
+            'outline': self.cnf.get('focuscolor', '#81b3f4'), 
+                    'outline': self.cnf.get('focuscolor', '#81b3f4'), 
+                    'state': 'hidden'})
+
+        # takefocuswidth can be changed.
+        # Focus line is not on point the line is off when thickness is changed.
+        s = w = self.cnf.get('focusthickness', 2)
+        diff1 = diff2 = (int(self['highlightthickness'])*2) + (s*2)
+        if diff2 == (s*2):
+            diff2 -= 1
+        
+        if s == 1:
+            s = 2
+            diff2 = (int(self['highlightthickness'])*2) + (s*2)
+            diff1 = diff2 + 1
+        
+        _tk_points = (s+int(self['highlightthickness']),
+                        s+int(self['highlightthickness']),
+                        self.cnf.get('width',  87)-diff1,
+                        self.cnf.get('height', 24)-diff2, 4)
+        return self.rounded_rect(
+            _tk_points, width=w, style='arc', 
+            outline=self.cnf.get('focuscolor', '#81b3f4'), 
+            tag='_tf', state='hidden')
+    
+    # Main function
+    def create_items(self, cmd, safe_create=False, **kw):
+        id = []
+        for i in _button_items._items:
+            if self.check_tag(cmd, i, safe_create, kw.get('avoid', [])):
+                fn = getattr(_button_items, i)
+                id.append(fn(self, cmd=cmd, safe_create=safe_create, **kw))
+        return id
+
+
 class _button_functions:
     """Internal class.\n
     Function class for Button widget. Do not call directly."""
-
-    _buttons = []  # list of all buttons
-    _features = ('overbackground', 'overforeground', 'activeimage', 'activebitmap', 
-                 'anchor', 'bitmap', 'bordercolor', 'borderless', 'command', 'compound', 
-                 'disabledforeground', 'justify', 'disabledbackground', 'fg', 'font', 
-                 'foreground', 'height', 'image', 'overrelief', 'padx', 'pady', 'repeatdelay', 
-                 'repeatinterval', 'text', 'textvariable', 'underline', 'width', 'state', 
-                 'focusthickness', 'focuscolor', 'highlightbackground', 'activebackground', 
-                 'activeforeground')
 
     def _mouse_state_condition(self):
         """Internal function.\n
@@ -646,116 +773,6 @@ class _button_functions:
                     tkv._all_traces_colorvar[(self, i)] = (var, cbname)
                 kw[i] = var.get()
         return kw
-
-    def _create_items(self, cmd, safe_create=False, **kw):
-        """Internal function.\n
-        Checks and creates (text, image, bitmap, border, 
-        bordercolor, takefocus ring*) items."""
-
-        def check_tag(tag):
-            """Internal function."""
-            return self.check_tag(cmd, tag, safe_create, kw.get('avoid', []))
-        
-        def active_state(val):
-            """Internal function."""
-            _kw = dict( fill=self.cnf.get('foreground', 'black'),
-                        img=self.cnf.get('image', ''),
-                        bit=self.cnf.get('bitmap', ''),
-                        state='normal')
-            if self['state'] in ('pressed', 'active'):
-                return dict(fill=self.cnf.get('activeforeground', 'white'),
-                            img=self.cnf.get('activeimage', _kw['img']),
-                            bit=self.cnf.get('activebitmap', _kw['bit']),
-                            state='hidden')[val]
-            return _kw[val]
-
-        ids = []
-        cond_image = bool(
-            self.cnf.get('image', self.cnf.get('activeimage', '')) != '')
-        cond_bitmap = bool(
-            self.cnf.get('bitmap', self.cnf.get('activebitmap', '')) != '')
-
-        # Text item.
-        if check_tag('_txt') and self.cnf.get('text'):
-            ids.append(self._create('text', (0, 0), {
-                    'text': None, 'tag': '_txt', 'fill': active_state('fill')}))
-        
-        # Image item (image and activeimage).
-        if check_tag('_img') and cond_image:
-            ids.append(self._create('image', (0, 0), {
-                    'tag': '_img', 'image': active_state('img')}))
-        
-        # Bitmap items (bitmap and activebitmap).
-        elif check_tag('_bit') and cond_bitmap:
-            ids.append(self._create('bitmap', (0, 0), {
-                    'tag': '_bit', 'bitmap': active_state('bit')}))
-        
-        # Border color item.
-        bd_color = self.cnf.get('bordercolor', get_shade(self['bg'], 0.04, 'auto-120'))
-        if check_tag('_bd_color') and self._type == 'circle':
-            pad = 2
-            width = r = int(self.cnf.get('width', 87)/2)  # radius = x = y (in pixels)
-            _bd_points = (pad-width, pad-width, r*2+width-pad, r*2+width-pad)
-            kw_bd_color = {
-                'tag': '_bd_color', 
-                'state': active_state('state'),
-                'width': width*2,'outline': bd_color}
-            ids.append(self._create('oval', _bd_points, kw_bd_color))
-        elif check_tag('_bd_color'):
-            _bd_points = (0, -1, self.cnf.get('width', 87), self.cnf.get('height', 24)+3, 7)  # was 6
-            ids.append(self.rounded_rect(
-                _bd_points, width=6, tag='_bd_color', style='arc', outline=bd_color))
-        
-        # Border item.
-        bo_color = get_shade(self['bg'], 0.1, 'auto-120')
-        if check_tag('_border') and self._type == 'circle':   
-            pad = 2
-            r = int(self.cnf.get('width', 87)/2)  # radius = x = y
-            _bo_points = (pad, pad, r*2-(pad+1), r*2-(pad+1))
-            ids.append(self._create('oval', _bo_points, {
-                'tag': '_border', 'outline': self.cnf.get('bordercolor', bo_color) }))
-        elif check_tag('_border'):
-            h = 4
-            if int(self['highlightthickness']):
-                h += 1
-            _bo_points = (2, 2, self.cnf.get('width', 87)-5, self.cnf.get('height', 24)-h, 4)  # was 3
-            ids.append(self.rounded_rect(
-                _bo_points, width=1, outline=bo_color, smooth=1, tag='_border', 
-                style='arc', state=active_state('state')))
-        
-        # Takefocus highlight ring.
-        if check_tag('_tf') and self._type == 'circle':
-            pad = 1
-            width = self.cnf.get('focusthickness', 2)
-            r = int(self.cnf.get('width', 87)/2)  # radius = x = y
-            _tk_points = (pad+width, pad+width, r*2-width-pad, r*2-width-pad)
-            ids.append(self._create('oval', _tk_points, {
-                'tag': '_tf', 'width': width, 
-                'outline': self.cnf.get('focuscolor', '#81b3f4'), 
-                'state': 'hidden'}))
-                
-        elif check_tag('_tf'):
-            # takefocuswidth can be changed.
-            # Focus line is not on point the line is off when thickness is changed.
-            s = w = self.cnf.get('focusthickness', 2)
-            diff1 = diff2 = (int(self['highlightthickness'])*2) + (s*2)
-            if diff2 == (s*2):
-                diff2 -= 1
-            
-            if s == 1:
-                s = 2
-                diff2 = (int(self['highlightthickness'])*2) + (s*2)
-                diff1 = diff2 + 1
-            
-            _tk_points = (s+int(self['highlightthickness']),
-                            s+int(self['highlightthickness']),
-                            self.cnf.get('width',  87)-diff1,
-                            self.cnf.get('height', 24)-diff2, 4)
-            ids.append(self.rounded_rect(
-                _tk_points, width=w, style='arc', 
-                outline=self.cnf.get('focuscolor', '#81b3f4'), 
-                tag='_tf', state='hidden'))
-        return tuple(ids)
 
     def _get_functions(self, cmds, kw={}):
         """Internal function.\n
@@ -928,7 +945,7 @@ class _button_functions:
         self.cnf, kw = self._make_dictionaries(self.cnf, 
                             self._set_trace(_cnfmerge((cnf, kw))))
         # Checks the items
-        self._create_items('check')
+        _button_items.create_items(self, 'check')
         # >.<
         for opt in ('overbackground', 'activebitmap', 'activeimage',
                     'bitmap', 'fg', 'bordercolor', 'borderless', 'image',
@@ -1021,7 +1038,8 @@ class _button_functions:
         # [issue-6] (Fixed) Need fix (laggy on resizing) --> workaround: cancel if still resizing
         for i in self._after_IDs:
             self.after_cancel(self._after_IDs[i])
-        self._create_items('create', avoid=('_txt', '_img', '_bit'), safe_create=True)
+        _button_items.create_items(
+            self, 'create', avoid=('_txt', '_img', '_bit'), safe_create=True)
         self._set_coords(self._get_options(('_txt', '_img', '_bit'), self.cnf))
         self._after_IDs[1] = self.after(1, self._get_functions('_activebg'))
         for t in ('_img', '_bit', '_txt', '_bd_color', '_border', '_tf'):
@@ -1220,6 +1238,8 @@ class _button_functions:
 
 class ButtonBase(_Canvas, _button_functions):
     """Internal class used for tkinter macos Buttton"""
+    
+    _buttons = []  # list of all buttons
 
     def __init__(self, _type=None, master=None, cnf={}, **kw):
         kw = self._set_trace(_cnfmerge((cnf, kw)))
@@ -1230,7 +1250,7 @@ class ButtonBase(_Canvas, _button_functions):
         self._var_cb = None
         self.cnf = {}
         for i in kw.copy().keys():
-            if i in self._features:
+            if i in _button_properties._features:
                 self.cnf[i] = kw.pop(i, None)
 
         self.cnf['fg'] = self.cnf['foreground'] = self.cnf.get('fg', self.cnf.get('foreground', 'black'))
@@ -1258,7 +1278,7 @@ class ButtonBase(_Canvas, _button_functions):
 
         self._buttons.append(self)
         self._size = (self.winfo_width(), self.winfo_height())
-        self._create_items('create', safe_create=True)
+        _button_items.create_items(self, 'create', safe_create=True)
         self._org_bg = self['bg']
         if kw.get('relief') is not None:
             self._rel = (kw['relief'], True)
@@ -1280,7 +1300,7 @@ class ButtonBase(_Canvas, _button_functions):
         kw = self._relief(cnf, kw)
         cnf = {}
         for i in list(kw):
-            if ((i in self._features)
+            if ((i in _button_properties._features)
                 or (i == 'radius' and self._type == 'circle')):
                 cnf[i] = kw.pop(i, None)
         _return = _Canvas._configure(self, cmd, None, kw)
@@ -1295,7 +1315,7 @@ class ButtonBase(_Canvas, _button_functions):
         """Return the resource value for a KEY given as string."""
         if key == 'radius' and self._type == 'circle':
             return self.cnf.get('radius')
-        if key in self._features:
+        if key in _button_properties._features:
             return self.cnf.get(key)
         return _Canvas.cget(self, key)
     __getitem__ = cget
@@ -1303,7 +1323,7 @@ class ButtonBase(_Canvas, _button_functions):
     def keys(self):
         """Return a list of all resource names of this widget."""
         _return = _Canvas.keys(self)
-        _return.extend(self._features)
+        _return.extend(_button_properties._features)
         return sorted(list(set(_return)))
 
     @tkv._colorvar_patch_destroy
