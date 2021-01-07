@@ -694,11 +694,7 @@ class _button_items:
             r = int(self.cnf.get('width', 87)/2)  # radius = x = y
             _tk_points = (pad+width, pad+width, r*2-width-pad, r*2-width-pad)
             return self._create('oval', _tk_points, {
-                    'tag': '_tf', 'width': width, 
-                    'outline': self.cnf.get('focuscolor', '#81b3f4'), 
-            'outline': self.cnf.get('focuscolor', '#81b3f4'), 
-                    'outline': self.cnf.get('focuscolor', '#81b3f4'), 
-            'outline': self.cnf.get('focuscolor', '#81b3f4'), 
+                    'tag': '_tf', 'width': width,
                     'outline': self.cnf.get('focuscolor', '#81b3f4'), 
                     'state': 'hidden'})
 
@@ -725,12 +721,12 @@ class _button_items:
     
     # Main function
     def create_items(self, cmd, safe_create=False, **kw):
-        id = []
+        _id = []
         for i in _button_items._items:
             if self.check_tag(cmd, i, safe_create, kw.get('avoid', [])):
                 fn = getattr(_button_items, i)
-                id.append(fn(self, cmd=cmd, safe_create=safe_create, **kw))
-        return id
+                _id.append(fn(self, cmd=cmd, safe_create=safe_create, **kw))
+        return _id
 
 
 class _button_functions:
@@ -1238,7 +1234,7 @@ class _button_functions:
 
 class ButtonBase(_Canvas, _button_functions):
     """Internal class used for tkinter macos Buttton"""
-    
+
     _buttons = []  # list of all buttons
 
     def __init__(self, _type=None, master=None, cnf={}, **kw):
