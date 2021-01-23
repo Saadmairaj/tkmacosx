@@ -339,10 +339,9 @@ class _button_properties:
                     name: self.cnf.get(cmd, '')}, None)
 
     def _item(self, cmd, kw):
-        if not self.cnf.get('width'):
-            self.cnf['width'] = self.winfo_width()
-        if not self.cnf.get('height'):
-            self.cnf['height'] = self.winfo_height()
+        self.cnf['width'] = self.winfo_width()
+        self.cnf['height'] = self.winfo_height()
+        
         r1 = self._compound(self.cnf.get('compound'), self.cnf.get('width'), self.cnf.get('height'))
         r2 = {cmd: ((self.cnf['width']/2), self.cnf['height']/2)}
         return r1 or r2
@@ -523,7 +522,7 @@ class _button_properties:
         self.cnf['height'] = self.cnf.get('height') if self._fixed_size['h'] else H
         return ('configure', {'width': self.cnf['width'],
                               'height': self.cnf['height']}, None)
-        
+    
     def state(self, kw):
         _opt = {}
         if kw.get('state') in 'disabled':
@@ -1092,6 +1091,7 @@ class _button_functions:
                                 {'image': self.cnf.get('image', '')}, None)
                 _Canvas._configure(self, ('itemconfigure', '_bit'), 
                                 {'bitmap': self.cnf.get('bitmap', '')}, None)
+
         self._set_coords(self._get_options(('_txt', '_img', '_bit'), self.cnf))
 
     def _on_press(self, *ags):
@@ -1196,8 +1196,8 @@ class _button_functions:
         item_height = bbox[3] - bbox[1]
         default_padx = 2 + int(item_width/2)
         default_pady = 0 + int(item_height/2)
-        width = self.cnf.get('width', self.winfo_reqwidth())
-        height = self.cnf.get('height', self.winfo_reqheight())
+        width = self.cnf['width'] = self.winfo_width()
+        height = self.cnf['height'] = self.winfo_height()
 
         # Center
         x = width / 2
