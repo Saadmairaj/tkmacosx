@@ -1340,37 +1340,63 @@ class ButtonBase(_Canvas, _button_functions):
 class SFrameBase(_tk.Frame):
     """Base Class for SFrame."""
 
-    _features = ('scrollbarwidth', 'mousewheel',
-                 'avoidmousewheel', 'canvas', 'scrollbar')
+    _features = ('scrollbarwidth', 'mousewheel', 'autohidescrollbar'
+                 'avoidmousewheel', 'canvas', 'scrollbar', 'autohidescrollbardelay')
 
     def __init__(self, master=None, cnf={}, **kw):
         kw = _cnfmerge((cnf, kw))
         self.cnf = {}
         self._after_ids = {}
+        self._over_scrollbar = False
         self.cnf['scrollbarwidth'] = kw.pop('scrollbarwidth', 10)
         self.cnf['mousewheel'] = kw.pop('mousewheel', True)
         self.cnf['avoidmousewheel'] = kw.pop('avoidmousewheel', ())
-        self.cnf['canvas'] = kw.pop('canvas', _tk.Canvas(master=master, 
-                                                         highlightthickness=0,
-                                                         width=kw.pop('width', 250), 
-                                                         height=kw.pop('height', 250)))
-        self.cnf['scrollbar'] = kw.pop('scrollbar', _tk.Scrollbar(self.cnf['canvas'],
-                                                                  orient='vertical', 
-                                                                  width=self.cnf['scrollbarwidth']))
+        self.cnf['autohidescrollbar'] = kw.pop('autohidescrollbar', False)
+        self.cnf['autohidescrollbardelay'] = kw.pop('autohidescrollbardelay', 1000)
+        self.cnf['canvas'] = kw.pop(
+            'canvas', _tk.Canvas(master=master, highlightthickness=0, 
+            width=kw.pop('width', 250), height=kw.pop('height', 250)))
+        self.cnf['scrollbar'] = kw.pop(
+            'scrollbar', _tk.Scrollbar(self.cnf['canvas'], orient='vertical', 
+            width=self.cnf['scrollbarwidth']))
         _tk.Frame.__init__(self, self.cnf['canvas'], **kw)
         self.cnf['canvas']['bg'] = self['bg']
-        self.cnf['scrollbar'].place(relx=1, rely=0, anchor='ne', relheight=1)
+
+        if not self.cnf['autohidescrollbar']:
+            self.cnf['scrollbar'].place(relx=1, rely=0, anchor='ne', relheight=1)
+
         self.cnf['scrollbar'].configure(command=self.cnf['canvas'].yview)
         self.cnf['canvas'].configure(yscrollcommand=self.cnf['scrollbar'].set)
-        self.cnf['canvas'].create_window(0, 0, anchor='nw', tags="window", window=self,
-                                         width=self.cnf['canvas'].winfo_reqwidth()-\
-                                               self.cnf['scrollbar'].winfo_reqwidth())
+        self.cnf['canvas'].create_window(
+            0, 0, anchor='nw', tags="window", window=self, 
+            width=self.cnf['canvas'].winfo_reqwidth()-self.cnf['scrollbar'].winfo_reqwidth())
         self.cnf['canvas'].bind("<Configure>", self._configure_height, add="+")
-        _bind(self, className='configure',
-              sequence='<Configure>', func=self._configure_window)
+        
+        _bind(self, className='configure', sequence='<Configure>', func=self._configure_window)
+        _bind(self, className='auto_hide_motion', sequence='<Motion>', func=self._auto_hide_scrollbar)
+        _bind(
+            self['scrollbar'], className='auto_hide_motion', sequence='<Enter>', 
+            func=lambda _: self._auto_hide_scrollbar('show'))
+        _bind(
+            self['scrollbar'], className='auto_hide_motion', sequence='<Leave>', 
+            func=self._auto_hide_scrollbar)
+
         self._mouse_scrolling(self.cnf['mousewheel'])
         self._avoid_mousewheel(self.cnf.get('avoidmousewheel'))
         self._geometryManager()
+    
+    def _auto_hide_scrollbar(self, evt=None):
+        "Internal function"
+        if not self.cnf['autohidescrollbar']:
+            return 
+        self.after_cancel(self._after_ids.get(1, ' '))
+        if ((isinstance(evt, _tk.Event) and evt.x >= self['scrollbar'].winfo_x()) 
+                or evt == 'show'):
+            self['scrollbar'].place(relx=1, rely=0, anchor='ne', relheight=1)
+            self['scrollbar'].lift()
+        else:
+            self._after_ids[1] = self.after(
+                self['autohidescrollbardelay'], self['scrollbar'].place_forget)
 
     def _avoid_mousewheel(self, widgets):
         """Internal function.\n
@@ -1422,7 +1448,13 @@ class SFrameBase(_tk.Frame):
         if self.winfo_height() < self.cnf['canvas'].winfo_height(): 
             return 
         if evt.state == 0:
+            delay = 1
+            if self['autohidescrollbardelay'] < 1000:
+                delay = 1000 - self['autohidescrollbardelay']
             self.cnf['canvas'].yview_scroll(-1*delta(evt), 'units')
+            self.after_cancel(self._after_ids.get(2, ' '))
+            self._auto_hide_scrollbar('show')
+            self._after_ids[2] = self.after(delay, self._auto_hide_scrollbar)
 
     def _configure_height(self, evt):
         """Internal function."""
@@ -1435,7 +1467,8 @@ class SFrameBase(_tk.Frame):
         # fixes some bugs
         # makes scrolling more smoother
         self.after_cancel(self._after_ids.get(0, ' '))
-        self._after_ids[0] = self.after(1, lambda: self.cnf['canvas'].configure(
+        self._after_ids[0] = self.after(
+            1, lambda: self.cnf['canvas'].configure(
                 scrollregion=self.cnf['canvas'].bbox('all')))
 
     def _geometryManager(self):
