@@ -1340,7 +1340,7 @@ class ButtonBase(_Canvas, _button_functions):
 class SFrameBase(_tk.Frame):
     """Base Class for SFrame."""
 
-    _features = ('scrollbarwidth', 'mousewheel', 'autohidescrollbar'
+    _features = ('scrollbarwidth', 'mousewheel', 'autohidescrollbar',
                  'avoidmousewheel', 'canvas', 'scrollbar', 'autohidescrollbardelay')
 
     def __init__(self, master=None, cnf={}, **kw):
