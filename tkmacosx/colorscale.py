@@ -345,7 +345,7 @@ class Colorscale(tkb._Canvas):
         """Internal function."""
         kw1 = _tk._cnfmerge((cnf, kw))
         self.cnf.update(
-            {k: kw.pop(k, None) for k in kw1.copy() if k in self._features})
+            {k: kw1.pop(k, None) for k in kw1.copy() if k in self._features})
         self.cnf = {k: v for k, v in self.cnf.copy().items() if v is not None}
         _return = tkb._Canvas._configure(self, cmd, None, kw1)
         if _tk._cnfmerge((cnf, kw)).get('gradient'):
