@@ -62,9 +62,6 @@ def _colorvar_patch_configure(fn):
 
     def _patch(self, cmd, cnf, kw):
         """Internal function."""
-
-        cnf = _tk._cnfmerge((cnf, kw))
-        cnf_copy = dict(cnf)
         # -------------------- Added the below block --------------------
         # Add the resources to the list to have ColorVar functionality.
         if isinstance(cmd, tuple) and isinstance(self, _tk.Canvas):
@@ -75,6 +72,8 @@ def _colorvar_patch_configure(fn):
                           'activebackground', 'activeforeground',
                           'disabledbackground', 'disabledforeground',
                           'foreground'):
+                    tmp_dict = cnf if i in cnf else kw
+                    cnf_copy = dict(**tmp_dict)
                     if isinstance(cnf_copy.get(i), _tk.Variable):
                         var = cnf_copy[i]
                         cbname = var.trace_variable('w', lambda a, b, c,
@@ -90,8 +89,8 @@ def _colorvar_patch_configure(fn):
                         else:
                             _all_traces_colorvar[(self, (i, tag))] = (
                                 var, cbname)
-                        cnf[i] = var.get()
-        return fn(self, cmd, cnf, None)
+                        tmp_dict[i] = var.get()
+        return fn(self, cmd, cnf, kw)
     return _patch
 
 
