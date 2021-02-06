@@ -72,8 +72,8 @@ def _colorvar_patch_configure(fn):
                           'activebackground', 'activeforeground',
                           'disabledbackground', 'disabledforeground',
                           'foreground'):
-                    tmp_dict = cnf if i in cnf else kw
-                    cnf_copy = dict(**tmp_dict)
+                    tmp_dict = cnf if cnf and i in cnf else kw
+                    cnf_copy = dict(**tmp_dict) if tmp_dict else {}
                     if isinstance(cnf_copy.get(i), _tk.Variable):
                         var = cnf_copy[i]
                         cbname = var.trace_variable('w', lambda a, b, c,
