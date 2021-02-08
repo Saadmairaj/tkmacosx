@@ -367,7 +367,7 @@ class _button_properties:
     # These are properties of button widget:
     def _border(self, kw):
         return [('itemconfigure', '_border'),
-                {'outline': get_shade(self['bg'], 0.1, 'auto-120')}, None]
+                {'outline': get_shade(self['bg'], 0.04, 'auto-120')}, None]
     
     def _bit(self, kw):
         return _button_properties._item(self, '_bit', kw)
@@ -673,7 +673,7 @@ class _button_items:
     
     def _border(self, *ags, **kw):
         "Border item."
-        bo_color = get_shade(self['bg'], 0.1, 'auto-120')
+        bo_color = get_shade(self['bg'], 0.04, 'auto-120')
         if self._type == 'circle':
             pad = 2
             r = int(self.cnf.get('width', 87)/2)  # radius = x = y
@@ -971,7 +971,7 @@ class _button_functions:
         if cond1 or cond2:
             self._set_configure(self._get_options('takefocus', kw))
         # Line border: This will darken the border around the button.
-        if get_shade(self['bg'], 0.1, 'auto-120') != self.itemcget('_border', 'outline'):
+        if get_shade(self['bg'], 0.04, 'auto-120') != self.itemcget('_border', 'outline'):
             self._set_configure(self._get_options('_border', kw))
 
     def _focus_in_out(self, intensity):
@@ -983,16 +983,20 @@ class _button_functions:
             """Internal function."""
             try:
                 if self.focus_get() is None:
+                    self._tmp_bg = self['bg']
+                    color1 = self.winfo_rgb(self['highlightbackground'])
+                    color1 = [int((int(i/257) + 255)/2) for i in color1]
+                    color1 = '#%02x%02x%02x' % (color1[0], color1[1], color1[2])
+                    color2 = get_shade(color1, intensity, 'auto-120')
+                    _Canvas._configure(self, 'configure', {'bg': color1}, None)
+                    _Canvas._configure(self, ('itemconfigure', '_border'),
+                            {'outline': color2}, None)
+                if self.focus_get():
+                    if getattr(self, '_tmp_bg', False):
+                        _Canvas._configure(self, 'configure',{'bg': self._tmp_bg}, None)
                     color = get_shade(self['bg'], intensity, 'auto-120')
                     _Canvas._configure(self, ('itemconfigure', '_border'),
-                            {'outline': color}, None)
-                c1 = get_shade(self['bg'], intensity, 'auto-120')
-                c2 = self.itemcget('_border', 'outline')
-                if self.focus_get() and c1 == c2:
-                    color = get_shade(self['bg'], 0.1, 'auto-120')
-                    _Canvas._configure(self, ('itemconfigure', '_border'),
                              {'outline': color}, None)
-            # [issue-8] (Fixed) tkinter issue with combobox (w = w.children[n])
             except KeyError: 
                 pass
 
@@ -1034,7 +1038,6 @@ class _button_functions:
             self.cnf['radius'] = evt.width
         self._size = (self.cnf['width'], self.cnf['height']) = (evt.width, evt.height)
         self.delete('_activebg')
-        # [issue-6] (Fixed) Need fix (laggy on resizing) --> workaround: cancel if still resizing
         for i in self._after_IDs:
             self.after_cancel(self._after_IDs[i])
         _button_items.create_items(
