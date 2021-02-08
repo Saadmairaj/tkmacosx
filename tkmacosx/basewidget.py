@@ -93,22 +93,26 @@ def _on_press_color(cls=None, cnf={}, **kw):
         return
     cr = cls.cnf['activebackground'] = kw.get(
         'color', cls.cnf.get('activebackground', 
-        ("#4b91fe", "#055be5"))) # This is the default color for mac
+        ("#4b91fe", "#055be5"))) # This is the default accent color for mac.
     cls.delete(tag)
     ids = []
+    height = kw.get('height', h)  
     if isinstance(cr, (tuple, list)) and None in cr:
         cr = list(cr)
         cr.remove(None)
         cr = cr[0]
     if not isinstance(cr, (tuple, list)):
-        cr = (C.Color(cr), C.Color(cr))
+        cr_list = (cr,) * height      
     else:
         cr = (C.Color(cr[0]), C.Color(cr[1]))
-    for i, j in enumerate(tuple(cr[0].range_to(cr[1], kw.get('height', h)))):
+        cr_list = tuple(
+            cr[0].range_to(cr[1], height)
+            )
+    for i in range(height):
         ags = (0, i, kw.get('width', w), i)
-        cnf = {'fill': j, 'tag': tag, 'state': state}
+        cnf = {'fill': cr_list[i], 'tag': tag, 'state': state}
         ids.append(cls._create('line', ags, cnf))
-    cls.tag_lower(tag)     # keep the tag last
+    cls.tag_lower(tag)     # keep the tag lowest
     return tuple(ids)
 
 
