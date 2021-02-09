@@ -691,6 +691,8 @@ class _button_items:
     
     def _tf(self, *ags, **kw):
         "Takefocus highlight ring."
+        if self.cnf.get('focusthickness') == 0:
+            return
         if self._type == 'circle':
             pad = 1
             width = self.cnf.get('focusthickness', 2)
