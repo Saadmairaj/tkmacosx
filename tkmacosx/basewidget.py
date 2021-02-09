@@ -761,7 +761,7 @@ class _button_functions:
 
     def _set_trace(self, kw):
         """Internal function."""
-        for i in ('overforeground', 'foreground', 'fg', 'activeforeground'):
+        for i in ('overforeground', 'foreground', 'fg', 'activeforeground', 'focuscolor'):
             if isinstance(kw.get(i), _tk.Variable):
                 var = kw[i]
                 cbname = var.trace_variable('w', lambda a, b, c, i=i, var=var,
