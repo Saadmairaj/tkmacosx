@@ -17,7 +17,26 @@ import tkinter as _tk
 import tkmacosx.variables as tkv
 
 from tkinter import ttk
-from tkinter import _cnfmerge
+from tkinter import _cnfmerge, _default_root
+
+
+def _cnfmerge(cnfs):
+    """Internal function."""
+    if isinstance(cnfs, dict):
+        return cnfs
+    elif isinstance(cnfs, (type(None), str)):
+        return cnfs
+    else:
+        cnf = {}
+        for c in _tk._flatten(cnfs):
+            try:
+                if isinstance(c, dict):
+                    cnf.update(c)
+            except (AttributeError, TypeError) as msg:
+                print("_cnfmerge: fallback due to:", msg)
+                for k, v in c.items():
+                    cnf[k] = v
+        return cnf
 
 
 def delta(evt):
@@ -123,15 +142,9 @@ def _info_button(master, cnf={}, **kw):
     It creates a ttk button and use all the resources given
     and returns width and height of the ttk button, after taking
     width and height the button gets destroyed also the custom style."""
-    kw = _tk._cnfmerge((cnf, kw))  
-    name = '%s.TButton' % master
-    _style_tmp = ttk.Style()
-    _style_tmp.configure(name, font=kw.pop('font', None))
-    _style_tmp.configure(name, padding=(kw.pop('padx', 0), kw.pop('pady', 0)))
-    tmp = ttk.Button(master, style=name, **kw)
+    kw = _cnfmerge((cnf, kw))
+    tmp = _tk.Button(master, **kw)
     geo = [tmp.winfo_reqwidth(), tmp.winfo_reqheight()]
-    # [issue-2] Need fix --- doesn't really delete the custom style
-    del _style_tmp
     tmp.destroy()
     return geo
 
@@ -165,8 +178,16 @@ def get_shade(color, shade, mode='auto'):
     op = {'+': lambda x, y: float(x+y),
           '-': lambda x, y: float(x-y)}
     if isinstance(color, str):
-        color = list(float(i/65535.0)
-                     for i in _tk._default_root.winfo_rgb(color))
+        new_root= False
+        try:
+            root = _tk._default_root
+        except AttributeError:
+            # Raise AttributeError when running tests.
+            root = _tk.Tk()
+            new_root = True
+        color = list(float(i/65535.0) for i in root.winfo_rgb(color))
+        if new_root:
+            root.destroy()
     if 'auto' in mode:
         intensity = (110.0 if len(mode) <= 4 else float(
             mode.split('-')[1])) / 1000.0
@@ -569,14 +590,14 @@ class _button_properties:
 
     def takefocus(self, kw):
         _opt = None
-        if int(self['takefocus']) and self['state'] in ('normal', 'active', 'pressed'):
+        if self['takefocus'] and self['state'] in ('normal', 'active', 'pressed'):
             fn = self._get_functions('takefocus', kw)
             _opt = [self, {'className': 'takefocus', 'sequence':
                             '<FocusIn>', 'func': fn.get('<FocusIn>')},
                             {'className': 'takefocus', 'sequence':
                             '<FocusOut>', 'func': fn.get('<FocusOut>')}]
 
-        elif not int(self['takefocus']) or self['state'] in 'disabled':
+        elif not self['takefocus'] or self['state'] in 'disabled':
             _opt = [self,
                     {'className': 'takefocus', 'sequence': '<FocusIn>'},
                     {'className': 'takefocus', 'sequence': '<FocusOut>'},
@@ -606,6 +627,16 @@ class _button_properties:
                         'disabledforeground', self.cnf.get('disabledforeground')),
                     **{i: kw.get(i, self.cnf.get(i)) for i in ('text', 'anchor', 'font', 'justify')})
         return (('itemconfigure', '_txt'), _opt, None)
+
+
+BUTTON_PROPERTIES = [
+    'activebackground', 'activeforeground', 'anchor', 'background', 
+    'bd', 'bg', 'bitmap', 'borderwidth', 'command', 'compound', 'cursor', 
+    'disabledforeground', 'fg', 'font', 'foreground', 'height', 
+    'highlightbackground', 'highlightcolor', 'highlightthickness', 'image', 
+    'justify', 'overrelief', 'padx', 'pady', 'relief', 'repeatdelay', 
+    'repeatinterval', 'state', 'takefocus', 'text', 'textvariable', 
+    'underline', 'width']
 
 
 class _button_items:
@@ -640,11 +671,12 @@ class _button_items:
     # These are main items (function names = item tag name.)
     def _txt(self, *ags, **kw):
         "Text item."
-        if self.cnf.get('text'):
-            return self._create(
-                'text', (0, 0), {'text': None, 'tag': '_txt', 
-                'fill': _button_items._active_state(self, 'fill')})
-    
+        txt_id = self._create(
+            'text', (0, 0), {'text': None, 'tag': '_txt', 
+            'fill': _button_items._active_state(self, 'fill')})
+        self.cnf['font'] = self.cnf.get('font', self.itemcget(txt_id, 'font'))
+        return txt_id
+
     def _bit(self, *ags, **kw):
         "Bitmap items (bitmap and activebitmap)."
         return _button_items._bit_img_main(self,'bitmap', *ags, **kw)
@@ -744,6 +776,99 @@ class _button_functions:
         con1 = bool(self.cnf.get('state') not in 'disabled')
         con2 = bool(self.winfo_containing(*self.winfo_pointerxy()) == self)
         return con1 and con2
+    
+    def _check_exception(self, kw):
+        """Internal function"""
+        for i in ('activebackground', 'activeforeground', 'bordercolor',
+                  'disabledforeground', 'foreground', 'fg', 
+                  'overforeground', 'overbackground',
+                  'focuscolor', 'highlightbackground'):
+            if i in kw and kw[i] != '':
+                if i == 'activebackground' and isinstance(kw[i], (list, tuple)):
+                    for c in kw[i]:
+                        self.winfo_rgb(c)
+                elif not isinstance(kw[i], _tk.Variable):
+                    self.winfo_rgb(kw[i])
+        
+        if 'borderless' in kw:
+            if kw['borderless'] in (False, 0, 'false', 'no', 'off'):
+                kw['borderless'] = 0
+            elif kw['borderless'] in (True, 1, 'true', 'yes', 'on'):
+                kw['borderless'] = 1
+            else:
+                raise _tk.TclError('expected boolean value but got "%s"' %kw['borderless'])
+        
+        enum_para = {
+            'anchor': ('n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw', 'center'),
+            'compound': ('bottom', 'center', 'left', 'none', 'right', 'top'),
+            'state': ('active', 'disabled', 'normal', 'pressed'),
+            'justify': ('left', 'right', 'center'),
+        }
+
+        for k, v in enum_para.items():
+            if k in kw and kw[k] not in v and not (
+                    k == 'compound' and str(kw[k]).lower() in 'none' 
+                    and kw[k] != ''):
+                err = 'ambiguous' if kw[k] == '' else 'bad'
+                name = 'justification' if k == 'justify' else k
+                raise _tk.TclError(
+                    '%s %s "%s": must be %s%s or %s' % (
+                        err,
+                        name,
+                        kw[k],
+                        ', '.join(v[:-1]),
+                        ',' if len(v) > 2 else '', 
+                        v[-1]))
+
+        if 'font' in kw and kw['font'] == '':
+            raise _tk.TclError('font "" doesn\'t exist')
+
+        if ('image' in kw and isinstance(kw['image'], str) 
+                and kw['image'] != ''):
+            raise _tk.TclError('image "%s" doesn\'t exist' % kw['image'])
+        
+        if ('activeimage' in kw and isinstance(kw['activeimage'], str) 
+                and kw['activeimage'] != ''):
+            raise _tk.TclError('image "%s" doesn\'t exist' % kw['activeimage'])
+        
+        if 'overrelief' in kw and kw['overrelief'] not in (
+            'flat', 'groove', 'raised', 'ridge', 'solid', 'sunken', ''):
+            raise _tk.TclError(
+                'bad relief "%s": must be flat, groove, raised, ridge, solid, or sunken' 
+                %(kw['overrelief']))
+        
+        # Not working Integer
+        for i in ('focusthickness', 'height', 'width', 'repeatinterval', 'repeatdelay', 'underline'):           
+            if i in kw:
+                if kw[i] == '' or '.' in str(kw[i]) or (
+                        isinstance(kw[i], str) and len([n for n in kw[i] if n.isdigit()]) != len(kw[i])):
+                    raise _tk.TclError('expected integer but got "%s"' % kw[i])
+        
+        units = {
+            'c': 72 / 2.54,     # centimeters
+            'i': 72,            # inches
+            'm': 72 / 25.4,     # millimeters
+            'p': 1,             # points
+        }
+
+        # # Pixel
+        for i in ('highlightthickness', 'padx', 'pady'):
+            if i in kw:
+                if '.' in str(kw[i]):
+                    kw[i] = round(kw[i])
+
+                if isinstance(kw[i], str):
+                    for c in str(kw[i]):
+                        num_bool = [n for n in kw[i][:-1] if n.isdigit()]
+                        if c in units and num_bool:
+                            kw[i] = int(kw[i][:-1]) * units[c]
+                            kw[i] = round(kw[i])
+                if not isinstance(kw[i], (int, float)):
+                # condition for not round values.
+                # if isinstance(kw[i], str) and not (kw[i][-1] in units \
+                #         and len([n for n in kw[i][:-1] if n.isdigit()]) == len(kw[i][:-1])):
+                    raise _tk.TclError('bad screen distance "%s"' %kw[i])
+        return kw
 
     def _make_dictionaries(self, cnf={}, kw={}):
         """Internal function.\n
@@ -938,13 +1063,15 @@ class _button_functions:
                 if options[1].get('tag') == '_activebg':
                     return _on_press_color(*options)    # _on_press_color
                 return _bind(*options)  # binds
-
+    
     def _configure1(self, cnf={}, **kw):
         """Internal Function.
         This function configure all the resources of 
         the Widget and save it to the class dict."""
-        self.cnf, kw = self._make_dictionaries(self.cnf, 
-                            self._set_trace(_cnfmerge((cnf, kw))))
+        self.cnf, kw = self._make_dictionaries(
+            self.cnf, self._set_trace(
+                self._check_exception(_cnfmerge((cnf, kw)))
+                ))
         # Checks the items
         _button_items.create_items(self, 'check')
         # >.<
@@ -955,7 +1082,7 @@ class _button_functions:
                     'activeforeground', 'compound'):
             if kw.get(opt) is not None:
                 self._set_configure(self._get_options(opt, kw))
-                if ((opt == 'state' and kw.get('compound', self.cnf.get('compound'))) 
+                if ((opt == 'state' and kw.get('compound', self.cnf.get('compound')))
                     or opt == 'compound'):
                     self._set_coords(**self._get_options(('_txt', '_img', '_bit'), kw))
         # Size
@@ -986,6 +1113,7 @@ class _button_functions:
             try:
                 if self.focus_get() is None:
                     self._tmp_bg = self['bg']
+                    # [BUG] winfo_rgb doesn't read mac system colors.
                     color1 = self.winfo_rgb(self['highlightbackground'])
                     color1 = [int((int(i/257) + 255)/2) for i in color1]
                     color1 = '#%02x%02x%02x' % (color1[0], color1[1], color1[2])
@@ -1184,11 +1312,7 @@ class _button_functions:
                 height = (height/2, height/2)
             elif flag == 'left':
                 width = (width/2+W_im/2, width/2-W_txt/2)
-                height = (height/2, height/2)
-            elif flag is not None:
-                raise _tk.TclError(
-                    'bad compound flag "{}", must be -none, -top, -bottom, -left, or -right'\
-                        .format(flag))
+                height = (height/2, height/2)        
             if isinstance(height, tuple):
                 if _im_size is None:
                     return {'_txt': (width[0], height[0])}
@@ -1200,7 +1324,7 @@ class _button_functions:
         Sets the anchor position from (n, ne, e, se, s, sw, w, nw, or center)."""
         if self.cnf.get('compound') is not None:
             return
-        bbox = self.bbox(item)
+        bbox = self.bbox(item) or [0, 0, 0, 0]
         item_width = bbox[2] - bbox[0]
         item_height = bbox[3] - bbox[1]
         default_padx = 2 + int(item_width/2)
@@ -1233,11 +1357,6 @@ class _button_functions:
                 
         elif anchor == 'w':
             x = default_padx + 0
-            
-        elif anchor != 'center':
-            raise _tk.TclError(
-                'bad anchor position "{}": must be n, ne, e, se, s, sw, w, nw, or center'.format(anchor))
-
         return self.coords(item, x, y)
 
 
@@ -1254,20 +1373,38 @@ class ButtonBase(_Canvas, _button_functions):
         self._fixed_size = {'w': False, 'h': False}
         self._var_cb = None
         self.cnf = {}
+        cnf = {}
         for i in kw.copy().keys():
             if i in _button_properties._features:
-                self.cnf[i] = kw.pop(i, None)
+                cnf[i] = kw.pop(i, None)
 
-        self.cnf['fg'] = self.cnf['foreground'] = self.cnf.get('fg', self.cnf.get('foreground', 'black'))
-        self.cnf['anchor'] = self.cnf.get('anchor', 'center')
-        self.cnf['borderless'] = self.cnf.get('borderless', False)
-        self.cnf['disabledforeground'] = self.cnf.get('disabledforeground', 'grey')
-        self.cnf['state'] = self.cnf.get('state', 'normal')
-        self.cnf['activeforeground'] = self.cnf.get('activeforeground', 'white')
+        cnf['fg'] = cnf['foreground'] = cnf.get('fg', cnf.get('foreground', 'black'))
+        cnf['anchor'] = cnf.get('anchor', 'center')
+        cnf['justify'] = cnf.get('justify', 'center')
+        cnf['borderless'] = cnf.get('borderless', False)
+        cnf['disabledforeground'] = cnf.get('disabledforeground', 'grey')
+        cnf['disabledbackground'] = cnf.get('disabledbackground', 'grey')
+        cnf['state'] = cnf.get('state', 'normal')
+        cnf['activeforeground'] = cnf.get('activeforeground', 'white')
+        cnf['activebackground'] = cnf.get('activebackground', ("#4b91fe", "#055be5"))
+        cnf['focuscolor'] = cnf.get('focuscolor', '#81b3f4')
+        cnf['focusthickness'] = cnf.get('focusthickness', 2)
+        cnf['compound'] = cnf.get('compound', None)
+        cnf['padx'] = cnf.get('padx', 1)
+        cnf['pady'] = cnf.get('pady', 1)
+        cnf['repeatdelay'] = cnf.get('repeatdelay', 0)
+        cnf['repeatinterval'] = cnf.get('repeatinterval', 1)
+        cnf['wraplength'] = cnf.get('wraplength', 0)
+        cnf['underline'] = cnf.get('underline', -1)
+
+        for i in ('activebitmap', 'activeimage', 'bitmap', 'command', 
+                  'image', 'overbackground', 'overforeground', 'overrelief', 
+                  'text', 'textvariable'):
+            cnf[i] = cnf.get(i, '')
 
         if self._type == 'circle':
-            self.cnf['radius'] = int(kw.pop('radius', 35)) 
-            ra = int(self.cnf['radius']*2 + 4)
+            cnf['radius'] = int(kw.pop('radius', 35)) 
+            ra = int(cnf['radius']*2 + 4)
             kw['width'] = kw['height'] = kw.get('width', kw.get('height', ra))
         else:
             kw['width'] = kw.get('width', 87)
@@ -1278,6 +1415,7 @@ class ButtonBase(_Canvas, _button_functions):
         kw['highlightthickness'] = kw.get('highlightthickness', 0)
 
         _Canvas.__init__(self, master=master, **kw)
+        self.cnf = self._check_exception(dict(**cnf))
         self.cnf['bordercolor'] = self.cnf['highlightbackground'] = self.cnf.get(
             'bordercolor', self.cnf.get('highlightbackground', get_shade(self['bg'], 0.04, 'auto-120')))
 
@@ -1314,22 +1452,38 @@ class ButtonBase(_Canvas, _button_functions):
         self._configure1(cnf)
         if _return is not None and isinstance(_return, dict):
             _return.update(self.cnf)
+            _return['compound'] = self.cnf.get('compound', 'none')
+            for k in list(_return):
+                if k not in self.keys():
+                    _return.pop(k)
+            
         return _return
 
     def cget(self, key):
         """Return the resource value for a KEY given as string."""
+        need_string = ('textvariable', 'image', 'activeimage')
+        need_int = ('borderwidth', 'bd', 'highlightthickness')
         if key == 'radius' and self._type == 'circle':
             return self.cnf.get('radius')
         if key in _button_properties._features:
+            if key in need_string and self.cnf.get(key):
+                return str(self.cnf.get(key))
+            elif key == 'command' and self.cnf.get(key) is None:
+                return 'none'
             return self.cnf.get(key)
-        return _Canvas.cget(self, key)
+        value = _Canvas.cget(self, key)
+        if key in need_int:
+            return int(value)
+        return value
+
+
     __getitem__ = cget
 
     def keys(self):
         """Return a list of all resource names of this widget."""
-        _return = _Canvas.keys(self)
-        _return.extend(_button_properties._features)
-        return sorted(list(set(_return)))
+        properties = [*BUTTON_PROPERTIES, *_button_properties._features]
+        properties = sorted(list(set(properties)))
+        return properties
 
     @tkv._colorvar_patch_destroy
     def destroy(self):
@@ -1849,8 +2003,8 @@ class RadiobuttonBase(_tk.Radiobutton, _radiobutton_functions):
     
     def _configure(self, cmd, cnf, kw):
         """Internal function."""
-        _radiobutton_functions._set_configure(self, _cnfmerge((cnf, kw)))
-        super()._configure(cmd, cnf, kw)
+        self._set_configure(_cnfmerge((cnf, kw)))
+        return super()._configure(cmd, cnf, kw)
 
     def deselect(self):
         """Put the button in off-state."""

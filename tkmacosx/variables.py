@@ -19,9 +19,39 @@ import pickle
 import tkinter as _tk
 
 
-# Modified Misc._options(...) to make ColorVar work with tkinter
 # {(self, option, tag): (var, cbname)}
 _all_traces_colorvar = {}
+
+_properties1 = (
+    'activefill',
+    'activeoutline',
+    'disabledfill',
+    'disabledoutline',
+    'fill',
+    'outline',
+    'background',
+    'activebackground',
+    'activeforeground',
+    'disabledbackground',
+    'disabledforeground',
+    'foreground'
+)
+
+_properties2 = (
+    'fg',
+    'foreground',
+    'bg',
+    'background',
+    'activebackground',
+    'activeforeground',
+    'disabledforeground',
+    'highlightbackground',
+    'highlightcolor',
+    'selectforeground',
+    'readonlybackground',
+    'selectbackground',
+    'insertbackground',
+    'disabledbackground')
 
 
 def _colorvar_patch_cget(fn):
@@ -62,25 +92,18 @@ def _colorvar_patch_configure(fn):
 
     def _patch(self, cmd, cnf, kw):
         """Internal function."""
-        # -------------------- Added the below block --------------------
-        # Add the resources to the list to have ColorVar functionality.
         if isinstance(cmd, tuple) and isinstance(self, _tk.Canvas):
             tags = self.find('withtag', cmd[1])
             for tag in tags:
-                for i in ('activefill', 'activeoutline', 'disabledfill',
-                          'disabledoutline', 'fill', 'outline', 'background',
-                          'activebackground', 'activeforeground',
-                          'disabledbackground', 'disabledforeground',
-                          'foreground'):
+                for i in _properties1:
                     tmp_dict = cnf if cnf and i in cnf else kw
                     cnf_copy = dict(**tmp_dict) if tmp_dict else {}
                     if isinstance(cnf_copy.get(i), _tk.Variable):
                         var = cnf_copy[i]
-                        cbname = var.trace_variable('w', lambda a, b, c,
-                                                    cls=self, opt=i,
-                                                    tagId=tag, var=var:
-                                                    cls._configure(('itemconfigure', tagId),
-                                                                   {opt: var.get()}, None))
+                        cbname = var.trace_variable(
+                            'w', lambda a, b, c, cls=self, opt=i,
+                            tagId=tag, var=var: cls._configure(
+                                ('itemconfigure', tagId), {opt: var.get()}, None))
                         if (self, (i, tag)) in _all_traces_colorvar:
                             v, cb = _all_traces_colorvar.get((self, (i, tag)))
                             v.trace_vdelete('w', cb)
@@ -104,15 +127,12 @@ def _colorvar_patch_options(fn):
         if kw:
             cnf = _tk._cnfmerge((cnf, kw))
 
-        for i in ('fg', 'foreground', 'bg', 'background',
-                  'activebackground', 'activeforeground', 'disabledforeground',
-                  'highlightbackground', 'highlightcolor', 'selectforeground',
-                  'readonlybackground', 'selectbackground', 'insertbackground',
-                  'disabledbackground'):
+        for i in _properties2:
             if isinstance(cnf.get(i), _tk.Variable):
                 var = cnf[i]
-                cbname = var.trace_variable('w', lambda a, b, c, i=i, var=var,
-                                            cls=self: cls.config({i: var.get()}))
+                cbname = var.trace_variable(
+                    'w', lambda a, b, c, i=i, var=var,
+                    cls=self: cls.config({i: var.get()}))
                 if (self, i) in _all_traces_colorvar:
                     v, cb = _all_traces_colorvar.get((self, i))
                     v.trace_vdelete('w', cb)
@@ -120,19 +140,11 @@ def _colorvar_patch_options(fn):
                 else:
                     _all_traces_colorvar[(self, i)] = (var, cbname)
                 cnf[i] = var.get()
-            # [issue-1] once a ColorVar is assigned, it cannot be removed
-            #           until the widget is destroyed or give another ColorVar
-            # [issue-1] (trial) the below doesn't work as excepted.
-            # elif (self, i) in _all_traces_colorvar:
-            #     if self[i] != _all_traces_colorvar[(self, i)][0].get():
-            #         print( self, i, self[i])
-            #         v, cb = _all_traces_colorvar.pop((self, i))
-            #         v.trace_vdelete('w', cb)
         return fn(self, cnf, None)
     return _patch
 
 
-def _create(self, itemType, args, kw):  # Args: (val, val, ..., cnf={})
+def _create(self, itemType, args, kw):
     """Internal function."""
     args = _tk._flatten(args)
     cnf = args[-1]
@@ -141,14 +153,10 @@ def _create(self, itemType, args, kw):  # Args: (val, val, ..., cnf={})
     else:
         cnf = {}
 
-    # -------------------- Added the below block --------------------
     # Add the resources to the list to have ColorVar functionality.
     ckw = _tk._cnfmerge((cnf, kw))
     var = None
-    for i in ('activefill', 'activeoutline', 'disabledfill',
-              'disabledoutline', 'fill', 'outline', 'background',
-              'activebackground', 'activeforeground', 'foreground',
-              'disabledbackground', 'disabledforeground'):
+    for i in _properties1:
         if isinstance(ckw.get(i), _tk.Variable):
             var = ckw[i]
             _all_traces_colorvar[(self, (i, None))] = (var, None)
@@ -156,8 +164,8 @@ def _create(self, itemType, args, kw):  # Args: (val, val, ..., cnf={})
                 cnf[i] = var.get()
             elif i in kw:
                 kw[i] = var.get()
-    # ---------------------------------------------------------------
 
+    # get unique tag id
     tagId = self.tk.getint(self.tk.call(
         self._w, 'create', itemType,
         *(args + self._options(cnf, kw))))
@@ -167,11 +175,10 @@ def _create(self, itemType, args, kw):  # Args: (val, val, ..., cnf={})
             wid, (opt, tag_id) = key
             var, cbname = value
             if tag_id is None and cbname is None:
-                cbname = var.trace_variable('w', lambda a, b, c,
-                                            cls=self, opt=opt,
-                                            tagId=tagId, var=var:
-                                            cls._configure(('itemconfigure', tagId),
-                                                           {opt: var.get()}, None))
+                cbname = var.trace_variable(
+                    'w', lambda a, b, c, cls=self, opt=opt,
+                    tagId=tagId, var=var: cls._configure(
+                        ('itemconfigure', tagId), {opt: var.get()}, None))
                 _all_traces_colorvar[(self, (opt, tagId))] = (var, cbname)
                 _all_traces_colorvar.pop((self, (opt, None)))
     return tagId
@@ -201,7 +208,7 @@ class ColorVar(_tk.Variable):
         """
         _tk.Variable.__init__(self, master, value, name)
 
-    def set(self, value=''):
+    def set(self, value):
         """Set the variable to VALUE."""
         if value.startswith('#') and not bool(self._rgbstring.match(value)):
             raise _tk.TclError('"{}" is not a valid HEX.'.format(value))
