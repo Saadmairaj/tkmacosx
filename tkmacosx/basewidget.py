@@ -1468,7 +1468,7 @@ class ButtonBase(_Canvas, _button_functions):
         if key in _button_properties._features:
             if key in need_string and self.cnf.get(key):
                 return str(self.cnf.get(key))
-            elif key == 'command' and self.cnf.get(key) is None:
+            if key == 'command' and self.cnf.get(key) is None:
                 return 'none'
             return self.cnf.get(key)
         value = _Canvas.cget(self, key)
