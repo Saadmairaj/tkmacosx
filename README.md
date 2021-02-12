@@ -373,6 +373,7 @@ Use `Marquee` for creating scrolling text which moves from right to left only if
   | _justify_             | Specifies how multiple lines of text will be aligned with respect to each other: _tk.LEFT_ for flush left, _tk.CENTER_ for centered (the default), or _tk.RIGHT_ for right-justified. |
   | _left_margin_         | Text to keep moving to right after last character is displayed before reseting.                                                                                                       |
   | _smoothness_          | Millisecond delay in movement of each frame. Default is 1 ms.                                                                                                                         |
+  | _state_               | By default, a _Marquee_ widget is in the _tk.NORMAL_ state. Set this option to _tk.DISABLED_ to make it unresponsive to mouse events.                                                 |
   | _relief_              | Specifies the appearance of a decorative border around the _Marquee_. The default is _tk.FLAT_; for other values.                                                                     |
   | _takefocus_           | Normally, focus does not cycle through _Marquee_ widgets. If you want this widget to be visited by the focus, set `takefocus=1`.                                                      |
   | _text_                | To display one or more lines of text in a _Marquee_ widget, set this option to a string containing the text. Internal newlines ('\n') will force a line break.                        |
