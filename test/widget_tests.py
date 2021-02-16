@@ -265,7 +265,7 @@ class StandardOptionsTests:
         widget = self.create()
         self.checkParam(widget, 'bitmap', 'questhead')
         self.checkParam(widget, 'bitmap', 'gray50')
-        filename = findfile('python.xbm', subdir='imgdata')
+        filename = findfile('python.xbm', subdir='test/imgdata')
         self.checkParam(widget, 'bitmap', '@' + filename)
         # Cocoa Tk widgets don't detect invalid -bitmap values
         # See https://core.tcl.tk/tk/info/31cd33dbf0
