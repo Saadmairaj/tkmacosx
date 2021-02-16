@@ -212,6 +212,7 @@ class _radiobutton_functions:
 
     def _set_configure(self, cnf={}):
         """Internal function."""
+        self._trace_fix(cnf)
         for p in list(self._cnf):
             self._cnf[p] = cnf.get(p, self._cnf[p])
         lb = getattr(self, '_indi_lb', False)
@@ -225,21 +226,22 @@ class _radiobutton_functions:
         elif lb:
             self._revert()
 
+    def _trace_fix(self, kw={}):
+        """Internal function."""
+        for i in ('background', 'foreground', 'fg', 'bg'):
+            if kw.get(i) and isinstance(kw.get(i), tkinter.Variable):
+                key = 'background' if i[0] == 'b' else 'foreground'
+                kw[i].trace_add(
+                    'write', lambda *a, var=kw[i], k=key:
+                        self._cnf.update({k: var.get()}))
+
 
 class RadiobuttonBase(tkinter.Radiobutton, _radiobutton_functions):
     _radiobuttons = []
 
     def __init__(self, master=None, cnf={}, **kw):
-        """Construct a radiobutton widget with the parent MASTER.
-
-        Valid resource names: activebackground, activeforeground, anchor,
-        background, bd, bg, bitmap, borderwidth, command, cursor,
-        disabledforeground, fg, font, foreground, height,
-        highlightbackground, highlightcolor, highlightthickness, image,
-        indicatoron, justify, padx, pady, relief, selectcolor, selectimage,
-        state, takefocus, text, textvariable, underline, value, variable,
-        width, wraplength."""
         kw = _cnfmerge((kw, cnf))
+        self._trace_fix(kw)
         tkinter.Radiobutton.__init__(self, master, kw)
         self._radiobuttons.append(self)
         self._cnf = dict(
