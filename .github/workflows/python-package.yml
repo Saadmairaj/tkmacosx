@@ -36,5 +36,8 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with unittest
       run: |
-        export DISPLAY=:0
+        -v /tmp/.X11-unix:/tmp/.X11-unix
+        -e DISPLAY=unix$DISPLAY
+        sudo apt-get install x11-xserver-utils
+        xhost + 
         python -m unittest discover
