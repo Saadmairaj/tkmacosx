@@ -19,9 +19,8 @@ from tkinter import font
 from tkinter import ttk
 from tkinter.colorchooser import askcolor
 
-from tkmacosx.widget import SFrame, Button
-from tkmacosx.variables import ColorVar
-from tkmacosx.colorscale import Colorscale, check_light_dark
+from tkmacosx import SFrame, Button, Colorscale, ColorVar
+from tkmacosx.utils import check_light_dark
 
 
 def grid(root, row, column):

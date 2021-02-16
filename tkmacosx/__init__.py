@@ -22,9 +22,9 @@ Read more about tkmacosx in detail on
 https://github.com/Saadmairaj/tkmacosx#tkmacosx
 """
 
-__version__ = '0.1.6'
+__version__ = '1.0.0'
 
-from tkmacosx.basewidget import check_appearance, get_shade, delta
 from tkmacosx.variables import ColorVar, DictVar, SaveVar
-from tkmacosx.widget import Button, CircleButton, SFrame, Marquee, Radiobutton
-from tkmacosx.colorscale import Colorscale, gradient, hex_to_rgb, check_light_dark
+from tkmacosx.widgets import Button, CircleButton, Colorscale, Radiobutton, Marquee, SFrame
+from tkmacosx.utils import (check_appearance, check_light_dark, 
+                            delta, hex_to_rgb, get_shade, gradient)

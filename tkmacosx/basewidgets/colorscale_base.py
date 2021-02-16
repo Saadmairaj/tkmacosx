@@ -12,136 +12,84 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-'''
-Newer style colorchoosers for tkinter module.
-'''
-
-import re
 import colour
-import tkinter as _tk
-import tkmacosx.basewidget as tkb
-
-from tkinter import font
+import tkinter
 from tkinter.font import Font
-
+from tkinter.constants import VERTICAL, HORIZONTAL
+from tkmacosx.utils import (_cnfmerge, _bind, _Canvas, check_param,
+                            check_light_dark, delta, gradient)
 
 HEX = 'hex'
 RGB = 'rgb'
 
+COLORSCALE_PROPERTIES = [
+    'borderwidth', 'cursor', 'command', 'gradient', 'height',
+    'highlightbackground', 'highlightcolor', 'highlightthickness',
+    'mousewheel', 'orient', 'relief', 'showinfo', 'showinfodelay',
+    'state', 'takefocus', 'value', 'variable', 'width'
+]
 
-def gradient(iteration):
-    """This function returns a list of HSL values
-    of all the colors in an order."""
-
-    ops = {'+': lambda c, step: min(1.0, c + step),
-           '-': lambda c, step: max(0.0, c - step)}
-
-    index = 0
-    operation = '+'
-    iteration = max(0, iteration-2)
-    rgb, _list = [1.0, 0.0, 0.0], []
-    combo = ((2, 1, 0), (2, 0, 1), (0, 2, 1), (0, 1, 2), (1, 0, 2), (1, 2, 0))
-    step = float(len(combo)) / float(iteration)
-    _list.append('#%02x%02x%02x' % (round(rgb[0]*255),
-                                    round(rgb[1]*255), round(rgb[2]*255)))
-    for i in range(iteration):
-        if (rgb[combo[index][1]] == 1.0 and operation == '+') or \
-           (rgb[combo[index][1]] == 0.0 and operation == '-'):
-            operation = '-' if operation == '+' else '+'
-            index += 1
-        rgb[combo[index][1]] = ops[operation](rgb[combo[index][1]], step)
-        _list.append('#%02x%02x%02x' % (round(rgb[0]*255),
-                                        round(rgb[1]*255), round(rgb[2]*255)))
-    _list.append('#%02x%02x%02x' % (round(1.0*255),
-                                    round(0.0*255), round(0.0*255)))
-    return _list
+COLORSCALE_FEATURES = (
+    'value', 'command', 'orient', 'mousewheel', 'variable', 'showinfo',
+    'showinfodelay', 'gradient'
+)
 
 
-def hex_to_rgb(hx, hsl=False):
-    """Converts a HEX code into RGB or HSL.
-    Args:
-        hx (str): Takes both short as well as long HEX codes.
-        hsl (bool): Converts the given HEX code into HSL value if True.
-    Return:
-        Tuple of length 3 consisting of either int or float values.
-    Raise:
-        ValueError: If given value is not a valid HEX code."""
-    if re.compile(r'#[a-fA-F0-9]{3}(?:[a-fA-F0-9]{3})?$').match(hx):
-        div = 255.0 if hsl else 0
-        if len(hx) <= 4:
-            return tuple(int(hx[i]*2, 16) / div if div else
-                         int(hx[i]*2, 16) for i in (1, 2, 3))
-        return tuple(int(hx[i:i+2], 16) / div if div else
-                     int(hx[i:i+2], 16) for i in (1, 3, 5))
-    raise ValueError(f'"{hx}" is not a valid HEX code.')
-
-
-def check_light_dark(value, intensity=110):
-    """Tells if the given RGB or HEX code is lighter or darker color.
-
-    Args:
-        value [str, tuple]: Give sequence of RBG values and hexcode.
-        intensity (int): The measurable amount of a brightness.
-    
-    Return:
-        str('white') / str('black')"""
-    if isinstance(value, str) and value.startswith('#'):
-        value = hex_to_rgb(value)
-    if (value[0]*0.299 + value[1]*0.587 + value[2]*0.114) > intensity:
-        return 'black'
-    return 'white'
-
-
-class Colorscale(tkb._Canvas):
-    """
-    ## Color Scale.
-    This is ColorScale alternate to tkinter's colorchooser. 
-
-    ### Args: 
-    - `value`: Get either 'RGB' or 'HEX'.
-    - `command`: callback function with an argument.
-    - `orient`: Set the orientation.
-    - `mousewheel`: Set mousewheel to scroll marker.
-    - `variable`: Give tkinter variable (`StringVar`).
-    - `showinfo`: Shows hex or rbg while selecting color.
-    - `gradient`: Take tuple of two colors or default.
-    - `showinfodelay`: Delay before the showinfo disappears (in ms).
-    """
-
-    _features = ('value', 'command', 'orient', 'mousewheel', 'variable', 'showinfo',
-                 'showinfodelay', 'gradient',)  # add more features
+class ColorscaleBase(_Canvas):
+    "Base class for Colorscale widget."
 
     def __init__(self, master=None, cnf={}, **kw):
-        kw = {k: v for k, v in _tk._cnfmerge(
+        kw = {k: v for k, v in _cnfmerge(
             (cnf, kw)).items() if v is not None}
-        self.cnf = {k: kw.pop(k, None)
-                    for k in kw.copy() if k in self._features}
+        cnf = {k: kw.pop(k, None)
+               for k in kw.copy() if k in COLORSCALE_FEATURES}
 
-        self.cnf['value'] = self.cnf.get('value', 'hex')
-        self.cnf['orient'] = self.cnf.get('orient', 'vertical')
-        self.cnf['gradient'] = self.cnf.get('gradient', 'default')
-        self.cnf['showinfo'] = self.cnf.get('showinfo', True)
-        self.cnf['showinfodelay'] = self.cnf.get('showinfodelay', 1500)
+        cnf['command'] = cnf.get('command', '')
+        cnf['gradient'] = cnf.get('gradient', 'default')
+        cnf['mousewheel'] = cnf.get('mousewheel', False)
+        cnf['orient'] = cnf.get('orient', 'vertical')
+        cnf['showinfo'] = cnf.get('showinfo', True)
+        cnf['showinfodelay'] = cnf.get('showinfodelay', 1500)
+        cnf['value'] = cnf.get('value', 'hex')
+        cnf['variable'] = cnf.get('variable', '')
 
         kw['width'] = kw.get(
-            "width", 250 if 'ver' in self.cnf['orient'] else 30)
+            "width", 250 if 'ver' in cnf['orient'] else 30)
         kw['height'] = kw.get(
-            "height", 30 if 'ver' in self.cnf['orient'] else 250)
+            "height", 30 if 'ver' in cnf['orient'] else 250)
         kw['highlightthickness'] = kw.get('highlightthickness', 0)
-        tkb._Canvas.__init__(self, master=master, cnf={}, **kw)
+        _Canvas.__init__(self, master=master, cnf={}, **kw)
 
-        # Protected members of the class
+        self.cnf = self._check_param(**cnf)
         self._size = (0, 0)
         self._marker_color = 'black'
         self._xy = int((self.winfo_reqwidth() if 'ver' in
-                        self['orient'] else self.winfo_reqheight()) / 3)
+                        self.cnf['orient'] else self.winfo_reqheight()) / 3)
 
-        binds = [{'className': 'set_size', 'sequence': '<Configure>', 'func': self._set_size},
-                 {'className': 'b1_on_motion', 'sequence': '<B1-Motion>',
-                     'func': self._move_marker},
-                 {'className': 'b1_press', 'sequence': '<Button-1>', 'func': self._move_marker}]
-        tkb._bind(self, *binds)
+        binds = [
+            {'className': 'set_size', 'sequence': '<Configure>', 'func': self._set_size},
+            {'className': 'b1_on_motion', 'sequence': '<B1-Motion>',
+                'func': self._move_marker},
+            {'className': 'b1_press', 'sequence': '<Button-1>',
+                'func': self._move_marker}
+        ]
+        _bind(self, *binds)
         self._set_mousewheel()
+
+    def _check_param(self, cnf={}, **kw):
+        kw = _cnfmerge((cnf, kw))
+        if 'gradient' in kw:
+            if kw['gradient'] != 'default':
+                cond = isinstance(kw['gradient'], (list, tuple))
+                if not cond or (cond and len(kw['gradient']) <= 1):
+                    raise tkinter.TclError(
+                        'expected sequence of two color values but got "%s"'
+                        % kw['gradient'])
+                else:
+                    for c in kw['gradient']:
+                        self.winfo_rgb(c)
+        kw = check_param(self, 'colorscale', kw)
+        return kw
 
     def _set_size(self, evt=None):
         """Internal function."""
@@ -229,14 +177,10 @@ class Colorscale(tkb._Canvas):
             """Internal function."""
             if self['orient'] == 'vertical':
                 return dict(
-                    evtx=mw,
-                    evty=10,
-                    _xy=evt.x,
+                    evtx=mw, evty=10, _xy=evt.x,
                 )
             return dict(
-                evtx=10,
-                evty=mw,
-                _xy=evt.y,
+                evtx=10, evty=mw, _xy=evt.y,
             )
 
         if mw:
@@ -317,58 +261,71 @@ class Colorscale(tkb._Canvas):
                 and self['orient'] == 'vertical'
             hor_cond = self._xy < self.winfo_height() \
                 and self['orient'] == 'horizontal'
-            if tkb.delta(evt) <= -1 and (ver_cond or hor_cond):
+            if delta(evt) <= -1 and (ver_cond or hor_cond):
                 self._xy += 1
                 if not self._move_marker(evt, mw=self._xy):
                     self._xy -= 1
-            if tkb.delta(evt) >= 1 and self._xy > 1:
+            if delta(evt) >= 1 and self._xy > 1:
                 self._xy -= 1
                 if not self._move_marker(evt, mw=self._xy):
                     self._xy += 1
 
         if self.cnf.get('mousewheel'):
-            tkb._bind(self, className='mousewheel',
-                      sequence='<MouseWheel>', func=on_mousewheel)
-            tkb._bind(self, className='mousewheel_x11',
-                      sequence='<Button-4>', func=on_mousewheel)
-            tkb._bind(self, className='mousewheel_x11',
-                      sequence='<Button-5>', func=on_mousewheel)
+            _bind(self, className='mousewheel',
+                  sequence='<MouseWheel>', func=on_mousewheel)
+            _bind(self, className='mousewheel_x11',
+                  sequence='<Button-4>', func=on_mousewheel)
+            _bind(self, className='mousewheel_x11',
+                  sequence='<Button-5>', func=on_mousewheel)
         else:
-            tkb._bind(self, className='mousewheel',
-                      sequence='<MouseWheel>')
-            tkb._bind(self, className='mousewheel_x11',
-                      sequence='<Button-4>')
-            tkb._bind(self, className='mousewheel_x11',
-                      sequence='<Button-5>')
+            _bind(self, className='mousewheel',
+                  sequence='<MouseWheel>')
+            _bind(self, className='mousewheel_x11',
+                  sequence='<Button-4>')
+            _bind(self, className='mousewheel_x11',
+                  sequence='<Button-5>')
 
     def _configure(self, cmd, cnf=None, kw=None):
         """Internal function."""
-        kw1 = _tk._cnfmerge((cnf, kw))
-        self.cnf.update(
-            {k: kw1.pop(k, None) for k in kw1.copy() if k in self._features})
-        self.cnf = {k: v for k, v in self.cnf.copy().items() if v is not None}
-        _return = tkb._Canvas._configure(self, cmd, None, kw1)
-        if _tk._cnfmerge((cnf, kw)).get('gradient'):
+        kw1 = _cnfmerge((cnf, kw))
+
+        for i in list(kw1):
+            if i in COLORSCALE_FEATURES:
+                self.cnf.update(
+                    self._check_param({i: kw1.pop(i)})
+                )
+
+        values = _Canvas._configure(self, cmd, None, kw1)
+        if _cnfmerge((cnf, kw)).get('gradient'):
             self._create_items('create', safe_create=True,
                                avoid=('borderline', 'marker',
                                       'markerbg', 'info'))
         self._set_mousewheel()
-        if _return and isinstance(_return, dict):
-            _return.update(self.cnf)
-        return _return
+        if values and isinstance(values, dict):
+            values.update(self.cnf)
+            for k in list(values):
+                if k not in COLORSCALE_PROPERTIES:
+                    values.pop(k)
+        return values
 
     def cget(self, key):
         """Return the resource value for a KEY given as string."""
         if key in self.cnf.keys():
+            if key == 'variable':
+                return str(self.cnf[key])
             return self.cnf.get(key)
-        return tkb._Canvas.cget(self, key)
+        value = _Canvas.cget(self, key)
+        if key in ('height', 'width', 'highlightthickness',
+                   'borderwidth', 'bd'):
+            return int(value)
+        return value
     __getitem__ = cget
 
     def keys(self):
         """Return a list of all resource names of this widget."""
-        return list(sorted(self.config() + self._features))
+        return COLORSCALE_PROPERTIES
 
     def destroy(self):
         """Destroy this widget."""
         self.after_cancel(getattr(self, '_remove_id', ' '))
-        return tkb._Canvas.destroy(self)
+        return _Canvas.destroy(self)

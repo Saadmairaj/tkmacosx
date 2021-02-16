@@ -12,338 +12,43 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-import colour as C
-import tkinter as _tk
-import tkmacosx.variables as tkv
-
-from tkinter import ttk
-from tkinter import _cnfmerge, _default_root
-
-
-def _cnfmerge(cnfs):
-    """Internal function."""
-    if isinstance(cnfs, dict):
-        return cnfs
-    elif isinstance(cnfs, (type(None), str)):
-        return cnfs
-    else:
-        cnf = {}
-        for c in _tk._flatten(cnfs):
-            try:
-                if isinstance(c, dict):
-                    cnf.update(c)
-            except (AttributeError, TypeError) as msg:
-                print("_cnfmerge: fallback due to:", msg)
-                for k, v in c.items():
-                    cnf[k] = v
-        return cnf
+import tkinter
+from tkmacosx.utils import (_cnfmerge, _bind, _Canvas, check_param,
+                            _info_button, _on_press_color, 
+                            get_shade, check_function_equality)
+import tkmacosx.utils.colorvar_patches as cp
 
 
-def delta(evt):
-    """Modified delta to work with all platforms."""
-    if evt.num == 5 or evt.delta < 0:
-        return -1
-    return 1
+BUTTON_PROPERTIES = [
+    'activebackground', 'activeforeground', 'anchor', 'background', 
+    'bd', 'bg', 'bitmap', 'borderwidth', 'command', 'compound', 'cursor', 
+    'disabledforeground', 'fg', 'font', 'foreground', 'height', 
+    'highlightbackground', 'highlightcolor', 'highlightthickness', 'image', 
+    'justify', 'overrelief', 'padx', 'pady', 'relief', 'repeatdelay', 
+    'repeatinterval', 'state', 'takefocus', 'text', 'textvariable', 
+    'underline', 'width'
+]
 
 
-def _agsmerge(args):
-    """Internal functions.\n
-    Merges lists/tuples."""
-    if not isinstance(args, (tuple, list)):
-        return args
-    a = []
-    for i in args:
-        if isinstance(i, (tuple, list)):
-            a.extend(i)
-        else:
-            a.append(i)
-    return a
+BUTTON_FEATURES = (
+    'overbackground', 'overforeground', 'activeimage', 'activebitmap', 
+    'anchor', 'bitmap', 'bordercolor', 'borderless', 'command', 'compound', 
+    'disabledforeground', 'justify', 'disabledbackground', 'fg', 'font', 
+    'foreground', 'height', 'image', 'overrelief', 'padx', 'pady', 'repeatdelay', 
+    'repeatinterval', 'text', 'textvariable', 'underline', 'width', 'state', 
+    'focusthickness', 'focuscolor', 'highlightbackground', 'activebackground', 
+    'activeforeground'
+)
 
 
-def check_function_equality(func1, func2):
-    """Checks if two functions are same."""
-    return func1.__code__.co_code == func2.__code__.co_code
-
-
-def _bind(cls=None, *ags, **kw):
-    """Internal function.\n
-    Binds and unbinds sequences with any name given as className."""
-    cls = cls or kw.pop('cls', ags.pop(0))
-    if ags:
-        return [_bind(cls=cls, **i) for i in ags]
-    classname = kw['className'] + str(cls)
-    bindtags = list(cls.bindtags())
-    if classname in bindtags:
-        bindtags.remove(classname) 
-    if kw.get('func'):
-        _bind(cls, className=kw['className'], sequence=kw['sequence'])
-        bindtags.append(classname)
-        cls.bindtags(tuple(bindtags))
-        return cls.bind_class(classname, sequence=kw['sequence'],
-                              func=kw['func'], add=kw.get('add', '+'))
-    cls.bindtags(tuple(bindtags))
-    cls.unbind_class(classname, kw['sequence'])
-
-
-def _on_press_color(cls=None, cnf={}, **kw):
-    """Internal function. Do not call directly.\n
-    Give gradient color effect used for activebackground.
-    Returns ids"""
-    kw = _cnfmerge((cnf, kw))
-    cls = kw.get('cls', cls)
-    w = cls.cnf.get('height', cls.winfo_width())
-    h = cls.cnf.get('height', cls.winfo_height())
-    tag = kw.get('tag', 'press')
-    state = kw.get('state', 'normal' if cls.cnf.get(
-                   'state') in ('active', 'pressed') else 'hidden')
-    if not cls:
-        raise ValueError('Counld not refer to any class instance "cls".')
-    if kw.get('color') is None:
-        kw.pop('color', None)
-    width = cls.coords(tag) or 0
-    if isinstance(width, (list, tuple)) and len(width) > 3:
-        width = int(width[2])
-    all_activebg_ids = cls.find('withtag', tag)
-    cond1 = bool(h == len(all_activebg_ids))
-    cond2 = bool(w == width)
-    # [issue-1] Need a better approach for getting "cond3"
-    cond3 = bool(kw.get('color', (False,)) == cls.cnf.get('activebackground'))
-    if cond1 and cond2 and cond3 and not kw.get('force_create', False):
-        return
-    cr = cls.cnf['activebackground'] = kw.get(
-        'color', cls.cnf.get('activebackground', 
-        ("#4b91fe", "#055be5"))) # This is the default accent color for mac.
-    cls.delete(tag)
-    ids = []
-    height = kw.get('height', h)  
-    if isinstance(cr, (tuple, list)) and None in cr:
-        cr = list(cr)
-        cr.remove(None)
-        cr = cr[0]
-    if not isinstance(cr, (tuple, list)):
-        cr_list = (cr,) * height      
-    else:
-        cr = (C.Color(cr[0]), C.Color(cr[1]))
-        cr_list = tuple(
-            cr[0].range_to(cr[1], height)
-            )
-    for i in range(height):
-        ags = (0, i, kw.get('width', w), i)
-        cnf = {'fill': cr_list[i], 'tag': tag, 'state': state}
-        ids.append(cls._create('line', ags, cnf))
-    cls.tag_lower(tag)     # keep the tag lowest
-    return tuple(ids)
-
-
-def _info_button(master, cnf={}, **kw):
-    """Internal Function.\n
-    This function takes essentials parameters to give
-    the approximate width and height accordingly. \n
-    It creates a ttk button and use all the resources given
-    and returns width and height of the ttk button, after taking
-    width and height the button gets destroyed also the custom style."""
-    kw = _cnfmerge((cnf, kw))
-    tmp = _tk.Button(master, **kw)
-    geo = [tmp.winfo_reqwidth(), tmp.winfo_reqheight()]
-    tmp.destroy()
-    return geo
-
-
-def check_appearance(cmd='defaults read -g AppleInterfaceStyle'):
-    """### Checks DARK/LIGHT mode of macos. Returns Boolean.
-    #### Args:
-    - `cmd`: Give commands. Like to check DARK/LIGHT mode \
-            the command is `'defaults read -g AppleInterfaceStyle'` .
-    """
-    import subprocess
-    cmd = 'defaults read -g AppleInterfaceStyle'
-    p = subprocess.Popen(cmd, stdout=subprocess.PIPE,
-                         stderr=subprocess.PIPE, shell=True)
-    return bool(p.communicate()[0])
-
-
-def get_shade(color, shade, mode='auto'):
-    """### Darken or Lighten a shade of color.
-    #### Args:
-    1. `color`: Give a color as either HEX or name of the color.
-    2. `shade`: The amount of change required. Takes float \
-                between 0.0 to 1.0 eg: shade=0.225.
-    3. `mode`:
-        - `'-'` for darker shade.
-        - `'+'` for lighter shade.
-        - `'auto-110'` automatically decide lighter or \
-                       darker. where 110 is the intensity.
-
-    return hexcode"""
-    op = {'+': lambda x, y: float(x+y),
-          '-': lambda x, y: float(x-y)}
-    if isinstance(color, str):
-        new_root= False
-        try:
-            root = _tk._default_root
-        except AttributeError:
-            # Raise AttributeError when running tests.
-            root = _tk.Tk()
-            new_root = True
-        color = list(float(i/65535.0) for i in root.winfo_rgb(color))
-        if new_root:
-            root.destroy()
-    if 'auto' in mode:
-        intensity = (110.0 if len(mode) <= 4 else float(
-            mode.split('-')[1])) / 1000.0
-        color_intensity = float(
-            color[0]*0.299 + color[1]*0.587 + color[2]*0.114)
-        mode = '-' if color_intensity > intensity else '+'
-        if color_intensity > intensity*2 or color_intensity < intensity/2:
-            shade += shade
-    if mode not in op:
-        raise ValueError(
-            'Invalid mode "{}", Takes only "-" or "+"'. format(mode))
-    for index, c in enumerate((op[mode](c, shade) for c in color)):
-        if c > 1.0:
-            c = 1.0
-        elif c < 0.0:
-            c = 0.0
-        color[index] = int(c*255.0)
-    return '#%02x%02x%02x' % (color[0], color[1], color[2])
-
-
-class _Canvas(_tk.Widget):
-    """Internal Class."""
-
-    def __init__(self, master=None, cnf={}, **kw):
-        _tk.Widget.__init__(self, master, 'canvas', cnf, kw)
-
-    def find(self, *args):
-        """Internal function."""
-        return self._getints(
-            self.tk.call((self._w, 'find') + args)) or ()
-
-    def bbox(self, *args):
-        """Return a tuple of X1,Y1,X2,Y2 coordinates for a rectangle
-        which encloses all items with tags specified as arguments."""
-        return self._getints(
-            self.tk.call((self._w, 'bbox') + args)) or None
-
-    def coords(self, *args):
-        """Return a list of coordinates for the item given in ARGS."""
-        return [self.tk.getdouble(x) for x in
-                self.tk.splitlist(
-            self.tk.call((self._w, 'coords') + args))]
-
-    def _create(self, itemType, args, kw):  # Args: (val, val, ..., cnf={})
-        """Internal function."""
-        args = _tk._flatten(args)
-        cnf = args[-1]
-        if isinstance(cnf, (dict, tuple)):
-            args = args[:-1]
-        else:
-            cnf = {}
-        return self.tk.getint(self.tk.call(
-            self._w, 'create', itemType,
-            *(args + self._options(cnf, kw))))
-
-    def delete(self, *args):
-        """Delete items identified by all tag or ids contained in ARGS."""
-        self.tk.call((self._w, 'delete') + args)
-
-    def itemcget(self, tagOrId, option):
-        """Return the resource value for an OPTION for item TAGORID."""
-        return self.tk.call(
-            (self._w, 'itemcget') + (tagOrId, '-'+option))
-
-    def check_tag(self, cmd, tag, safe_create=False, avoid=[]):
-        """Internal function.\n
-        If `cmd="check"` and the tag does not exist then
-        the tag is created, but if `cmd="create"` and
-        safe_create=True this will delete the tag if exists
-        and creates a new tag  with same settings."""
-        c = True
-        if cmd == 'check':
-            c = False
-        if cmd not in ('create', 'check'):
-            raise ValueError(
-                '%s is not a valid command! Takes -create, -check' % cmd)
-        cond1 = bool(not self.find('withtag', tag) or c)
-        cond2 = bool(tag not in avoid)
-        if safe_create and cond1 and cond2:
-            self.delete(tag)
-        return cond1 and cond2
-    
-    def tag_lower(self, *args):
-        """Lower an item TAGORID given in ARGS
-        (optional below another item)."""
-        self.tk.call((self._w, 'lower') + args)
-
-    def tag_raise(self, *args):
-        """Raise an item TAGORID given in ARGS
-        (optional above another item)."""
-        self.tk.call((self._w, 'raise') + args)
-
-    def rounded_rect(self, ags=(), *args, **kw):
-        """Internal function."""
-        x, y, w, h, c = _agsmerge((ags, args))
-        ids = []
-        cnf = dict(kw)
-        for i in ('extent', 'start', 'style'):
-            cnf.pop(i, None) 
-        for i in ('joinstyle', 'smooth', 'slinesteps'):
-            kw.pop(i, None)
-        points = (  # Arc points:-
-            (x, y, x+2*c, y+2*c),
-            (x, y+h-2*c, x+2*c, y+h),
-            (x+w-2*c, y+h-2*c, x+w, y+h),
-            (x+w-2*c, y, x+w, y+2*c),
-            # Polygon points:-
-            (x+c, y, x+w-c, y),
-            (x+c, y+h, x+w-c, y+h),
-            (x, y+c, x, y+h-c),
-            (x+w, y+c, x+w, y+h-c))
-
-        for i, point in enumerate(points):
-            if i <= 3:
-                kw['start'] = 90*(i+1)
-                ids.append(self._create('arc', point, kw))
-            else:
-                ids.append(self._create('polygon', point, cnf))
-        return tuple(ids)
-
-    def _rounded(self, ags=(), *args, **kw):
-        """Internal function."""
-        x1, y1, x2, y2, c = _agsmerge((ags, args))
-        ids = []
-        points = (  # Arc points:-
-            (x2-c-1, y1, x2-1, y1+c),
-            (x1, y1, x1+c, y1+c),
-            (x1, y2-c-1, x1+c, y2-1),
-            (x2-c, y2-c, x2-1, y2-1),
-            # Rectangle points:-
-            (x1+c/2, y1, x2-c/2, y2),
-            (x1, y1+c/2, x2, y2-c/2))
-
-        kw['start'], kw['outline'] = 0, ''
-        for i, point in enumerate(points):
-            if i <= 3:
-                ids.append(self._create('arc', point, kw))
-                kw['start'] += 90
-            else:
-                kw.pop('start', None)
-                kw['width'] = 0
-                ids.append(self._create('rectangle', point, kw))
-        return tuple(ids)
+BUTTON_ITEMS = (
+    '_txt', '_bit', '_img', '_bd_color', '_border', '_tf'
+)
 
 
 class _button_properties:
     """Internal class.\n
     Contains modified properties of Button widget. Do not call directly."""
-
-    _features = ('overbackground', 'overforeground', 'activeimage', 'activebitmap', 
-                 'anchor', 'bitmap', 'bordercolor', 'borderless', 'command', 'compound', 
-                 'disabledforeground', 'justify', 'disabledbackground', 'fg', 'font', 
-                 'foreground', 'height', 'image', 'overrelief', 'padx', 'pady', 'repeatdelay', 
-                 'repeatinterval', 'text', 'textvariable', 'underline', 'width', 'state', 
-                 'focusthickness', 'focuscolor', 'highlightbackground', 'activebackground', 
-                 'activeforeground')
 
     # Utils
     def _bit_img(self, cmd, kw):
@@ -540,8 +245,8 @@ class _button_properties:
             kw['width'] = self.cnf['width']
         if self._fixed_size['h'] and kw.get('height', True):
             kw['height'] = self.cnf['height']
-        self._fixed_size['w'] = True if kw.get('width', kw.get('radius')) else False
-        self._fixed_size['h'] = True if kw.get('height', kw.get('radius')) else False
+        self._fixed_size['w'] = True if kw.get('width', kw.get('radius')) is not None else False
+        self._fixed_size['h'] = True if kw.get('height', kw.get('radius')) is not None else False
         W, H = _info_button(self, **_button_properties._size_opts(self))
         self.cnf['width'] = self.cnf.get('width') if self._fixed_size['w'] else W
         self.cnf['height'] = self.cnf.get('height') if self._fixed_size['h'] else H
@@ -629,23 +334,11 @@ class _button_properties:
         return (('itemconfigure', '_txt'), _opt, None)
 
 
-BUTTON_PROPERTIES = [
-    'activebackground', 'activeforeground', 'anchor', 'background', 
-    'bd', 'bg', 'bitmap', 'borderwidth', 'command', 'compound', 'cursor', 
-    'disabledforeground', 'fg', 'font', 'foreground', 'height', 
-    'highlightbackground', 'highlightcolor', 'highlightthickness', 'image', 
-    'justify', 'overrelief', 'padx', 'pady', 'relief', 'repeatdelay', 
-    'repeatinterval', 'state', 'takefocus', 'text', 'textvariable', 
-    'underline', 'width']
-
-
 class _button_items:
     """Internal class.
 
     Checks and creates (text, image, bitmap, border, 
     bordercolor, takefocus ring*) items."""
-
-    _items = ('_txt', '_bit', '_img', '_bd_color', '_border', '_tf')
 
     # Utils
     def _active_state(self, val):
@@ -759,7 +452,7 @@ class _button_items:
     # Main function
     def create_items(self, cmd, safe_create=False, **kw):
         _id = []
-        for i in _button_items._items:
+        for i in BUTTON_ITEMS:
             if self.check_tag(cmd, i, safe_create, kw.get('avoid', [])):
                 fn = getattr(_button_items, i)
                 _id.append(fn(self, cmd=cmd, safe_create=safe_create, **kw))
@@ -777,107 +470,16 @@ class _button_functions:
         con2 = bool(self.winfo_containing(*self.winfo_pointerxy()) == self)
         return con1 and con2
     
-    def _check_exception(self, kw):
-        """Internal function"""
-        for i in ('activebackground', 'activeforeground', 'bordercolor',
-                  'disabledforeground', 'foreground', 'fg', 
-                  'overforeground', 'overbackground',
-                  'focuscolor', 'highlightbackground'):
-            if i in kw and kw[i] != '':
-                if i == 'activebackground' and isinstance(kw[i], (list, tuple)):
-                    for c in kw[i]:
-                        self.winfo_rgb(c)
-                elif not isinstance(kw[i], _tk.Variable):
-                    self.winfo_rgb(kw[i])
-        
-        if 'borderless' in kw:
-            if kw['borderless'] in (False, 0, 'false', 'no', 'off'):
-                kw['borderless'] = 0
-            elif kw['borderless'] in (True, 1, 'true', 'yes', 'on'):
-                kw['borderless'] = 1
-            else:
-                raise _tk.TclError('expected boolean value but got "%s"' %kw['borderless'])
-        
-        enum_para = {
-            'anchor': ('n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw', 'center'),
-            'compound': ('bottom', 'center', 'left', 'none', 'right', 'top'),
-            'state': ('active', 'disabled', 'normal', 'pressed'),
-            'justify': ('left', 'right', 'center'),
-        }
-
-        for k, v in enum_para.items():
-            if k in kw and kw[k] not in v and not (
-                    k == 'compound' and str(kw[k]).lower() in 'none' 
-                    and kw[k] != ''):
-                err = 'ambiguous' if kw[k] == '' else 'bad'
-                name = 'justification' if k == 'justify' else k
-                raise _tk.TclError(
-                    '%s %s "%s": must be %s%s or %s' % (
-                        err,
-                        name,
-                        kw[k],
-                        ', '.join(v[:-1]),
-                        ',' if len(v) > 2 else '', 
-                        v[-1]))
-
-        if 'font' in kw and kw['font'] == '':
-            raise _tk.TclError('font "" doesn\'t exist')
-
-        if ('image' in kw and isinstance(kw['image'], str) 
-                and kw['image'] != ''):
-            raise _tk.TclError('image "%s" doesn\'t exist' % kw['image'])
-        
-        if ('activeimage' in kw and isinstance(kw['activeimage'], str) 
-                and kw['activeimage'] != ''):
-            raise _tk.TclError('image "%s" doesn\'t exist' % kw['activeimage'])
-        
-        if 'overrelief' in kw and kw['overrelief'] not in (
-            'flat', 'groove', 'raised', 'ridge', 'solid', 'sunken', ''):
-            raise _tk.TclError(
-                'bad relief "%s": must be flat, groove, raised, ridge, solid, or sunken' 
-                %(kw['overrelief']))
-        
-        # Not working Integer
-        for i in ('focusthickness', 'height', 'width', 'repeatinterval', 'repeatdelay', 'underline'):           
-            if i in kw:
-                if kw[i] == '' or '.' in str(kw[i]) or (
-                        isinstance(kw[i], str) and len([n for n in kw[i] if n.isdigit()]) != len(kw[i])):
-                    raise _tk.TclError('expected integer but got "%s"' % kw[i])
-        
-        units = {
-            'c': 72 / 2.54,     # centimeters
-            'i': 72,            # inches
-            'm': 72 / 25.4,     # millimeters
-            'p': 1,             # points
-        }
-
-        # # Pixel
-        for i in ('highlightthickness', 'padx', 'pady'):
-            if i in kw:
-                if '.' in str(kw[i]):
-                    kw[i] = round(kw[i])
-
-                if isinstance(kw[i], str):
-                    for c in str(kw[i]):
-                        num_bool = [n for n in kw[i][:-1] if n.isdigit()]
-                        if c in units and num_bool:
-                            kw[i] = int(kw[i][:-1]) * units[c]
-                            kw[i] = round(kw[i])
-                if not isinstance(kw[i], (int, float)):
-                # condition for not round values.
-                # if isinstance(kw[i], str) and not (kw[i][-1] in units \
-                #         and len([n for n in kw[i][:-1] if n.isdigit()]) == len(kw[i][:-1])):
-                    raise _tk.TclError('bad screen distance "%s"' %kw[i])
-        return kw
-
     def _make_dictionaries(self, cnf={}, kw={}):
         """Internal function.\n
         Merges kw into cnf and removes None values."""
-        kw['bordercolor'] = kw['highlightbackground'] = kw.get('bordercolor', kw.get('highlightbackground'))
+        kw['bordercolor'] = kw['highlightbackground'] = kw.get(
+            'bordercolor', kw.get('highlightbackground'))
         kw = {k: v for k, v in kw.items() if v is not None}
         cnf.update(kw)
         cnf = {k: v for k, v in cnf.items() if v is not None}
-        cnf['fg'] = cnf['foreground'] = kw.get('foreground', kw.get('fg', cnf.get('fg', 'black')))
+        cnf['fg'] = cnf['foreground'] = kw.get(
+            'foreground', kw.get('fg', cnf.get('fg', 'black')))
         if cnf.get('textvariable', '') != '':
             cnf['text'] = cnf['textvariable'].get()
         if kw.get('activebackground'):
@@ -887,16 +489,16 @@ class _button_functions:
     def _set_trace(self, kw):
         """Internal function."""
         for i in ('overforeground', 'foreground', 'fg', 'activeforeground', 'focuscolor'):
-            if isinstance(kw.get(i), _tk.Variable):
+            if isinstance(kw.get(i), tkinter.Variable):
                 var = kw[i]
                 cbname = var.trace_variable('w', lambda a, b, c, i=i, var=var,
                                 cls=self: cls.config({i: var.get()}))
-                if (self, i) in tkv._all_traces_colorvar:
-                    v, cb = tkv._all_traces_colorvar.get((self, i))
+                if (self, i) in cp._all_traces_colorvar:
+                    v, cb = cp._all_traces_colorvar.get((self, i))
                     v.trace_vdelete('w', cb)
-                    tkv._all_traces_colorvar[(self, i)] = (var, cbname)
+                    cp._all_traces_colorvar[(self, i)] = (var, cbname)
                 else:
-                    tkv._all_traces_colorvar[(self, i)] = (var, cbname)
+                    cp._all_traces_colorvar[(self, i)] = (var, cbname)
                 kw[i] = var.get()
         return kw
 
@@ -1051,7 +653,7 @@ class _button_functions:
                     if self.coords(i) and options[1].get('anchor'):
                         self._set_anchor(options[1].pop('anchor', 'center'), i)
                 _Canvas._configure(self, *options)
-            if isinstance(options[0], _tk.Misc):
+            if isinstance(options[0], tkinter.Misc):
                 if isinstance(options[-1], (tuple, list)):
                     # binds, itemconfigure and configure
                     binds, conf = options[:-2], options[-1]
@@ -1070,8 +672,9 @@ class _button_functions:
         the Widget and save it to the class dict."""
         self.cnf, kw = self._make_dictionaries(
             self.cnf, self._set_trace(
-                self._check_exception(_cnfmerge((cnf, kw)))
-                ))
+                check_param(self, 'button', _cnfmerge((cnf, kw)))
+            )
+        )
         # Checks the items
         _button_items.create_items(self, 'check')
         # >.<
@@ -1161,10 +764,10 @@ class _button_functions:
         if self._type == 'circle' and evt.width != evt.height:
             if evt.width > evt.height:
                 evt.width = evt.height
-                # _tk.Canvas.config(self, width=evt.width)
+                # tkinter.Canvas.config(self, width=evt.width)
             else:
                 evt.height = evt.width
-                # _tk.Canvas.config(self, height=evt.width)
+                # tkinter.Canvas.config(self, height=evt.width)
             self.cnf['radius'] = evt.width
         self._size = (self.cnf['width'], self.cnf['height']) = (evt.width, evt.height)
         self.delete('_activebg')
@@ -1373,9 +976,10 @@ class ButtonBase(_Canvas, _button_functions):
         self._fixed_size = {'w': False, 'h': False}
         self._var_cb = None
         self.cnf = {}
+        
         cnf = {}
         for i in kw.copy().keys():
-            if i in _button_properties._features:
+            if i in BUTTON_FEATURES:
                 cnf[i] = kw.pop(i, None)
 
         cnf['fg'] = cnf['foreground'] = cnf.get('fg', cnf.get('foreground', 'black'))
@@ -1415,7 +1019,7 @@ class ButtonBase(_Canvas, _button_functions):
         kw['highlightthickness'] = kw.get('highlightthickness', 0)
 
         _Canvas.__init__(self, master=master, **kw)
-        self.cnf = self._check_exception(dict(**cnf))
+        self.cnf = check_param(self, 'button', **cnf)
         self.cnf['bordercolor'] = self.cnf['highlightbackground'] = self.cnf.get(
             'bordercolor', self.cnf.get('highlightbackground', get_shade(self['bg'], 0.04, 'auto-120')))
 
@@ -1443,7 +1047,7 @@ class ButtonBase(_Canvas, _button_functions):
         kw = self._relief(cnf, kw)
         cnf = {}
         for i in list(kw):
-            if ((i in _button_properties._features)
+            if ((i in BUTTON_FEATURES)
                 or (i == 'radius' and self._type == 'circle')):
                 cnf[i] = kw.pop(i, None)
         _return = _Canvas._configure(self, cmd, None, kw)
@@ -1456,7 +1060,6 @@ class ButtonBase(_Canvas, _button_functions):
             for k in list(_return):
                 if k not in self.keys():
                     _return.pop(k)
-            
         return _return
 
     def cget(self, key):
@@ -1465,7 +1068,7 @@ class ButtonBase(_Canvas, _button_functions):
         need_int = ('borderwidth', 'bd', 'highlightthickness')
         if key == 'radius' and self._type == 'circle':
             return self.cnf.get('radius')
-        if key in _button_properties._features:
+        if key in BUTTON_FEATURES:
             if key in need_string and self.cnf.get(key):
                 return str(self.cnf.get(key))
             if key == 'command' and self.cnf.get(key) is None:
@@ -1475,17 +1078,15 @@ class ButtonBase(_Canvas, _button_functions):
         if key in need_int:
             return int(value)
         return value
-
-
     __getitem__ = cget
 
     def keys(self):
         """Return a list of all resource names of this widget."""
-        properties = [*BUTTON_PROPERTIES, *_button_properties._features]
-        properties = sorted(list(set(properties)))
-        return properties
+        return sorted(
+            set([*BUTTON_PROPERTIES, *BUTTON_FEATURES])
+        )
 
-    @tkv._colorvar_patch_destroy
+    @cp._colorvar_patch_destroy
     def destroy(self):
         """Destroy this and all descendants widgets. This will
         end the application of this Tcl interpreter."""
@@ -1498,522 +1099,3 @@ class ButtonBase(_Canvas, _button_functions):
         if self in self._buttons:
             self._buttons.remove(self)
         return _Canvas.destroy(self)
-
-
-class SFrameBase(_tk.Frame):
-    """Base Class for SFrame."""
-
-    _features = ('scrollbarwidth', 'mousewheel', 'autohidescrollbar',
-                 'avoidmousewheel', 'canvas', 'scrollbar', 'autohidescrollbardelay')
-
-    def __init__(self, master=None, cnf={}, **kw):
-        kw = _cnfmerge((cnf, kw))
-        self.cnf = {}
-        self._after_ids = {}
-        self._over_scrollbar = False
-        self.cnf['scrollbarwidth'] = kw.pop('scrollbarwidth', 10)
-        self.cnf['mousewheel'] = kw.pop('mousewheel', True)
-        self.cnf['avoidmousewheel'] = kw.pop('avoidmousewheel', ())
-        self.cnf['autohidescrollbar'] = kw.pop('autohidescrollbar', False)
-        self.cnf['autohidescrollbardelay'] = kw.pop('autohidescrollbardelay', 1000)
-        self.cnf['canvas'] = kw.pop(
-            'canvas', _tk.Canvas(master=master, highlightthickness=0, 
-            width=kw.pop('width', 250), height=kw.pop('height', 250)))
-        self.cnf['scrollbar'] = kw.pop(
-            'scrollbar', _tk.Scrollbar(self.cnf['canvas'], orient='vertical', 
-            width=self.cnf['scrollbarwidth']))
-        _tk.Frame.__init__(self, self.cnf['canvas'], **kw)
-        self.cnf['canvas']['bg'] = self['bg']
-
-        if not self.cnf['autohidescrollbar']:
-            self.cnf['scrollbar'].place(relx=1, rely=0, anchor='ne', relheight=1)
-
-        self.cnf['scrollbar'].configure(command=self.cnf['canvas'].yview)
-        self.cnf['canvas'].configure(yscrollcommand=self.cnf['scrollbar'].set)
-        self.cnf['canvas'].create_window(
-            0, 0, anchor='nw', tags="window", window=self, 
-            width=self.cnf['canvas'].winfo_reqwidth()-self.cnf['scrollbar'].winfo_reqwidth())
-        self.cnf['canvas'].bind("<Configure>", self._configure_height, add="+")
-        
-        _bind(self, className='configure', sequence='<Configure>', func=self._configure_window)
-        _bind(self, className='auto_hide_motion', sequence='<Motion>', func=self._auto_hide_scrollbar)
-        _bind(
-            self['scrollbar'], className='auto_hide_motion', sequence='<Enter>', 
-            func=lambda _: self._auto_hide_scrollbar('show'))
-        _bind(
-            self['scrollbar'], className='auto_hide_motion', sequence='<Leave>', 
-            func=self._auto_hide_scrollbar)
-
-        self._mouse_scrolling(self.cnf['mousewheel'])
-        self._avoid_mousewheel(self.cnf.get('avoidmousewheel'))
-        self._geometryManager()
-    
-    def _auto_hide_scrollbar(self, evt=None):
-        "Internal function"
-        if not self.cnf['autohidescrollbar']:
-            return 
-        self.after_cancel(self._after_ids.get(1, ' '))
-        if ((isinstance(evt, _tk.Event) and evt.x >= self['scrollbar'].winfo_x()) 
-                or evt == 'show'):
-            self['scrollbar'].place(relx=1, rely=0, anchor='ne', relheight=1)
-            self['scrollbar'].lift()
-        else:
-            self._after_ids[1] = self.after(
-                self['autohidescrollbardelay'], self['scrollbar'].place_forget)
-
-    def _avoid_mousewheel(self, widgets):
-        """Internal function.\n
-        Use this to have multiple scrollable 
-        widgets inside of SFrame."""
-
-        def set_widget(wid):
-            """Internal function.\n
-            Binds <Enter> and <Leave> to the widget 
-            to enable/disable mousewheel scrolling."""
-            binds = [{'className': 'mw_state_sframe', 'sequence':
-                   '<Leave>', 'func': lambda _: self._mouse_scrolling(True)}]
-            if not isinstance(wid, SFrameBase):
-                binds.append({'className': 'mw_state_sframe', 'sequence': 
-                    '<Enter>', 'func': lambda _: self._mouse_scrolling(False)})
-            _bind(wid, *binds)
-    
-        if isinstance(widgets, (list, tuple)):
-            for widget in widgets:
-                set_widget(widget)
-        else:
-            set_widget(widgets)
-
-    def _mouse_scrolling(self, state):
-        """Internal function."""
-        def enable_mousewheel(evt=None):
-            """Internal function."""
-            self.bind_all('<MouseWheel>', self._on_mouse_scroll)
-
-        def disable_mousewheel(evt=None):
-            """Internal function."""
-            self.unbind_all('<MouseWheel>')
-
-        if state:
-            _bind(self,
-                  {'className': 'mousewheel_state', 'sequence':
-                   '<Enter>', 'func': enable_mousewheel},
-                  {'className': 'mousewheel_state', 'sequence':
-                   '<Leave>', 'func': disable_mousewheel})
-            enable_mousewheel()
-        else:
-            _bind(self,
-                  {'className': 'mousewheel_state', 'sequence': '<Enter>'},
-                  {'className': 'mousewheel_state', 'sequence': '<Leave>'})
-            disable_mousewheel()
-
-    def _on_mouse_scroll(self, evt):
-        """Internal function."""
-        if self.winfo_height() < self.cnf['canvas'].winfo_height(): 
-            return 
-        if evt.state == 0:
-            delay = 1
-            if self['autohidescrollbardelay'] < 1000:
-                delay = 1000 - self['autohidescrollbardelay']
-            self.cnf['canvas'].yview_scroll(-1*delta(evt), 'units')
-            self.after_cancel(self._after_ids.get(2, ' '))
-            self._auto_hide_scrollbar('show')
-            self._after_ids[2] = self.after(delay, self._auto_hide_scrollbar)
-
-    def _configure_height(self, evt):
-        """Internal function."""
-        width = self.cnf['canvas'].winfo_width()-self.cnf['scrollbar'].winfo_width()
-        self.cnf['canvas'].itemconfig('window', width=width)
-
-    def _configure_window(self, evt):
-        """Internal function."""
-        # this will update the position of scrollbar when scrolled from mousewheel.
-        # fixes some bugs
-        # makes scrolling more smoother
-        self.after_cancel(self._after_ids.get(0, ' '))
-        self._after_ids[0] = self.after(
-            1, lambda: self.cnf['canvas'].configure(
-                scrollregion=self.cnf['canvas'].bbox('all')))
-
-    def _geometryManager(self):
-        """Internal function."""
-        # Use set to support the following in both python 2 and python 3
-        geo_methods = [m for m in (set(_tk.Pack.__dict__) | set(_tk.Grid.__dict__) |
-                       set(_tk.Place.__dict__)) if m not in _tk.Frame.__dict__]
-        for m in geo_methods:
-            if m[0] != '_' and 'config' not in m:
-                setattr(self, m, getattr(self.cnf['canvas'], m))
-
-    def _configure(self, cmd, cnf=None, kw=None):
-        kw = _tk._cnfmerge((cnf, kw))
-        self.cnf['scrollbar']['width'] = kw.pop(
-            'scrollbarwidth', self.cnf['scrollbar']['width'])
-        for key in kw.copy():
-            if key in self._features:
-                self.cnf[key] = kw.pop(key, self.cnf.get(key))
-        self.cnf['canvas']['width'] = kw.pop(
-            'width', self.cnf['canvas']['width'])
-        self.cnf['canvas']['height'] = kw.pop(
-            'height', self.cnf['canvas']['height'])
-        self._mouse_scrolling(self.cnf['mousewheel'])
-        self._avoid_mousewheel(self.cnf['avoidmousewheel'])
-        _return = _tk.Frame._configure(self, cmd, {}, kw)
-        if kw.get('bg', kw.get('background')):
-            self.cnf['canvas']['bg'] = self['bg']
-        if isinstance(_return, dict):
-            _return.update(self.cnf)
-        return _return
-
-    def cget(self, key):
-        """Return the resource value for a KEY given as string."""
-        if key in self._features:
-            return self.cnf.get(key)
-        return _tk.Frame.cget(self, key)
-    __getitem__ = cget
-
-
-class MarqueeBase(_tk.Canvas):
-    """Base class for Marquee."""
-
-    def __init__(self, master=None, cnf={}, **kw):
-        kw = _cnfmerge((cnf, kw))
-        self._stop_state = False
-        self.cnf = dict(
-            text=kw.pop('text', ''),
-            font=kw.pop('font', None),
-            fg=kw.pop('fg', 'black') if kw.get(
-                'fg') else kw.pop('foreground', 'black'),
-            fps=kw.pop('fps', 30),
-            left_margin=kw.pop('left_margin', 10),
-            initial_delay=kw.pop('initial_delay', 1000),
-            end_delay=kw.pop('end_delay', 1000),
-            smoothness=kw.pop('smoothness', 1),  # 1 <= smooth < 1
-        )
-        kw['height'] = kw.get('height', 24)
-        kw['highlightthickness'] = kw.get('highlightthickness', 0)
-        _tk.Canvas.__init__(self, master=master, **kw)
-        self._create('text', (3, 1), dict(anchor='w', tag='text', text=self.cnf.get('text'),
-                                          font=self.cnf.get('font'), fill=self.cnf.get('fg')))
-        _bind(self, className='configure',
-                  sequence='<Configure>', func=self._check)
-        self.after_id = ' '
-    
-    def _set_height(self, evt=None):
-        """Internal function."""
-        bbox = self.bbox('text')
-        height = bbox[3] - bbox[1] + 8
-        if int(self['height']) == height: 
-            return
-        _tk.Canvas._configure(self, 'configure', {'height': height}, None)
-
-    def _reset(self, force_reset=False):
-        """Internal function.\n
-        Resets the text position, do not call directly."""
-        if self.after_id == ' ' and not force_reset:
-            return
-        self.after_cancel(self.after_id)
-        self.coords('text', 3, self.winfo_height()/2)  # RESETS TEXT
-        self.after_id = ' '
-
-    def _check(self, evt=None):
-        """Internal function.\n
-        Sets the text properly in the frame."""
-        self._set_height()
-        self.coords('text', 3, self.winfo_height()/2)
-        text_width = self.bbox('text')[2]   # TEXT WIDTH
-        frame_width = self.winfo_width()    # FRAME WIDTH
-        if text_width + 1 < frame_width:
-            self._reset()
-        elif self.after_id == ' ':
-            delay = self.cnf.get('initial_delay')  # INITITAL DEALY
-            self.after_id = self.after(delay, self._animate)
-
-    def _animate(self, evt=None):
-        """Internal function.\n
-        Process text and move text."""
-        if self._stop_state: 
-            return
-        self._set_height()
-        text_width = self.bbox('text')[2]   # TEXT WIDTH
-        frame_width = self.winfo_width()    # FRAME WIDTH
-        delay = int(self.cnf.get('smoothness')*1000 / self.cnf.get('fps'))
-        if text_width + 1 + self.cnf.get('left_margin') < frame_width:
-            self.after(self.cnf.get('end_delay'), self.coords,
-                       'text', 3, self.winfo_height()/2)  # RESETS TEXT
-            delay = self.cnf.get('initial_delay') + \
-                self.cnf.get('end_delay')  # INITITAL DEALY
-        else:
-            # MOVE -1 PIXEL EVERYTIME
-            self.tk.call((self._w, 'move') + (
-                'text', -self.cnf.get('smoothness'), 0))
-        self.after_id = self.after(delay, self._animate)
-
-    def _configure(self, cmd, cnf=None, kw=None):
-        """Internal function."""
-        kw = _cnfmerge((cnf, kw))
-        self.cnf = dict(
-            text=kw.pop('text', self.cnf.get('text')),
-            font=kw.pop('font', self.cnf.get('font')),
-            fg=kw.pop('fg', self.cnf.get('fg')) if kw.get('fg')
-            else kw.pop('foreground', self.cnf.get('foreground')),
-            fps=kw.pop('fps', self.cnf.get('fps')),
-            left_margin=kw.pop('left_margin', self.cnf.get('left_margin')),
-            initial_delay=kw.pop(
-                'initial_delay', self.cnf.get('initial_delay')),
-            end_delay=kw.pop('end_delay', self.cnf.get('end_delay')),
-            smoothness=kw.pop('smoothness', self.cnf.get('smoothness')),
-        )
-        _tk.Canvas._configure(self, ('itemconfigure','text'), dict(text=self.cnf.get('text'),
-                        font=self.cnf.get('font'), fill=self.cnf.get('fg')), None)
-        self._set_height()
-        return _tk.Canvas._configure(self, cmd, kw, None)
-
-    def cget(self, key):
-        """Return the resource value for a KEY given as string."""
-        if key in self.cnf.keys():
-            return self.cnf[key]
-        return _tk.Canvas.cget(self, key)
-    __getitem__ = cget
-
-    def destroy(self):
-        """Destroy this widget."""
-        self.after_cancel(self.after_id)
-        return _tk.Canvas.destroy(self)
-
-
-class _radiobutton_functions:
-    _properties = (
-        'activebackground',
-        'activeforeground',
-        'anchor',
-        'background',
-        'bd',
-        'bg',
-        'cursor',
-        'disabledforeground',
-        'fg',
-        'font',
-        'foreground',
-        'justify',
-        'state',
-        'text',
-        'textvariable',
-        'underline',
-        'wraplength',
-    )
-
-    def _check_setit(self, kw={}):
-        """Internal function.\n
-        Checks if indicator patch needed or not."""
-        cond1 = kw.get('indicator', kw.get('indicatoron', self['indicator']))
-        if (not cond1 and
-                not (kw.get('bitmap', self['bitmap']) or 
-                     kw.get('image', self['image']))):
-            return True
-        return False
-    
-    def _if_selected(self):
-        """Internal function.\n
-        Checks if the radiobutton is selected or not."""
-        if self._cnf['variable'] is not None:
-            if (isinstance(self._cnf['variable'], _tk.StringVar) 
-                    and isinstance(self['value'], int)):
-                return self._cnf['variable'].get() == str(self['value'])
-            return self._cnf['variable'].get() == self['value']
-        return True
-    
-    def _change_selector_color(self, wid, mode):
-        """Internal function."""
-        lb = getattr(self, '_indi_lb', False)
-        if not lb or not lb.winfo_exists():
-            return
-        if mode == 'checked':
-            self._indi_lb['bg'] = self._cnf['selectcolor']
-            if wid != self:
-                _tk.Radiobutton._configure(
-                    self, 'configure', {'selectcolor': self._cnf['selectcolor']}, None)
-            return
-        self._indi_lb['bg'] = self['bg']
-        if wid != self:
-            _tk.Radiobutton._configure(
-                self, 'configure', {'selectcolor': self['bg']}, None)
-    
-    def _bind_handler(self, *ags, **kw):
-        """Internet function.\n
-        Don't call this function directly."""
-        _bind(self, *ags, **kw)
-        lb = getattr(self, '_indi_lb', False)
-        if lb and lb.winfo_exists():
-            _bind(lb, *ags, **kw)
-    
-    def _internal_configure(self, **kw):
-        """Internal function.\n
-        Don't call this function directly. 
-        Configure both radiobutton and the label."""
-        _tk.Radiobutton._configure(self, 'configure', kw, None)
-        lb = getattr(self, '_indi_lb', False)
-        if lb and lb.winfo_exists():
-            lb._configure('configure', kw, None)
-
-    def _on_press(self, evt=None):
-        """Internal function. \n
-        When widget is pressed <Button-1>."""
-        def cmd(evt):
-            self._bind_handler(className='button_command', sequence='<ButtonRelease-1>')
-            self._state('on_release')
-            self._clear_unchecked()
-            self._change_selector_color(evt.widget, 'checked')
-            self.tk.call(self._w, 'select')
-            if evt.widget != self:
-                self.invoke()
-            
-        def on_enter(evt):
-            """Internal function.\n
-            Enables when pressed and cursor
-            is moved back on widget."""
-            self._state('on_enter')
-            if self._if_selected():
-                self._change_selector_color(evt.widget, 'unchecked')
-            self._bind_handler(className='button_command', sequence='<ButtonRelease-1>', func=cmd)
-
-        def on_leave(evt):
-            """Internal function.\n
-            Disables/Cancels when pressed 
-            and cursor is moved away from 
-            the widget."""
-            self._state('on_leave')
-            if self._if_selected():
-                self._change_selector_color(evt.widget, 'checked')
-            self._bind_handler(className='button_command', sequence='<ButtonRelease-1>')
-        
-        if self['state'] not in 'disabled':
-            self._state('on_press')
-            self._change_selector_color(evt.widget, 'unchecked')
-            self._bind_handler(
-                {'className': 'on_press_enter', 'sequence': '<Enter>', 'func': on_enter},
-                {'className': 'on_press_leave', 'sequence': '<Leave>', 'func': on_leave},
-                {'className': 'button_command', 'sequence': '<ButtonRelease-1>', 'func': cmd}
-            )
-
-    def _on_release(self, evt):
-        """Internal function. \n
-        When button is released <ButtonRelease-1>."""
-        if self['state'] not in 'disabled':
-            self._bind_handler(
-                {'className': 'on_press_enter', 'sequence': '<Enter>'},
-                {'className': 'on_press_leave', 'sequence': '<Leave>'},
-                {'className': 'button_command', 'sequence': '<ButtonRelease-1>'}
-            )
-
-    def _clear_unchecked(self, evt=None):
-        """Internal function."""
-        for i in self._radiobuttons:
-            lb = getattr(i, '_indi_lb', False)
-            if (lb and lb.winfo_exists()
-                and i._cnf['variable'] == self._cnf['variable']
-                    and i != self and self._cnf['variable']):
-                lb['bg'] = i['bg']
-    
-    def _state(self, mode):
-        """Internal function."""
-        if mode in ('on_enter', 'on_press'):
-            self._internal_configure(
-                state='active',
-                background=self['activebackground'],
-                foreground=self['activeforeground'],
-            )
-        elif mode in ('on_leave', 'on_release'):
-            self._internal_configure(
-                state='normal', 
-                background=self._cnf['background'], 
-                foreground=self._cnf['foreground']
-            )
-
-    def _setit(self):
-        """Internal function.
-        Sets the radio button with the patch."""
-        self.propagate(0)
-        self._indi_lb = _tk.Label(self)
-        for i in self._properties:
-            self._indi_lb[i] = self[i]
-        self._indi_lb.pack(expand=1, fill='both')
-
-        if self._if_selected():
-            self._indi_lb['bg'] = self['selectcolor']
-        
-        self._bind_handler(
-            {'className': "on_press", "sequence": "<Button-1>"}, # Unbinds if any
-            {'className': "on_release", "sequence": "<ButtonRelease-1>"}, # Unbinds if any
-            {'className': "on_press", "sequence": "<Button-1>", "func": self._on_press},
-            {'className': "on_release", "sequence": "<ButtonRelease-1>", "func": self._on_release},
-        )
-
-    def _revert(self):
-        """Internal function.\n
-        Un-patch the radio button when `indicatoron` is set to 1."""
-        self._indi_lb.destroy()
-        self.propagate(1)
-
-    def _set_configure(self, cnf={}):
-        """Internal function."""        
-        for p in list(self._cnf): 
-            self._cnf[p] = cnf.get(p, self._cnf[p])
-        lb = getattr(self, '_indi_lb', False)
-        if self._check_setit(cnf):
-            if lb and lb.winfo_exists():
-                for i in cnf:
-                    if i in self._properties:
-                        self._indi_lb[i] = cnf[i]
-            else:
-                self._setit()
-        elif lb:
-            self._revert() 
-
-
-class RadiobuttonBase(_tk.Radiobutton, _radiobutton_functions):
-    _radiobuttons = []
-
-    def __init__(self, master=None, cnf={}, **kw):
-        """Construct a radiobutton widget with the parent MASTER.
-
-        Valid resource names: activebackground, activeforeground, anchor,
-        background, bd, bg, bitmap, borderwidth, command, cursor,
-        disabledforeground, fg, font, foreground, height,
-        highlightbackground, highlightcolor, highlightthickness, image,
-        indicatoron, justify, padx, pady, relief, selectcolor, selectimage,
-        state, takefocus, text, textvariable, underline, value, variable,
-        width, wraplength."""
-        kw = _cnfmerge((kw, cnf))
-        _tk.Radiobutton.__init__(self, master, kw)
-        self._radiobuttons.append(self)
-        self._cnf = dict(
-            variable = kw.get('variable'),
-            selectcolor = self['selectcolor'],
-            foreground = self['foreground'],
-            background = self['background'],
-        )
-        
-        # Set the patch if indicatoron is set to 0.
-        if self._check_setit():
-            self._setit()
-        
-        self._bind_handler(
-            {'className': "on_press", "sequence": "<Button-1>", "func": self._on_press},
-            {'className': "on_release", "sequence": "<ButtonRelease-1>", "func": self._on_release},
-        )
-    
-    def _configure(self, cmd, cnf, kw):
-        """Internal function."""
-        self._set_configure(_cnfmerge((cnf, kw)))
-        return super()._configure(cmd, cnf, kw)
-
-    def deselect(self):
-        """Put the button in off-state."""
-        self._change_selector_color(None, 'unchecked')
-        return super().deselect()
-        
-    def select(self):
-        """Put the button in on-state."""
-        self._clear_unchecked()
-        self._change_selector_color(None, 'checked')
-        return super().select()
-    
