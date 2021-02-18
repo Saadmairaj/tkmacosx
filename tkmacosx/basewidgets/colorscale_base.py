@@ -69,9 +69,9 @@ class ColorscaleBase(_Canvas):
         binds = [
             {'className': 'set_size', 'sequence': '<Configure>', 'func': self._set_size},
             {'className': 'b1_on_motion', 'sequence': '<B1-Motion>',
-                'func': self._move_marker},
+                'func': self._check_marker},
             {'className': 'b1_press', 'sequence': '<Button-1>',
-                'func': self._move_marker}
+                'func': self._check_marker}
         ]
         _bind(self, *binds)
         self._set_mousewheel()
@@ -85,9 +85,8 @@ class ColorscaleBase(_Canvas):
                     raise tkinter.TclError(
                         'expected sequence of two color values but got "%s"'
                         % kw['gradient'])
-                else:
-                    for c in kw['gradient']:
-                        self.winfo_rgb(c)
+                for c in kw['gradient']:
+                    self.winfo_rgb(c)
         kw = check_param(self, 'colorscale', kw)
         return kw
 
@@ -168,38 +167,9 @@ class ColorscaleBase(_Canvas):
     def _release(self, evt=None):
         """Internal function."""
         self.delete('info', 'markerbg')
-
-    def _move_marker(self, evt, mw=None):
-        """Internal function."""
+    
+    def _move_marker(self, evt):
         spacer, spacbg = 35, 25
-
-        def diff_orient_val():
-            """Internal function."""
-            if self['orient'] == 'vertical':
-                return dict(
-                    evtx=mw, evty=10, _xy=evt.x,
-                )
-            return dict(
-                evtx=10, evty=mw, _xy=evt.y,
-            )
-
-        if mw:
-            evt.x = diff_orient_val()['evtx']
-            evt.y = diff_orient_val()['evty']
-
-        self.after_cancel(getattr(self, '_remove_id', ' '))
-        self._remove_id = self.after(self.cnf['showinfodelay'], self._release)
-
-        cond_x = bool(evt.x > 0 and evt.x < self.winfo_width())
-        cond_y = bool(evt.y > 0 and evt.y < self.winfo_height())
-        cond_state = bool(self['state'] not in 'disabled')
-
-        if not (cond_x and cond_y and cond_state):
-            return
-
-        if not mw:
-            self._xy = diff_orient_val()['_xy']
-
         c_id = self.find('overlapping', evt.x, evt.y, evt.x, evt.y)
         text = hexcode = self.itemcget(c_id[0], 'fill')
         rgb = [int(i/65535.0*255.0) for i in self.winfo_rgb(hexcode)]
@@ -251,6 +221,30 @@ class ColorscaleBase(_Canvas):
                            info_cnf=info_cnf, markerbg_cnf=markerbg_cnf)
         return True
 
+    def _check_marker(self, evt, mw=None):
+        """Internal function."""
+        diff_orient_val = {
+            'vertical': dict(evtx=mw, evty=10, _xy=evt.x),
+            'horizontal': dict(evtx=10, evty=mw, _xy=evt.y)}
+        
+        self.after_cancel(getattr(self, '_remove_id', ' '))
+        self._remove_id = self.after(self.cnf['showinfodelay'], self._release)
+
+        if mw:
+            evt.x = diff_orient_val[self['orient']]['evtx']
+            evt.y = diff_orient_val[self['orient']]['evty']
+        else:
+            self._xy = diff_orient_val[self['orient']]['_xy']
+
+        cond_x = bool(evt.x > 0 and evt.x < self.winfo_width())
+        cond_y = bool(evt.y > 0 and evt.y < self.winfo_height())
+        cond_state = bool(self['state'] not in 'disabled')
+
+        if not (cond_x and cond_y and cond_state):
+            return
+        return self._move_marker(evt)
+        
+
     def _set_mousewheel(self, evt=None):
         """Internal function.\n
         Sets mousewheel scrolling."""
@@ -263,11 +257,11 @@ class ColorscaleBase(_Canvas):
                 and self['orient'] == 'horizontal'
             if delta(evt) <= -1 and (ver_cond or hor_cond):
                 self._xy += 1
-                if not self._move_marker(evt, mw=self._xy):
+                if not self._check_marker(evt, mw=self._xy):
                     self._xy -= 1
             if delta(evt) >= 1 and self._xy > 1:
                 self._xy -= 1
-                if not self._move_marker(evt, mw=self._xy):
+                if not self._check_marker(evt, mw=self._xy):
                     self._xy += 1
 
         if self.cnf.get('mousewheel'):
