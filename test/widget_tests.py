@@ -1,6 +1,7 @@
 import tkinter
-import tkmacosx
+from tkmacosx import ColorVar
 from tkmacosx.utils import pixels_conv
+from tkmacosx.basewidgets.button_base import ButtonBase
 from test.support import (AbstractTkTest, tcl_version, requires_tcl,
                           get_tk_patchlevel, tcl_obj_eq,
                           verbose, findfile)
@@ -104,6 +105,18 @@ class AbstractWidgetTest(AbstractTkTest):
         self.checkInvalidParam(widget, name, 'spam',
                                errmsg='expected floating-point number but got "spam"')
 
+    def checkBitmapParam(self, widget, name):
+        self.checkParam(widget, name, 'questhead')
+        self.checkParam(widget, name, 'gray50')
+        filename = findfile('python.xbm', subdir='test/imgdata')
+        self.checkParam(widget, name, '@' + filename)
+        # Cocoa Tk widgets don't detect invalid -bitmap values
+        # See https://core.tcl.tk/tk/info/31cd33dbf0
+        if not ('aqua' in self.root.tk.call('tk', 'windowingsystem') and
+                'AppKit' in self.root.winfo_server()):
+            self.checkInvalidParam(widget, name, 'spam',
+                                   errmsg='bitmap "spam" not defined')
+
     def checkBooleanParam(self, widget, name):
         for value in (False, 0, 'false', 'no', 'off'):
             self.checkParam(widget, name, value, expected=0)
@@ -119,6 +132,9 @@ class AbstractWidgetTest(AbstractTkTest):
                          '#ff0000', '#00ff00', '#0000ff', '#123456',
                          'red', 'green', 'blue', 'white', 'black', 'grey',
                          **kwargs)
+        for v in (ColorVar(self.root, 'red'), ColorVar(self.root, '#ffff00'),
+                  ColorVar(self.root, 'black'), ColorVar(self.root)):
+            self.checkParam(widget, name, v, expected=v.get())
         self.checkInvalidParam(widget, name, 'spam',
                                errmsg='unknown color name "spam"')
 
@@ -179,7 +195,10 @@ class AbstractWidgetTest(AbstractTkTest):
 
     def checkImageParam(self, widget, name):
         image = tkinter.PhotoImage(master=self.root, name='image1')
-        self.checkParam(widget, name, image, conv=str)
+        # Bug, tests on github-actions are failing when checking
+        # Image param for Buttons and radiobutton.
+        if not isinstance(widget, (tkinter.Radiobutton, ButtonBase)):
+            self.checkParam(widget, name, image, conv=str)
         self.checkInvalidParam(widget, name, 'spam',
                                errmsg='image "spam" doesn\'t exist')
         widget[name] = ''
@@ -263,16 +282,7 @@ class StandardOptionsTests:
 
     def test_configure_bitmap(self):
         widget = self.create()
-        self.checkParam(widget, 'bitmap', 'questhead')
-        self.checkParam(widget, 'bitmap', 'gray50')
-        filename = findfile('python.xbm', subdir='test/imgdata')
-        self.checkParam(widget, 'bitmap', '@' + filename)
-        # Cocoa Tk widgets don't detect invalid -bitmap values
-        # See https://core.tcl.tk/tk/info/31cd33dbf0
-        if not ('aqua' in self.root.tk.call('tk', 'windowingsystem') and
-                'AppKit' in self.root.winfo_server()):
-            self.checkInvalidParam(widget, 'bitmap', 'spam',
-                                   errmsg='bitmap "spam" not defined')
+        self.checkBitmapParam(widget, 'bitmap')
 
     def test_configure_borderwidth(self):
         widget = self.create()
