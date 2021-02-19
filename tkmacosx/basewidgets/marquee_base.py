@@ -18,8 +18,8 @@ from tkmacosx.utils import (_cnfmerge, _bind, check_param)
 
 MARQUEE_PROPERTIES = [
     'background', 'bg', 'borderwidth', 'bd', 'cursor', 'disabledforeground',
-    'end_delay', 'foreground', 'font', 'fps', 'height', 'highlightbackground', 
-    'highlightcolor', 'highlightthickness', 'initial_delay', 'justify', 
+    'end_delay', 'foreground', 'font', 'fps', 'height', 'highlightbackground',
+    'highlightcolor', 'highlightthickness', 'initial_delay', 'justify',
     'left_margin', 'relief', 'smoothness', 'state', 'takefocus', 'text', 'width',
 ]
 
@@ -69,7 +69,7 @@ class MarqueeBase(tkinter.Canvas):
         # Configure text item
         for op in list(itemconfig()):
             if (op in self.cnf and
-                    op not in ('fg', 'foreground', 'disabledforeground')):
+                    not ('foreground' in op or 'fg' in op)):
                 itemconfig({op: self.cnf[op]})
 
         self.cnf['font'] = self.itemcget(TAG, 'font')
@@ -160,7 +160,11 @@ class MarqueeBase(tkinter.Canvas):
     def cget(self, key):
         """Return the resource value for a KEY given as string."""
         if key in self.cnf:
-            return str(self.cnf[key])
+            val = self.cnf[key]
+            if (('foreground' in key or 'fg' in key)
+                    and isinstance(val, tkinter.Variable)):
+                return val.get()
+            return str(val)
         return tkinter.Canvas.cget(self, key)
     __getitem__ = cget
 
