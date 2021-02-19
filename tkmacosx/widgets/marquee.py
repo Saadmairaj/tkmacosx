@@ -18,7 +18,7 @@ from tkmacosx.basewidgets.marquee_base import MarqueeBase
 class Marquee(MarqueeBase):
     """Marquee widget."""
 
-    def __init__(self, master, cnf={}, **kw):
+    def __init__(self, master=None, cnf={}, **kw):
         """Use `Marquee` for creating scrolling text which moves from 
         right to left only if the text does not fit completely.
 

@@ -20,7 +20,7 @@ from tkmacosx.basewidgets.colorscale_base import (ColorscaleBase, HEX, RGB,
 class Colorscale(ColorscaleBase):
     "Colorscale widget."
 
-    def __init__(self, master, cnf={}, **kw):
+    def __init__(self, master=None, cnf={}, **kw):
         """
         ## Color Scale.
         This is ColorScale alternate to colorchooser of tkinter. 

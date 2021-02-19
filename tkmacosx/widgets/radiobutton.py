@@ -18,7 +18,7 @@ from tkmacosx.basewidgets.radiobutton_base import RadiobuttonBase
 class Radiobutton(RadiobuttonBase):
     """Radiobutton widget which shows only one of several buttons in on-state."""
 
-    def __init__(self, master, cnf={}, **kw):
+    def __init__(self, master=None, cnf={}, **kw):
         """Construct a radiobutton widget with the parent MASTER.
 
         Valid resource names: activebackground, activeforeground, anchor,
