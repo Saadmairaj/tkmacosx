@@ -488,7 +488,10 @@ class _button_functions:
 
     def _set_trace(self, kw):
         """Internal function."""
-        for i in ('overforeground', 'foreground', 'fg', 'activeforeground', 'focuscolor'):
+        for i in ('activeforeground', 'activebackground', 'bordercolor', 
+                  'disabledbackground', 'disabledforeground', 'foreground', 
+                  'fg', 'focuscolor', 'highlightbackground', 'overbackground', 
+                  'overforeground'):
             if isinstance(kw.get(i), tkinter.Variable):
                 var = kw[i]
                 cbname = var.trace_variable('w', lambda a, b, c, i=i, var=var,
