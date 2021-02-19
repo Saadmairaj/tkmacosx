@@ -46,6 +46,7 @@ _properties2 = (
     'activeforeground',
     'disabledforeground',
     'highlightbackground',
+    'selectcolor',
     'highlightcolor',
     'selectforeground',
     'readonlybackground',
