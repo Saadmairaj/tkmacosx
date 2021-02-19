@@ -84,16 +84,7 @@ class ButtonTest(AbstractWidgetTest, PixelSizeTests, unittest.TestCase):
 
     def test_configure_activebitmap(self):
         widget = self.create()
-        self.checkParam(widget, 'activebitmap', 'questhead')
-        self.checkParam(widget, 'activebitmap', 'gray50')
-        filename = findfile('python.xbm', subdir='test/imgdata')
-        self.checkParam(widget, 'activebitmap', '@' + filename)
-        # Cocoa Tk widgets don't detect invalid -bitmap values
-        # See https://core.tcl.tk/tk/info/31cd33dbf0
-        if not ('aqua' in self.root.tk.call('tk', 'windowingsystem') and
-                'AppKit' in self.root.winfo_server()):
-            self.checkInvalidParam(widget, 'activebitmap', 'spam',
-                                   errmsg='bitmap "spam" not defined')
+        self.checkBitmapParam(widget, 'activebitmap')
 
     def test_configure_activeimage(self):
         widget = self.create()
