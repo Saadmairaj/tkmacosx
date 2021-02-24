@@ -53,15 +53,3 @@ class Button(ButtonBase):
         root.mainloop()
         ```"""
         ButtonBase.__init__(self, 'normal', master, cnf, **kw)
-
-    def invoke(self):
-        """Invoke the command associated with the button.
-
-        The return value is the return value from the command,
-        or an empty string if there is no command associated with
-        the button. This command is ignored if the button's state
-        is disabled.
-        """
-        if self['state'] not in ('disable', 'disabled'):
-            if self.cnf.get('command'):
-                return self.cnf['command']()

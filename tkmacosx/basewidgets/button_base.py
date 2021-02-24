@@ -1086,6 +1086,18 @@ class ButtonBase(_Canvas, _button_functions):
         return sorted(
             set([*BUTTON_PROPERTIES, *BUTTON_FEATURES])
         )
+    
+    def invoke(self):
+        """Invoke the command associated with the button.
+
+        The return value is the return value from the command,
+        or an empty string if there is no command associated with
+        the button. This command is ignored if the button's state
+        is disabled.
+        """
+        if (self['state'] not in ('disable', 'disabled') 
+                and self.cnf.get('command')):
+            return self.cnf['command']()
 
     @cp._colorvar_patch_destroy
     def destroy(self):
