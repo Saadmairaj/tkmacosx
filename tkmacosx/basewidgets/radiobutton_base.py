@@ -13,7 +13,6 @@
 #    limitations under the License.
 
 import tkinter
-from tkinter.constants import RADIOBUTTON
 from tkmacosx.utils import (_cnfmerge, _bind)
 
 RADIOBUTTON_PROPERTIES = [
