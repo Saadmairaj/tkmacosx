@@ -920,8 +920,6 @@ class _button_functions:
                 width = (width/2+W_im/2, width/2-W_txt/2)
                 height = (height/2, height/2)        
             if isinstance(height, tuple):
-                if _im_size is None:
-                    return {'_txt': (width[0], height[0])}
                 return {'_txt': (width[0], height[0]),
                             _PiTag: (width[1], height[1])}
 
