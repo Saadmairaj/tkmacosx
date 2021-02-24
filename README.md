@@ -1,6 +1,8 @@
 # tkmacosx
 
 [![PyPI version shields.io](https://img.shields.io/pypi/v/tkmacosx)](https://pypi.org/project/tkmacosx/)
+[![Tests](https://github.com/Saadmairaj/tkmacosx/actions/workflows/python-package.yml/badge.svg)](https://github.com/Saadmairaj/tkmacosx/actions/workflows/python-package.yml)
+[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/Saadmairaj/tkmacosx.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Saadmairaj/tkmacosx/context:python)
 [![CodeFactor](https://www.codefactor.io/repository/github/saadmairaj/tkmacosx/badge)](https://www.codefactor.io/repository/github/saadmairaj/tkmacosx)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Saadmairaj/tkmacosx/graphs/commit-activity)
 [![Downloads](https://pepy.tech/badge/tkmacosx)](https://pepy.tech/project/tkmacosx)
@@ -8,6 +10,7 @@
 [![GitHub issues-closed](https://img.shields.io/github/issues-closed/Saadmairaj/tkmacosx.svg)](https://github.com/Saadmairaj/tkmacosx/issues?q=is%3Aissue+is%3Aclosed)
 [![Anaconda-Server Badge](https://anaconda.org/saad_7/tkmacosx/badges/installer/conda.svg)](https://conda.anaconda.org/saad_7)
 ![PowerShell Gallery](https://img.shields.io/powershellgallery/p/Pester?color=blue)
+
 
 This module provides some modified widgets of Tkinter which fixes many issues with widgets not working properly on macOS platform. For example Button of tkmacosx which looks and feels exactly like a native Tkinter button can change its _background_ and _foreground_ color and has a lot more functionality, Issues with Radiobutton are also fixed with this library. The library also offers some more useful functionality.
 
