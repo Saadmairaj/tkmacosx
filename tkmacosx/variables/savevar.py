@@ -54,7 +54,7 @@ def SaveVar(var, master=None, value=None, name=None, filename='data.pkl'):
                 new = var.get()
                 if new != default:
                     var.set(new)
-                elif new == default and not startup[0]:
+                elif not startup[0]:
                     var.set(default)
                 else:
                     var.set(old)
@@ -82,5 +82,5 @@ def SaveVar(var, master=None, value=None, name=None, filename='data.pkl'):
                 var.trace_vdelete('w', cbname)
             except tkinter.TclError:
                 pass
-    res = var.trace_variable('w',  update_val)
+    var.trace_variable('w',  update_val)
     return var

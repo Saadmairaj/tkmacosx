@@ -63,7 +63,7 @@ class MarqueeBase(tkinter.Canvas):
             COORD = (3, self.winfo_height()/2)
             ANCHOR = 'w'
             self.delete(TAG)
-            t_id = self._create(
+            self._create(
                 'text', COORD, dict(anchor=ANCHOR, tag=TAG))
 
         # Configure text item
