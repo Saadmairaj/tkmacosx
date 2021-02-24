@@ -15,7 +15,6 @@
 import colour
 import tkinter
 from tkinter.font import Font
-from tkinter.constants import VERTICAL, HORIZONTAL
 from tkmacosx.utils import (_cnfmerge, _bind, _Canvas, check_param,
                             check_light_dark, delta, gradient)
 
@@ -135,7 +134,6 @@ class ColorscaleBase(_Canvas):
                            'fill': c, 'tag': 'gradient'}))
 
         if check_tag('borderline'):
-            w, h = self.winfo_width(), self.winfo_height()
             borderline_points = kw.get('borderline_points',
                                        (1, 1, self.winfo_width()-2,
                                         self.winfo_height()-2, 0))

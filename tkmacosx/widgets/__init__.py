@@ -14,7 +14,7 @@
 
 from tkmacosx.widgets.button import Button
 from tkmacosx.widgets.circlebutton import CircleButton
-from tkmacosx.widgets.colorscale import Colorscale, HEX, RGB, VERTICAL, HORIZONTAL
+from tkmacosx.widgets.colorscale import Colorscale, HEX, RGB
 from tkmacosx.widgets.marquee import Marquee
 from tkmacosx.widgets.radiobutton import Radiobutton
 from tkmacosx.widgets.sframe import SFrame

@@ -13,8 +13,7 @@
 #    limitations under the License.
 
 
-from tkmacosx.basewidgets.colorscale_base import (ColorscaleBase, HEX, RGB,
-                                                  VERTICAL, HORIZONTAL)
+from tkmacosx.basewidgets.colorscale_base import (ColorscaleBase, HEX, RGB)
 
 
 class Colorscale(ColorscaleBase):
