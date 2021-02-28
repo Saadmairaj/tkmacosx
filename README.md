@@ -6,10 +6,11 @@
 [![CodeFactor](https://www.codefactor.io/repository/github/saadmairaj/tkmacosx/badge)](https://www.codefactor.io/repository/github/saadmairaj/tkmacosx)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Saadmairaj/tkmacosx/graphs/commit-activity)
 [![Downloads](https://pepy.tech/badge/tkmacosx)](https://pepy.tech/project/tkmacosx)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FSaadmairaj%2Ftkmacosx.svg?type=small)](https://app.fossa.com/projects/git%2Bgithub.com%2FSaadmairaj%2Ftkmacosx?ref=badge_small)
 [![GitHub license](https://img.shields.io/github/license/Saadmairaj/tkmacosx.svg)](https://github.com/Saadmairaj/tkmacosx/blob/master/LICENSE)
 [![GitHub issues-closed](https://img.shields.io/github/issues-closed/Saadmairaj/tkmacosx.svg)](https://github.com/Saadmairaj/tkmacosx/issues?q=is%3Aissue+is%3Aclosed)
 [![Anaconda-Server Badge](https://anaconda.org/saad_7/tkmacosx/badges/installer/conda.svg)](https://conda.anaconda.org/saad_7)
-![PowerShell Gallery](https://img.shields.io/powershellgallery/p/Pester?color=blue)
+![Platform](https://img.shields.io/powershellgallery/p/Pester?color=blue)
 
 
 This module provides some modified widgets of Tkinter which fixes many issues with widgets not working properly on macOS platform. For example Button of tkmacosx which looks and feels exactly like a native Tkinter button can change its _background_ and _foreground_ color and has a lot more functionality, Issues with Radiobutton are also fixed with this library. The library also offers some more useful functionality.
@@ -73,7 +74,11 @@ Similarly, for tag specify [tag](https://github.com/Saadmairaj/tkmacosx/tags) wi
 pip install git+https://github.com/Saadmairaj/tkmacosx@v0.1.0
 ```
 
-If you use [Anaconda](https://www.anaconda.com/products/individual) environment then you could run:
+If you use **[Anaconda](https://www.anaconda.com/products/individual) environment** then you could run:
+
+[![Anaconda-Server Badge](https://anaconda.org/saad_7/tkmacosx/badges/version.svg)](https://anaconda.org/saad_7/tkmacosx)
+[![Anaconda-Server Badge](https://anaconda.org/saad_7/tkmacosx/badges/downloads.svg)](https://anaconda.org/saad_7/tkmacosx)
+[![Anaconda-Server Badge](https://anaconda.org/saad_7/tkmacosx/badges/platforms.svg)](https://anaconda.org/saad_7/tkmacosx)
 
 ```bash
 conda install -c saad_7 tkmacosx
@@ -775,3 +780,5 @@ Please make sure to update tests as appropriate.
 ## License
 
 [Apache](https://github.com/Saadmairaj/tkmacosx/blob/master/LICENSE)
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FSaadmairaj%2Ftkmacosx.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FSaadmairaj%2Ftkmacosx?ref=badge_large)
