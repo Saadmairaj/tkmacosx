@@ -76,7 +76,7 @@ def _info_button(cls, cnf={}, **kw):
     and returns width and height of the ttk button, after taking
     width and height the button gets destroyed also the custom style."""
     tmp = tkinter.Button(cls, **_cnfmerge((cnf, kw)))
-    geo = [tmp.winfo_reqwidth(), max(0, tmp.winfo_reqheight()-3)]
+    geo = [tmp.winfo_reqwidth(), tmp.winfo_reqheight()]
     tmp.destroy()
     return geo
 
