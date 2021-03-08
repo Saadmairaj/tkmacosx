@@ -527,7 +527,7 @@ ColorVar of tkmacosx set same color to each widget it is assigned to. As ColorVa
 
   ```python
   from tkinter import Tk, Label
-  from tkmacosx import colors, ColorVar, Button, gradient
+  from tkmacosx import ColorVar, Button, gradient
 
   root = Tk()
   root['bg'] = '#333'
@@ -674,19 +674,19 @@ This function returns sequences of rainbow colors hexcodes in order.
   - Add "-selectcolor" option to ColorVar list.
   - Reorganise tkmacosx package files into multiple packages.
   - Reorganise button items to a separate class.
-  - Fix Misc.\_configure() returning 'NoneType'. ([#12](https://github.com/Saadmairaj/tkmacosx/issues/12))
+  - Fix `Misc._configure()` returning 'NoneType'. ([#12](https://github.com/Saadmairaj/tkmacosx/issues/12))
   - Fix text misalignment when changed dynamically under certain situations.
-  - Fix "-activebackground" not accepting mac deafult system colors names.
+  - Fix -activebackground" not accepting mac deafult system colors names.
   - Fix button appearance when toplevel is out of focus.
-  - Fix "focusthickness=0" glitch of button.
+  - Fix `focusthickness=0` glitch of button.
   - Fix ColorVar not working with -focuscolor of button.
   - Fix unknown option "-bitmap". error
   - Fix "-width", "-height" have effect on 0 value.
-  - Fix Marquee "cget()" issues.
+  - Fix Marquee `cget()` issues.
   - Fix "-activebackground" not changing with Variable.
   - Fix ColorVar not working with few Button options.
   - Fix lag when Button is configured.
-  - Fix an error with "Button.destroy()". ([#17](https://github.com/Saadmairaj/tkmacosx/issues/17))
+  - Fix an error with `Button.destroy()`. ([#17](https://github.com/Saadmairaj/tkmacosx/issues/17))
 
 - [**v0.1.6**](https://github.com/Saadmairaj/tkmacosx/releases/tag/v0.1.6)
 
