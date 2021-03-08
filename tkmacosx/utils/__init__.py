@@ -54,7 +54,7 @@ def _bind(cls=None, *ags, **kw):
 
 def _cnfmerge(cnfs):
     """Internal function."""
-    if isinstance(cnfs, dict) or isinstance(cnfs, (type(None), str)):
+    if isinstance(cnfs, (type(None), str, dict)):
         return cnfs
     cnf = {}
     for c in tkinter._flatten(cnfs):
@@ -76,7 +76,7 @@ def _info_button(cls, cnf={}, **kw):
     and returns width and height of the ttk button, after taking
     width and height the button gets destroyed also the custom style."""
     tmp = tkinter.Button(cls, **_cnfmerge((cnf, kw)))
-    geo = [tmp.winfo_reqwidth(), tmp.winfo_reqheight()]
+    geo = [tmp.winfo_reqwidth(), max(0, tmp.winfo_reqheight()-3)]
     tmp.destroy()
     return geo
 
