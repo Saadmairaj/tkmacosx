@@ -644,31 +644,29 @@ class _button_functions:
     def _set_configure(self, options):
         """Internal function.\n
         Configures and binds according to the given options."""
-        if not options:
-            return
-        if isinstance(options, dict):
+        if options and isinstance(options, dict):
             return [self._set_configure(i) for i in options.values()]
-        if len(options) > 1 and isinstance(options[1], dict):
-            con1 = bool(isinstance(options[0], tuple))
-            if options[0] == 'configure' or (con1 and len(options[0]) > 1):
-                # itemconfigure and configure
-                for i in ('_txt', '_bit', '_img'):
-                    if self.coords(i) and options[1].get('anchor'):
-                        self._set_anchor(options[1].pop('anchor', 'center'), i)
-                _Canvas._configure(self, *options)
-            if isinstance(options[0], tkinter.Misc):
-                if isinstance(options[-1], (tuple, list)):
-                    # binds, itemconfigure and configure
-                    binds, conf = options[:-2], options[-1]
-                    for i in ('_txt', '_bit', '_img'):
-                        if i in self.find('all') and conf.get('anchor'):
-                            self._set_anchor(conf.pop('anchor', 'center'), i)
-                    _Canvas._configure(self, *conf)
-                    return _bind(*binds)
-                if options[1].get('tag') == '_activebg':
-                    return _on_press_color(*options)    # _on_press_color
-                return _bind(*options)  # binds
-    
+        elif not (options and isinstance(options[1], dict)):
+            return
+
+        con1 = bool(isinstance(options[0], tuple))
+        if options[0] == 'configure' or (con1 and len(options[0]) > 1):
+            # itemconfigure and configure
+            for i in ('_txt', '_bit', '_img'):
+                if self.coords(i) and options[1].get('anchor'):
+                    self._set_anchor(options[1].pop('anchor', 'center'), i)
+            _Canvas._configure(self, *options)
+
+        if isinstance(options[0], tkinter.Misc):
+            if isinstance(options[-1], (tuple, list)):
+                # binds, itemconfigure and configure
+                binds, conf = options[:-2], options[-1]
+                _Canvas._configure(self, *conf)
+                return _bind(*binds)
+            elif options[1].get('tag') == '_activebg':
+                return _on_press_color(*options)    # _on_press_color
+            return _bind(*options)  # binds
+
     def _configure1(self, cnf={}, **kw):
         """Internal Function.
         This function configure all the resources of 
