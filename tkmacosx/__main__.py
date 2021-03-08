@@ -61,9 +61,6 @@ def get_random_font(k=1):
     def slant():
         return random.choice(('italic', 'roman'))
 
-    def size():
-        return random.randrange(15, 30)
-
     def underline():
         return random.choice((True, False))
 
