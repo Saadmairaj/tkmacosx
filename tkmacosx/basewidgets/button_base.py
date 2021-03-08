@@ -45,6 +45,8 @@ BUTTON_ITEMS = (
     '_txt', '_bit', '_img', '_bd_color', '_border', '_tf'
 )
 
+BORDER_INTENSITY = 0.06
+
 
 class _button_properties:
     """Internal class.\n
@@ -93,7 +95,8 @@ class _button_properties:
     # These are properties of button widget:
     def _border(self, kw):
         return [('itemconfigure', '_border'),
-                {'outline': get_shade(self['bg'], 0.04, 'auto-120')}, None]
+            {'outline': get_shade(self['bg'], 
+                BORDER_INTENSITY, 'auto-120')}, None]
     
     def _bit(self, kw):
         return _button_properties._item(self, '_bit', kw)
@@ -356,7 +359,8 @@ class _button_items:
     
     def _bit_img_main(self, opt, *ags, **kw):
         kw['tag'] = '_img' if opt == 'image' else '_bit'
-        if (self.cnf.get(opt, self.cnf.get(str('active'+opt), '')) != ''):
+        if (self.cnf.get(opt) != '' or 
+                self.cnf.get(str('active'+opt), '') != '' ):
             return self._create(
                 opt, (0, 0), {'tag': kw['tag'], 
                 opt: _button_items._active_state(self, kw['tag'][1:])})
@@ -398,7 +402,7 @@ class _button_items:
     
     def _border(self, *ags, **kw):
         "Border item."
-        bo_color = get_shade(self['bg'], 0.04, 'auto-120')
+        bo_color = get_shade(self['bg'], BORDER_INTENSITY, 'auto-120')
         if self._type == 'circle':
             pad = 2
             r = int(self.cnf.get('width', 87)/2)  # radius = x = y
@@ -704,7 +708,7 @@ class _button_functions:
         if cond1 or cond2:
             self._set_configure(self._get_options('takefocus', kw))
         # Line border: This will darken the border around the button.
-        if get_shade(self['bg'], 0.04, 'auto-120') != self.itemcget('_border', 'outline'):
+        if get_shade(self['bg'], BORDER_INTENSITY, 'auto-120') != self.itemcget('_border', 'outline'):
             self._set_configure(self._get_options('_border', kw))
 
     def _focus_in_out(self, intensity):
@@ -796,7 +800,16 @@ class _button_functions:
     def _active(self, value):
         """Internal function.\n 
         Do not call directly. Changes appearance when active."""
-        
+
+        def check_active_img_bit(op=''):
+            tag = '_bit' if 'bit' in op else '_img'
+            if self['activeimage'] != '':
+                _Canvas._configure(self, ('itemconfigure', tag), 
+                    {'image': self[op+'image']}, None)
+            elif self['activebitmap'] != '':
+                 _Canvas._configure(self, ('itemconfigure', tag), 
+                    {'bitmap': self[op+'bitmap']}, None)
+
         if value in ('on_press', 'on_enter') or value is True:
             if self['state'] != 'pressed' :
                 if value == 'on_press': 
@@ -807,11 +820,8 @@ class _button_functions:
             _Canvas._configure(self, ('itemconfigure', '_border'), 
                                {'state': 'hidden'}, None)
             _Canvas._configure(self, ('itemconfigure', '_txt'), 
-                               {'fill': self.cnf.get('activeforeground', 'white')}, None)
-            _Canvas._configure(self, ('itemconfigure', '_img'), 
-                            {'image': self.cnf.get('activeimage', self.cnf.get('image', ''))}, None)
-            _Canvas._configure(self, ('itemconfigure', '_bit'), 
-                            {'bitmap': self.cnf.get('activebitmap', self.cnf.get('bitmap', ''))}, None)
+                               {'fill': self['activeforeground']}, None)
+            check_active_img_bit('active')
 
         elif value in ('on_leave', 'on_release') or value is False:  # When not active (False)
             if self['state'] != 'pressed':
@@ -825,15 +835,12 @@ class _button_functions:
                                    {'state': 'hidden'}, None)
                 _Canvas._configure(self, ('itemconfigure', '_border'), 
                                    {'state': 'normal'}, None)
-                fill = self.cnf.get('fg', 'black')
-                if self._mouse_state_condition() and self.cnf.get('overforeground'):
-                    fill = self.cnf['overforeground']
+                fill = self['fg']
+                if self._mouse_state_condition() and self['overforeground'] != '':
+                    fill = self['overforeground']
                 _Canvas._configure(self, ('itemconfigure', '_txt'), 
                                    {'fill': fill}, None)
-                _Canvas._configure(self, ('itemconfigure', '_img'), 
-                                {'image': self.cnf.get('image', '')}, None)
-                _Canvas._configure(self, ('itemconfigure', '_bit'), 
-                                {'bitmap': self.cnf.get('bitmap', '')}, None)
+                check_active_img_bit()
 
         self._set_coords(self._get_options(('_txt', '_img', '_bit'), self.cnf))
 
@@ -1040,7 +1047,7 @@ class ButtonBase(_Canvas, _button_functions):
                   'sequence': '<Button-1>', 'func': self._on_press},
               {'className': 'set_size', 'sequence': '<Configure>', 'func': self._set_size})
 
-        self._focus_in_out(0.04)
+        self._focus_in_out(BORDER_INTENSITY)
         self._configure1(self.cnf)
 
     def _configure(self, cmd, cnf=None, kw=None):
@@ -1107,6 +1114,8 @@ class ButtonBase(_Canvas, _button_functions):
             _bind(self._main_win,
                 {'className': 'focus%s' % str(self), 'sequence': '<FocusIn>'},
                 {'className': 'focus%s' % str(self), 'sequence': '<FocusOut>'})
+        for i in self._after_IDs:
+            self.after_cancel(self._after_IDs[i])
         if self.cnf.get('textvariable', '') != '':
             self.configure(textvariable='')
         if self in self._buttons:
