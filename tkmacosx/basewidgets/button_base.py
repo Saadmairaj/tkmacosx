@@ -646,7 +646,7 @@ class _button_functions:
         Configures and binds according to the given options."""
         if options and isinstance(options, dict):
             return [self._set_configure(i) for i in options.values()]
-        elif not (options and isinstance(options[1], dict)):
+        if not (options and isinstance(options[1], dict)):
             return
 
         con1 = bool(isinstance(options[0], tuple))
@@ -663,7 +663,7 @@ class _button_functions:
                 binds, conf = options[:-2], options[-1]
                 _Canvas._configure(self, *conf)
                 return _bind(*binds)
-            elif options[1].get('tag') == '_activebg':
+            if options[1].get('tag') == '_activebg':
                 return _on_press_color(*options)    # _on_press_color
             return _bind(*options)  # binds
 
