@@ -24,8 +24,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install --upgrade --force-reinstall 'setuptools<20.2'
-          pip install wheel twine, flake8, pytest
+          pip install wheel setuptools twine flake8 pytest
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
       # Checking for Python syntax errors beofre uploading to pypi
