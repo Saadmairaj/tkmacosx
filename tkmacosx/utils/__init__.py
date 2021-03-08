@@ -15,6 +15,7 @@
 import re
 import colour
 import tkinter
+from tkinter import ttk
 from tkmacosx.utils.check_parameter import Check_Comman_Parameters, pixels_conv
 
 
@@ -75,8 +76,19 @@ def _info_button(cls, cnf={}, **kw):
     It creates a ttk button and use all the resources given
     and returns width and height of the ttk button, after taking
     width and height the button gets destroyed also the custom style."""
-    tmp = tkinter.Button(cls, **_cnfmerge((cnf, kw)))
-    geo = [tmp.winfo_reqwidth(), tmp.winfo_reqheight()]
+    kw = _cnfmerge((cnf, kw))
+    if kw.get('bitmap'):
+        tmp = tkinter.Button(cls, **kw)
+    else:
+        kw['style'] = '%s.TButton' % cls
+        _style_tmp = ttk.Style(master=cls)
+        _style_tmp.configure(kw['style'], font=kw.pop('font', None))
+        _style_tmp.configure(kw['style'], padding=(
+            kw.pop('padx', 0), kw.pop('pady', 0)))
+        tmp = ttk.Button(cls, **kw)
+        # [issue-2] Need fix --- doesn't really delete the custom style
+        del _style_tmp
+    geo = [tmp.winfo_reqwidth(), max(24, tmp.winfo_reqheight()-4)]
     tmp.destroy()
     return geo
 
@@ -93,7 +105,7 @@ def _on_press_color(cls=None, cnf={}, **kw):
     state = kw.get('state', 'normal' if cls.cnf.get('state')
                    in ('active', 'pressed') else 'hidden')
     if not cls:
-        raise ValueError('Counld not refer to any class instance "cls".')
+        raise ValueError('Could not refer to any class instance "cls".')
     if kw.get('color') is None:
         kw.pop('color', None)
     width = cls.coords(tag) or 0
@@ -394,9 +406,9 @@ def gradient(iteration):
 
 
 __all__ = [
-    'check_appearance', 
-    'check_light_dark', 
+    'check_appearance',
+    'check_light_dark',
     'delta',
-    'get_shade', 
+    'get_shade',
     'gradient'
 ]
