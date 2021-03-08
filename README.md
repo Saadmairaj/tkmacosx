@@ -12,7 +12,6 @@
 [![Anaconda-Server Badge](https://anaconda.org/saad_7/tkmacosx/badges/installer/conda.svg)](https://conda.anaconda.org/saad_7)
 ![Platform](https://img.shields.io/powershellgallery/p/Pester?color=blue)
 
-
 This module provides some modified widgets of Tkinter which fixes many issues with widgets not working properly on macOS platform. For example Button of tkmacosx which looks and feels exactly like a native Tkinter button can change its _background_ and _foreground_ color and has a lot more functionality, Issues with Radiobutton are also fixed with this library. The library also offers some more useful functionality.
 
 **Read more about all the classes and methods in the [tkmacosx documentation](#documentation).**
@@ -151,7 +150,7 @@ The tkmacosx `Button` widget is alternative to tkinter's Button that supports al
 - **Example:**
 
   ```python
-  from tkinter import *
+  from tkinter import Tk
   from tkmacosx import Button
 
   root = Tk()
@@ -668,6 +667,26 @@ This function returns sequences of rainbow colors hexcodes in order.
   | _iteration_ | Length of the sequences. |
 
 ## Changelog
+
+- [**v1.0.0**](https://github.com/Saadmairaj/tkmacosx/releases/tag/v1.0.0)
+
+  - Add Tests.
+  - Add "-selectcolor" option to ColorVar list.
+  - Reorganise tkmacosx package files into multiple packages.
+  - Reorganise button items to a separate class.
+  - Fix Misc.\_configure() returning 'NoneType'. ([#12](https://github.com/Saadmairaj/tkmacosx/issues/12))
+  - Fix text misalignment when changed dynamically under certain situations.
+  - Fix "-activebackground" not accepting mac deafult system colors names.
+  - Fix button appearance when toplevel is out of focus.
+  - Fix "focusthickness=0" glitch of button.
+  - Fix ColorVar not working with -focuscolor of button.
+  - Fix unknown option "-bitmap". error
+  - Fix "-width", "-height" have effect on 0 value.
+  - Fix Marquee "cget()" issues.
+  - Fix "-activebackground" not changing with Variable.
+  - Fix ColorVar not working with few Button options.
+  - Fix lag when Button is configured.
+  - Fix an error with "Button.destroy()". ([#17](https://github.com/Saadmairaj/tkmacosx/issues/17))
 
 - [**v0.1.6**](https://github.com/Saadmairaj/tkmacosx/releases/tag/v0.1.6)
 
