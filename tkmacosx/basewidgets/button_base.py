@@ -712,7 +712,9 @@ class _button_functions:
     def _focus_in_out(self, intensity):
         """Internal function.\n
         Focus in and focus out effect maker."""
-        main_win = self.winfo_toplevel()
+        self._main_win = self.winfo_toplevel()
+        if not self._main_win.winfo_exists():
+            return
 
         def _chngIn(evt):
             """Internal function."""
@@ -736,12 +738,12 @@ class _button_functions:
             except KeyError: 
                 pass
 
-        _bind(main_win, 
+        _bind(self._main_win, 
               {'className': 'focus%s' % str(self),
                'sequence': '<FocusIn>', 'func': _chngIn},
               {'className': 'focus%s' % str(self),
                'sequence': '<FocusOut>', 'func': _chngIn})
-        return main_win
+        return self._main_win
 
     def _relief(self, cnf, kw={}):
         """Internal function.\n
@@ -1103,10 +1105,10 @@ class ButtonBase(_Canvas, _button_functions):
     def destroy(self):
         """Destroy this and all descendants widgets. This will
         end the application of this Tcl interpreter."""
-        main_win = self.winfo_toplevel()
-        _bind(main_win, 
-              {'className': 'focus%s' % str(self), 'sequence': '<FocusIn>'},
-              {'className': 'focus%s' % str(self), 'sequence': '<FocusOut>'})
+        if self._main_win.winfo_exists():
+            _bind(self._main_win,
+                {'className': 'focus%s' % str(self), 'sequence': '<FocusIn>'},
+                {'className': 'focus%s' % str(self), 'sequence': '<FocusOut>'})
         if self.cnf.get('textvariable', '') != '':
             self.configure(textvariable='')
         if self in self._buttons:
