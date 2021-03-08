@@ -162,7 +162,7 @@ def _create(self, itemType, args, kw):
 
     for key, value in dict(_all_traces_colorvar).items():
         if isinstance(key[1], (tuple, list)):
-            wid, (opt, tag_id) = key
+            _, (opt, tag_id) = key
             var, cbname = value
             if tag_id is None and cbname is None:
                 cbname = var.trace_variable(
