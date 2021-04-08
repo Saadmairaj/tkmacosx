@@ -213,6 +213,8 @@ class MarqueeTest(AbstractWidgetTest, unittest.TestCase):
     _keep_orig = False
 
     def create(self, **kwargs):
+        kwargs['bg'] = kwargs.get('bg', kwargs.get('background', 'black'))
+        kwargs['fg'] = kwargs.get('fg', kwargs.get('foreground', 'white'))
         return tkmacosx.Marquee(self.root, **kwargs)
 
     def test_configure_state(self):
