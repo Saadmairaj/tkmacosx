@@ -90,7 +90,3 @@ class TestSaveVar(TestBase):
     def test_file_created(self):
         v = self._create()
         file = open(self._filename, 'r')
-
-
-if __name__ == "__main__":
-    unittest.main()
