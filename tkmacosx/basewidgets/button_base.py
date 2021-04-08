@@ -131,16 +131,30 @@ class _button_properties:
         return _button_properties._bit_img(self, 'bitmap', kw)
 
     def borderless(self, kw):
+        def _get_master_bg():
+            """Internal function."""
+            global _warning_msg_shown
+            try: 
+                return self.master['bg']
+            except tkinter.TclError:
+                if not _warning_msg_shown:
+                    print('WARNING: "borderless" option of '
+                        'tkmacosx Button doesn\'t work with ttk widgets. '
+                        'Bordercolor/highlightbackground can be set manually '
+                        'with "highlightbackground" or "bordercolor" options.\n')
+                    _warning_msg_shown = True
+                return self.cnf.get('bordercolor', self.cnf['highlightbackground'])
+
         _opt = {}
         if bool(kw.get('borderless')) or self.cnf.get('borderless'):
             if not check_function_equality(self.master.config, self._get_functions('borderless', kw)):
                 self.master.config = self.master.configure = self._get_functions(
                     'borderless', kw)
-            self.cnf['highlightbackground'] = self.cnf['bordercolor'] = self.master['bg']
-            _opt[1] = [('itemconfigure', '_bd_color'), {'outline': self.master['bg']}, None]
-            _opt[2] = ['configure', {'highlightbackground': self.master['bg']}, None]
+            self.cnf['highlightbackground'] = self.cnf['bordercolor'] = _get_master_bg()
+            _opt[1] = [('itemconfigure', '_bd_color'), {'outline': _get_master_bg()}, None]
+            _opt[2] = ['configure', {'highlightbackground': _get_master_bg()}, None]
         elif not bool(kw.get('borderless', True)) or not self.cnf.get('borderless'):
-            if self.cnf.get('bordercolor') == self.master['bg']:
+            if self.cnf.get('bordercolor') == _get_master_bg():
                 self.cnf.pop('bordercolor', None)
                 self.cnf.pop('highlightbackground', None)
             bd_color = self.cnf.get(
