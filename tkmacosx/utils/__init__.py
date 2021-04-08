@@ -13,10 +13,18 @@
 #    limitations under the License.
 
 import re
+import sys
 import colour
 import tkinter
 from tkinter import ttk
 from tkmacosx.utils.check_parameter import Check_Comman_Parameters, pixels_conv
+
+
+SYSTEM_DEFAULT_BG = "white"
+SYSTEM_DEFAULT_FG = "black"
+if sys.platform == 'darwin':
+    SYSTEM_DEFAULT_BG = "systemWindowBackgroundColor"
+    SYSTEM_DEFAULT_FG = "systemTextColor"
 
 
 def _agsmerge(args):

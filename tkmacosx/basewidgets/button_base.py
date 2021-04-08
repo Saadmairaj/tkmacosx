@@ -13,7 +13,8 @@
 #    limitations under the License.
 
 import tkinter
-from tkmacosx.utils import (_cnfmerge, _bind, _Canvas, check_param,
+from tkmacosx.utils import (SYSTEM_DEFAULT_BG, SYSTEM_DEFAULT_FG, 
+                            _cnfmerge, _bind, _Canvas, check_param,
                             _info_button, _on_press_color, 
                             get_shade, check_function_equality)
 import tkmacosx.utils.colorvar_patches as cp
@@ -46,6 +47,8 @@ BUTTON_ITEMS = (
 )
 
 BORDER_INTENSITY = 0.06
+
+_warning_msg_shown = False
 
 
 class _button_properties:
@@ -1004,7 +1007,7 @@ class ButtonBase(_Canvas, _button_functions):
             if i in BUTTON_FEATURES:
                 cnf[i] = kw.pop(i, None)
 
-        cnf['fg'] = cnf['foreground'] = cnf.get('fg', cnf.get('foreground', 'black'))
+        cnf['fg'] = cnf['foreground'] = cnf.get('fg', cnf.get('foreground', SYSTEM_DEFAULT_FG))
         cnf['anchor'] = cnf.get('anchor', 'center')
         cnf['justify'] = cnf.get('justify', 'center')
         cnf['borderless'] = cnf.get('borderless', False)
@@ -1037,7 +1040,7 @@ class ButtonBase(_Canvas, _button_functions):
             kw['height'] = kw.get('height', 24)
 
         kw['takefocus'] = kw.get('takefocus', 1)
-        kw['bg'] = kw.pop('bg', kw.pop('background', 'white'))
+        kw['bg'] = kw.pop('bg', kw.pop('background', SYSTEM_DEFAULT_BG))
         kw['highlightthickness'] = kw.get('highlightthickness', 0)
 
         _Canvas.__init__(self, master=master, **kw)
