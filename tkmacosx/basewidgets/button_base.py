@@ -48,7 +48,7 @@ BUTTON_ITEMS = (
 
 BORDER_INTENSITY = 0.06
 
-_warning_msg_shown = False
+_warning_msg_shown = [False]
 
 
 class _button_properties:
@@ -136,16 +136,15 @@ class _button_properties:
     def borderless(self, kw):
         def _get_master_bg():
             """Internal function."""
-            global _warning_msg_shown
             try: 
                 return self.master['bg']
             except tkinter.TclError:
-                if not _warning_msg_shown:
+                if not _warning_msg_shown[0]:
                     print('WARNING: "borderless" option of '
                         'tkmacosx Button doesn\'t work with ttk widgets. '
                         'Bordercolor/highlightbackground can be set manually '
                         'with "highlightbackground" or "bordercolor" options.\n')
-                    _warning_msg_shown = True
+                    _warning_msg_shown[0] = True
                 return self.cnf.get('bordercolor', self.cnf['highlightbackground'])
 
         _opt = {}
