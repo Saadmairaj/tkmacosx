@@ -1,16 +1,19 @@
-# tkmacosx
-
-[![PyPI version shields.io](https://img.shields.io/pypi/v/tkmacosx)](https://pypi.org/project/tkmacosx/)
-[![Tests](https://github.com/Saadmairaj/tkmacosx/actions/workflows/python-package.yml/badge.svg)](https://github.com/Saadmairaj/tkmacosx/actions/workflows/python-package.yml)
-[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/Saadmairaj/tkmacosx.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Saadmairaj/tkmacosx/context:python)
-[![CodeFactor](https://www.codefactor.io/repository/github/saadmairaj/tkmacosx/badge)](https://www.codefactor.io/repository/github/saadmairaj/tkmacosx)
-[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Saadmairaj/tkmacosx/graphs/commit-activity)
-[![Downloads](https://pepy.tech/badge/tkmacosx)](https://pepy.tech/project/tkmacosx)
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FSaadmairaj%2Ftkmacosx.svg?type=small)](https://app.fossa.com/projects/git%2Bgithub.com%2FSaadmairaj%2Ftkmacosx?ref=badge_small)
-[![GitHub license](https://img.shields.io/github/license/Saadmairaj/tkmacosx.svg)](https://github.com/Saadmairaj/tkmacosx/blob/master/LICENSE)
-[![GitHub issues-closed](https://img.shields.io/github/issues-closed/Saadmairaj/tkmacosx.svg)](https://github.com/Saadmairaj/tkmacosx/issues?q=is%3Aissue+is%3Aclosed)
-[![Anaconda-Server Badge](https://anaconda.org/saad_7/tkmacosx/badges/installer/conda.svg)](https://conda.anaconda.org/saad_7)
-![Platform](https://img.shields.io/powershellgallery/p/Pester?color=blue)
+<p align="center">
+   <img width="600" alt="tkmacosx" src="https://user-images.githubusercontent.com/46227224/114267686-c7fce900-9a1a-11eb-9a74-aac48a9e9562.png">
+</p>
+<p align="center">
+   <a href="https://pypi.org/project/tkmacosx/"><img src="https://img.shields.io/pypi/v/tkmacosx"></a>
+   <a href="https://github.com/Saadmairaj/tkmacosx/actions/workflows/python-package.yml"><img src="https://github.com/Saadmairaj/tkmacosx/actions/workflows/python-package.yml/badge.svg"></a>
+   <a href="https://lgtm.com/projects/g/Saadmairaj/tkmacosx/context:python"><img src="https://img.shields.io/lgtm/grade/python/g/Saadmairaj/tkmacosx.svg?logo=lgtm&logoWidth=18"></a>
+   <a href="https://www.codefactor.io/repository/github/saadmairaj/tkmacosx"><img src="https://www.codefactor.io/repository/github/saadmairaj/tkmacosx/badge"></a>
+   <a href="https://GitHub.com/Saadmairaj/tkmacosx/graphs/commit-activity"><img src="https://img.shields.io/badge/Maintained%3F-yes-green.svg"></a>
+   <a href="https://pepy.tech/project/tkmacosx"><img src="https://pepy.tech/badge/tkmacosx"></a>
+   <a href="https://app.fossa.com/projects/git%2Bgithub.com%2FSaadmairaj%2Ftkmacosx?ref=badge_small"><img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2FSaadmairaj%2Ftkmacosx.svg?type=small"></a>
+   <a href="https://github.com/Saadmairaj/tkmacosx/blob/master/LICENSE"><img src="https://img.shields.io/github/license/Saadmairaj/tkmacosx.svg"></a>
+   <a href="https://github.com/Saadmairaj/tkmacosx/issues?q=is%3Aissue+is%3Aclosed"><img src="https://img.shields.io/github/issues-closed/Saadmairaj/tkmacosx.svg"></a>
+   <a href="https://conda.anaconda.org/saad_7"><img src="https://anaconda.org/saad_7/tkmacosx/badges/installer/conda.svg"></a>   
+   <img src="https://img.shields.io/powershellgallery/p/Pester?color=blue">
+</p>
 
 This module provides some modified widgets of Tkinter which fixes many issues with widgets not working properly on macOS platform. For example Button of tkmacosx which looks and feels exactly like a native Tkinter button can change its _background_ and _foreground_ color and has a lot more functionality, Issues with Radiobutton are also fixed with this library. The library also offers some more useful functionality.
 
@@ -91,7 +94,7 @@ python -m tkmacosx
 
 Run the above command in the terminal or command line after installing tkmacosx to see working and almost all the configurable options of different widgets of tkmacosx.
 
-<p align='center'><img src="https://raw.githubusercontent.com/Saadmairaj/tkmacosx/master/assets/demonstration.gif" height="500"></p>
+<p align='center'><img src="https://user-images.githubusercontent.com/46227224/114269362-4742ea80-9a24-11eb-810f-eaa85b68fcf0.gif" height="600"></p>
 
 Also if you want to style your button to stand out, scroll down to bottom of the window opened from the above command and randomise or configure button to different styles.
 
@@ -169,14 +172,15 @@ The tkmacosx `Button` widget is alternative to tkinter's Button that supports al
   ```
 
    <p align="center">
-      <img src="https://github.com/Saadmairaj/tkmacosx/blob/master/assets/Button.gif">
+      <img src="https://user-images.githubusercontent.com/46227224/114269000-f29e7000-9a21-11eb-9e10-ebd299c2ef7b.gif">
    </p>
 
 - Few sample of different styles of button that can be configured.
 
-<p align="center"><img src="https://raw.githubusercontent.com/Saadmairaj/tkmacosx/master/assets/samplebutton1.gif">
-            <img src="https://raw.githubusercontent.com/Saadmairaj/tkmacosx/master/assets/samplebutton2.gif">
-            <img src="https://raw.githubusercontent.com/Saadmairaj/tkmacosx/master/assets/samplebutton3.gif">
+<p align="center">
+   <img src="https://user-images.githubusercontent.com/46227224/114268774-8d964a80-9a20-11eb-9122-8ee9292d4738.gif">
+   <img src="https://user-images.githubusercontent.com/46227224/114268991-de5a7300-9a21-11eb-9f88-3145a6250f4d.gif">
+   <img src="https://user-images.githubusercontent.com/46227224/114268987-d8649200-9a21-11eb-9668-6d5766414475.gif">
 </p>
 
 ```python
@@ -241,7 +245,7 @@ root.mainloop()
 ```
 
    <p align="center">
-      <img src="https://github.com/Saadmairaj/tkmacosx/blob/master/assets/CircleButton.gif">
+      <img src="https://user-images.githubusercontent.com/46227224/114269031-24afd200-9a22-11eb-9c23-17c6d560600a.gif">
    </p>
 
 ---
@@ -297,7 +301,7 @@ The tkmacosx `SFrame` widget is just like a tkinter Frame but can be vertically 
   ```
 
    <p align="center">
-      <img src="https://github.com/Saadmairaj/tkmacosx/blob/master/assets/SFrame.gif">
+      <img src="https://user-images.githubusercontent.com/46227224/114269044-37c2a200-9a22-11eb-89b2-ccbe1c0cef83.gif">
    </p>
 
 ---
@@ -351,7 +355,7 @@ Colorscale is a new style color selector which is an alternate to tkinter's colo
   ```
 
    <p align="center">
-      <img src="https://github.com/Saadmairaj/tkmacosx/blob/master/assets/Colorscale.gif">
+      <img src="https://user-images.githubusercontent.com/46227224/114269070-55900700-9a22-11eb-8de5-38885fad5cf8.gif">
    </p>
 
 ---
@@ -418,7 +422,7 @@ Use `Marquee` for creating scrolling text which moves from right to left only if
   ```
 
    <p align="center">
-      <img src="https://github.com/Saadmairaj/tkmacosx/blob/master/assets/Marquee.gif">
+      <img src="https://user-images.githubusercontent.com/46227224/114269092-70fb1200-9a22-11eb-99f0-08f87078ff53.gif">
    </p>
 
 ---
@@ -500,7 +504,7 @@ Radiobutton of tkmacosx are fixed from multiple issues i.e. background color not
   ```
 
     <p align="center">
-      <img src="https://github.com/Saadmairaj/tkmacosx/blob/master/assets/Radiobutton.gif">
+      <img src="https://user-images.githubusercontent.com/46227224/114269117-925bfe00-9a22-11eb-9959-86210d9c24f5.gif">
     </p>
 
 ---
@@ -550,7 +554,7 @@ ColorVar of tkmacosx set same color to each widget it is assigned to. As ColorVa
   ```
 
    <p align="center">
-      <img src="https://github.com/Saadmairaj/tkmacosx/blob/master/assets/Colorvar.gif">
+      <img src="https://user-images.githubusercontent.com/46227224/114269131-b0c1f980-9a22-11eb-8f2a-13575329f71c.gif">
    </p>
 
 ---
