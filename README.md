@@ -1,5 +1,5 @@
 <p align="center">
-   <img width="600" alt="tkmacosx" src="https://user-images.githubusercontent.com/46227224/114267686-c7fce900-9a1a-11eb-9a74-aac48a9e9562.png">
+   <img width="550" alt="tkmacosx" src="https://user-images.githubusercontent.com/46227224/114270791-e8816f00-9a2b-11eb-911c-a736253b3de5.png">
 </p>
 <p align="center">
    <a href="https://pypi.org/project/tkmacosx/"><img src="https://img.shields.io/pypi/v/tkmacosx"></a>
