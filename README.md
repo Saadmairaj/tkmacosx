@@ -17,7 +17,7 @@
 
 This module provides some modified widgets of Tkinter which fixes many issues with widgets not working properly on macOS platform. For example Button of tkmacosx which looks and feels exactly like a native Tkinter button can change its _background_ and _foreground_ color and has a lot more functionality, Issues with Radiobutton are also fixed with this library. The library also offers some more useful functionality.
 
-**Read more about all the classes and methods in the [tkmacosx documentation](#documentation).**
+**Read more about all the classes and methods in the [tkmacosx documentation](https://github.com/Saadmairaj/tkmacosx#demonstration).**
 
 Table of Contents
 
