@@ -55,7 +55,7 @@ class widget_options:
         return list(getattr(cls, widget, None).keys())
 
 
-class Check_Comman_Parameters:
+class Check_Common_Parameters:
 
     enum_para = {
         'anchor': ('n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw', 'center'),

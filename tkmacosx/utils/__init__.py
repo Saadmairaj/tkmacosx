@@ -17,7 +17,7 @@ import sys
 import colour
 import tkinter
 from tkinter import ttk
-from tkmacosx.utils.check_parameter import Check_Comman_Parameters, pixels_conv
+from tkmacosx.utils.check_parameter import Check_Common_Parameters, pixels_conv
 
 
 SYSTEM_DEFAULT_BG = "white"
@@ -313,7 +313,7 @@ def check_light_dark(value, intensity=110):
 def check_param(master, name, cnf={}, **kw):
     "Internal function. Used to validate options of the widget."
     kw = _cnfmerge((cnf, kw))
-    cm = Check_Comman_Parameters(master)
+    cm = Check_Common_Parameters(master)
     return cm(name, kw)
 
 
