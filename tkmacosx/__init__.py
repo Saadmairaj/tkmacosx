@@ -1,11 +1,11 @@
 #                       Copyright 2021 Saad Mairaj
-# 
+#
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
 #    You may obtain a copy of the License at
-# 
+#
 #        http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 #    Unless required by applicable law or agreed to in writing, software
 #    distributed under the License is distributed on an "AS IS" BASIS,
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,9 +22,10 @@ Read more about tkmacosx in detail on
 https://github.com/Saadmairaj/tkmacosx#tkmacosx
 """
 
-__version__ = '1.0.0'
+__version__ = '1.0.1'
+__author__ = 'Saad Mairaj'
 
 from tkmacosx.variables import ColorVar, DictVar, SaveVar
 from tkmacosx.widgets import Button, CircleButton, Colorscale, Radiobutton, Marquee, SFrame
-from tkmacosx.utils import (check_appearance, check_light_dark, 
+from tkmacosx.utils import (check_appearance, check_light_dark,
                             delta, hex_to_rgb, get_shade, gradient)
