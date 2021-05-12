@@ -13,8 +13,7 @@
 #    limitations under the License.
 
 import tkinter
-from tkmacosx.utils import (SYSTEM_DEFAULT_BG, SYSTEM_DEFAULT_FG, 
-                            _cnfmerge, _bind, check_param)
+from tkmacosx.utils import (SYSTEM_DEFAULT, _cnfmerge, _bind, check_param)
 
 
 MARQUEE_PROPERTIES = [
@@ -35,7 +34,7 @@ class MarqueeBase(tkinter.Canvas):
         cnf = dict(
             text=kw.pop('text', ''),
             font=kw.pop('font', 'TkDefaultFont'),
-            fg=kw.pop('fg', kw.pop('foreground', SYSTEM_DEFAULT_FG)),
+            fg=kw.pop('fg', kw.pop('foreground', SYSTEM_DEFAULT.fg)),
             fps=kw.pop('fps', 30),
             justify=kw.pop('justify', 'left'),
             left_margin=kw.pop('left_margin', 10),
@@ -47,7 +46,7 @@ class MarqueeBase(tkinter.Canvas):
         cnf['foreground'] = cnf['fg']
         cnf = {k: v for k, v in cnf.items() if v is not None}
 
-        kw['bg'] = kw.get('bg', kw.get('background', SYSTEM_DEFAULT_BG))
+        kw['bg'] = kw.get('bg', kw.get('background', SYSTEM_DEFAULT.bg))
         kw['height'] = kw.get('height', 24)
         kw['highlightthickness'] = kw.get('highlightthickness', 0)
         tkinter.Canvas.__init__(self, master=master, **kw)
