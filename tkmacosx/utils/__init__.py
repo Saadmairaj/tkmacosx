@@ -22,7 +22,7 @@ from tkmacosx.utils.check_parameter import Check_Common_Parameters, pixels_conv
 
 class _appearanceColor:
     """Internal class for button appearance colors.
-    
+
     Return bg and fg appearance colors if on macos 
     and also compatible with macos."""
 
@@ -34,7 +34,6 @@ class _appearanceColor:
                 tkinter._default_root['bg'] = org
                 return True
         except (tkinter.TclError, AttributeError):
-            # TODO: Add warning message
             pass
         return False
 
@@ -45,13 +44,14 @@ class _appearanceColor:
         if self._check("systemWindowBackgroundColor"):
             return "systemWindowBackgroundColor"
         return "white"
-    
+
     @property
     def fg(self):
         """Returns black or macos system text appearance colour."""
         if self._check("systemTextColor"):
             return "systemTextColor"
         return "black"
+
 
 SYSTEM_DEFAULT = _appearanceColor()
 
