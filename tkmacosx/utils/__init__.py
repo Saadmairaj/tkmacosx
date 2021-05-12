@@ -20,11 +20,40 @@ from tkinter import ttk
 from tkmacosx.utils.check_parameter import Check_Common_Parameters, pixels_conv
 
 
-SYSTEM_DEFAULT_BG = "white"
-SYSTEM_DEFAULT_FG = "black"
-if sys.platform == 'darwin':
-    SYSTEM_DEFAULT_BG = "systemWindowBackgroundColor"
-    SYSTEM_DEFAULT_FG = "systemTextColor"
+class _appearanceColor:
+    """Internal class for button appearance colors.
+    
+    Return bg and fg appearance colors if on macos 
+    and also compatible with macos."""
+
+    def _check(self, option):
+        try:
+            if tkinter._default_root and sys.platform == 'darwin':
+                org = tkinter._default_root['bg']
+                tkinter._default_root['bg'] = option
+                tkinter._default_root['bg'] = org
+                return True
+        except (tkinter.TclError, AttributeError):
+            # TODO: Add warning message
+            pass
+        return False
+
+    @property
+    def bg(self):
+        """Returns white or macos system window background 
+        appearance colour."""
+        if self._check("systemWindowBackgroundColor"):
+            return "systemWindowBackgroundColor"
+        return "white"
+    
+    @property
+    def fg(self):
+        """Returns black or macos system text appearance colour."""
+        if self._check("systemTextColor"):
+            return "systemTextColor"
+        return "black"
+
+SYSTEM_DEFAULT = _appearanceColor()
 
 
 def _agsmerge(args):
