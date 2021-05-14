@@ -672,7 +672,11 @@ This function returns sequences of rainbow colors hexcodes in order.
 
 ## Changelog
 
-- [**v1.0.1**](https://github.com/Saadmairaj/tkmacosx/releases/tag/v1.0.0)
+- [**v1.0.2**](https://github.com/Saadmairaj/tkmacosx/releases/tag/v1.0.2)
+
+  - Fix unknown color name "systemWindowBackgroundColor" ([#20](https://github.com/Saadmairaj/tkmacosx/issues/20))
+
+- [**v1.0.1**](https://github.com/Saadmairaj/tkmacosx/releases/tag/v1.0.1)
 
   - Fix widgets not auto-switch light/dark mode. ([#18](https://github.com/Saadmairaj/tkmacosx/issues/18))
   - Fix Button not working with ttk widgets. ([#19](https://github.com/Saadmairaj/tkmacosx/issues/19))
