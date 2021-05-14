@@ -255,6 +255,7 @@ root.mainloop()
 The tkmacosx `SFrame` widget is just like a tkinter Frame but can be vertically scrolled. The SFrame supports intelligent mousewheel scrolling where it let you use mousewheel with other children widgets also having mousewheel scrolling without interfering with other widgets scrolling, a list of widgets having mousewheel scrolling can be passed to `avoidmousewheel` argument _(ex: `avoidmousewheel=(text1, text2, sframe)` or just one `avoidmousewheel=text2`)._
 
 - Configurable options for a sframe widget. Syntax: `SFrame(root, options=value, ...)`
+
   | Options | Description |
   |----------------------- |------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
   | _avoidmousewheel_ | Give widgets that also having the mousewheel scrolling and is a child of _SFrame_, this option will configure widgets to support their mousewheel scrolling as well and not interfere with _SFrame_ mousewheel scrolling. _For example: Text widget inside SFrame can have mousewheel scrolling as well as SFrame._ |
