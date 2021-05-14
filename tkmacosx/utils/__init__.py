@@ -20,11 +20,61 @@ from tkinter import ttk
 from tkmacosx.utils.check_parameter import Check_Common_Parameters, pixels_conv
 
 
-SYSTEM_DEFAULT_BG = "white"
-SYSTEM_DEFAULT_FG = "black"
-if sys.platform == 'darwin':
-    SYSTEM_DEFAULT_BG = "systemWindowBackgroundColor"
-    SYSTEM_DEFAULT_FG = "systemTextColor"
+STDOUT_WARNING = True
+
+
+class _appearanceColor:
+    """Internal class for button appearance colors.
+
+    Return bg and fg appearance colors if on macos 
+    and also compatible with macos."""
+
+    _bg = None
+    _fg = None
+    _warning_msg_shown = False
+
+    def _check(self, option):
+        """Internal function"""
+        try:
+            tkinter._default_root
+        except AttributeError:
+            # for running unit tests.
+            return False
+        try:
+            if tkinter._default_root and sys.platform == 'darwin':
+                org = tkinter._default_root['bg']
+                tkinter._default_root['bg'] = option
+                tkinter._default_root['bg'] = org
+                return True
+        except Exception:
+            if not self._warning_msg_shown and STDOUT_WARNING:
+                print("WARNING: Appearance colours are not either "
+                      "supported with the current tkinter or the "
+                      "colors doesn't exist on this Mac.")
+                self._warning_msg_shown = True
+        return False
+
+    @property
+    def bg(self):
+        """Returns white or macos system window background 
+        appearance colour"""
+        if self._bg is None:
+            self._bg = "white"
+            if self._check("systemWindowBackgroundColor"):
+                self._bg = "systemWindowBackgroundColor"
+        return self._bg
+
+    @property
+    def fg(self):
+        """Returns black or macos system text appearance colour"""
+        if self._fg is None:
+            self._fg = "black"
+            if self._check("systemTextColor"):
+                self._fg = "systemTextColor"
+        return self._fg
+
+
+SYSTEM_DEFAULT = _appearanceColor()
 
 
 def _agsmerge(args):

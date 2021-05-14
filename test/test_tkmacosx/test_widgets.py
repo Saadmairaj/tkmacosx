@@ -75,8 +75,6 @@ class ButtonTest(AbstractWidgetTest, PixelSizeTests, unittest.TestCase):
     _conv_pixels = round
 
     def create(self, **kwargs):
-        kwargs['bg'] = kwargs.get('bg', kwargs.get('background', 'black'))
-        kwargs['fg'] = kwargs.get('fg', kwargs.get('foreground', 'white'))
         return tkmacosx.Button(self.root, **kwargs)
 
     def test_configure_state(self):
@@ -137,8 +135,6 @@ class CircleButtonTest(ButtonTest):
     _conv_pixels = round
 
     def create(self, **kwargs):
-        kwargs['bg'] = kwargs.get('bg', kwargs.get('background', 'black'))
-        kwargs['fg'] = kwargs.get('fg', kwargs.get('foreground', 'white'))
         return tkmacosx.CircleButton(self.root, **kwargs)
 
     def test_configure_radius(self):

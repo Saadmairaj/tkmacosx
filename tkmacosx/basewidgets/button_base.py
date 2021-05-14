@@ -13,7 +13,7 @@
 #    limitations under the License.
 
 import tkinter
-from tkmacosx.utils import (SYSTEM_DEFAULT_BG, SYSTEM_DEFAULT_FG, 
+from tkmacosx.utils import (SYSTEM_DEFAULT, STDOUT_WARNING,
                             _cnfmerge, _bind, _Canvas, check_param,
                             _info_button, _on_press_color, 
                             get_shade, check_function_equality)
@@ -139,7 +139,7 @@ class _button_properties:
             try: 
                 return self.master['bg']
             except tkinter.TclError:
-                if not _warning_msg_shown[0]:
+                if not _warning_msg_shown[0] and STDOUT_WARNING:
                     print('WARNING: "borderless" option of '
                         'tkmacosx Button doesn\'t work with ttk widgets. '
                         'Bordercolor/highlightbackground can be set manually '
@@ -1006,7 +1006,7 @@ class ButtonBase(_Canvas, _button_functions):
             if i in BUTTON_FEATURES:
                 cnf[i] = kw.pop(i, None)
 
-        cnf['fg'] = cnf['foreground'] = cnf.get('fg', cnf.get('foreground', SYSTEM_DEFAULT_FG))
+        cnf['fg'] = cnf['foreground'] = cnf.get('fg', cnf.get('foreground', SYSTEM_DEFAULT.fg))
         cnf['anchor'] = cnf.get('anchor', 'center')
         cnf['justify'] = cnf.get('justify', 'center')
         cnf['borderless'] = cnf.get('borderless', False)
@@ -1039,7 +1039,7 @@ class ButtonBase(_Canvas, _button_functions):
             kw['height'] = kw.get('height', 24)
 
         kw['takefocus'] = kw.get('takefocus', 1)
-        kw['bg'] = kw.pop('bg', kw.pop('background', SYSTEM_DEFAULT_BG))
+        kw['bg'] = kw.pop('bg', kw.pop('background', SYSTEM_DEFAULT.bg))
         kw['highlightthickness'] = kw.get('highlightthickness', 0)
 
         _Canvas.__init__(self, master=master, **kw)

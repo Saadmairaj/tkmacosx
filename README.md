@@ -255,6 +255,7 @@ root.mainloop()
 The tkmacosx `SFrame` widget is just like a tkinter Frame but can be vertically scrolled. The SFrame supports intelligent mousewheel scrolling where it let you use mousewheel with other children widgets also having mousewheel scrolling without interfering with other widgets scrolling, a list of widgets having mousewheel scrolling can be passed to `avoidmousewheel` argument _(ex: `avoidmousewheel=(text1, text2, sframe)` or just one `avoidmousewheel=text2`)._
 
 - Configurable options for a sframe widget. Syntax: `SFrame(root, options=value, ...)`
+
   | Options | Description |
   |----------------------- |------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
   | _avoidmousewheel_ | Give widgets that also having the mousewheel scrolling and is a child of _SFrame_, this option will configure widgets to support their mousewheel scrolling as well and not interfere with _SFrame_ mousewheel scrolling. _For example: Text widget inside SFrame can have mousewheel scrolling as well as SFrame._ |
@@ -672,7 +673,11 @@ This function returns sequences of rainbow colors hexcodes in order.
 
 ## Changelog
 
-- [**v1.0.1**](https://github.com/Saadmairaj/tkmacosx/releases/tag/v1.0.0)
+- [**v1.0.2**](https://github.com/Saadmairaj/tkmacosx/releases/tag/v1.0.2)
+
+  - Fix unknown color name "systemWindowBackgroundColor" ([#20](https://github.com/Saadmairaj/tkmacosx/issues/20))
+
+- [**v1.0.1**](https://github.com/Saadmairaj/tkmacosx/releases/tag/v1.0.1)
 
   - Fix widgets not auto-switch light/dark mode. ([#18](https://github.com/Saadmairaj/tkmacosx/issues/18))
   - Fix Button not working with ttk widgets. ([#19](https://github.com/Saadmairaj/tkmacosx/issues/19))

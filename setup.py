@@ -12,7 +12,7 @@ def get_long_description(path):
 attrs = dict(
     name='tkmacosx',
     version=__version__,
-    packages=find_packages(),
+    packages=find_packages(exclude=('test',)),
     long_description=get_long_description('README.md'),
     description='Tkmacosx is a Python library extension to the Tkinter module that let you change background color of the button on macOS.',
     long_description_content_type='text/markdown',
