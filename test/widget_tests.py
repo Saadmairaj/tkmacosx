@@ -1,4 +1,5 @@
 import tkinter
+import tkinter.ttk as ttk
 from tkmacosx import ColorVar
 from tkmacosx.utils import pixels_conv
 from tkmacosx.basewidgets.button_base import ButtonBase
@@ -521,6 +522,86 @@ class PixelSizeTests:
         self.checkPixelsParam(widget, 'width', 402, 403.4, 404.6, -402, 0, '5i',
                               keep_orig=self._keep_orig
                               )
+
+
+class ButtonOptionsTests:
+
+    def test_configure_activebitmap(self):
+        widget = self.create()
+        self.checkBitmapParam(widget, 'activebitmap')
+
+    def test_configure_activeimage(self):
+        widget = self.create()
+        self.checkImageParam(widget, 'activeimage')
+
+    def test_configure_bordercolor(self):
+        widget = self.create()
+        self.checkColorParam(widget, 'bordercolor')
+        widget['borderless'] = True
+        for c in ('#ff0000', '#00ff00', '#0000ff', '#123456',
+                  'red', 'green', 'blue', 'white', 'black', 'grey'):
+            widget['bordercolor'] = c
+            self.assertNotEqual(widget['bordercolor'], c)
+        
+        widget['borderless'] = False
+        for c in ('#ff0000', '#00ff00', '#0000ff', '#123456',
+                  'red', 'green', 'blue', 'white', 'black', 'grey'):
+            widget['bordercolor'] = c
+            self.assertEqual(widget['bordercolor'], c)
+
+    def test_configure_borderless(self):
+        widget = self.create()
+        self.checkBooleanParam(widget, 'borderless')
+        
+        if not (self._ttk_parent or self._ttk_parent_with_style):
+            org = self._master['bg']
+        
+        widget['borderless'] = True
+        for c in ('#ff0000', '#00ff00', '#0000ff', '#123456',
+                  'red', 'green', 'blue', 'white', 'black', 'grey'):
+            if self._ttk_parent or self._ttk_parent_with_style:
+                print(self._ttk_style)
+                self.assertEqual(widget['highlightbackground'], ttk.Style(
+                    self._master).lookup(self._ttk_style, "background"))
+                ttk.Style(self._master).configure(self._ttk_style, bg=c)
+            else:
+                self.assertEqual(widget['highlightbackground'], self._master['bg'])
+                self._master['bg'] = c
+        
+        widget['borderless'] = False
+        for c in ('#ff0000', '#00ff00', '#0000ff', '#123456',
+                  'red', 'green', 'blue', 'white', 'black', 'grey'):
+            if self._ttk_parent or self._ttk_parent_with_style:
+                self.assertNotEqual(widget['highlightbackground'], ttk.Style(
+                    self._master).lookup(self._ttk_style, "background"))
+                ttk.Style(self._master).configure(self._ttk_style, bg=c)
+            else:
+                self.assertNotEqual(widget['highlightbackground'], self._master['bg'])
+                self._master['bg'] = c
+
+        if not (self._ttk_parent or self._ttk_parent_with_style):
+            self._master['bg'] = org
+
+    def test_configure_disabledbackground(self):
+        widget = self.create()
+        self.checkColorParam(widget, 'disabledbackground')
+
+    def test_configure_focuscolor(self):
+        widget = self.create()
+        self.checkColorParam(widget, 'focuscolor')
+
+    def test_configure_focusthickness(self):
+        widget = self.create()
+        self.checkIntegerParam(
+            widget, 'focusthickness', 1, 20, 30, 0)
+
+    def test_configure_overforeground(self):
+        widget = self.create()
+        self.checkColorParam(widget, 'overforeground')
+
+    def test_configure_overbackground(self):
+        widget = self.create()
+        self.checkColorParam(widget, 'overbackground')
 
 
 def add_standard_options(*source_classes):
