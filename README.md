@@ -676,6 +676,7 @@ This function returns sequences of rainbow colors hexcodes in order.
 - [**v1.0.2**](https://github.com/Saadmairaj/tkmacosx/releases/tag/v1.0.2)
 
   - Fix unknown color name "systemWindowBackgroundColor" ([#20](https://github.com/Saadmairaj/tkmacosx/issues/20))
+  - Exclude test package in setup.py
 
 - [**v1.0.1**](https://github.com/Saadmairaj/tkmacosx/releases/tag/v1.0.1)
 
