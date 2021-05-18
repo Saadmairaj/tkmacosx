@@ -542,7 +542,7 @@ class ButtonOptionsTests:
                   'red', 'green', 'blue', 'white', 'black', 'grey'):
             widget['bordercolor'] = c
             self.assertNotEqual(widget['bordercolor'], c)
-        
+
         widget['borderless'] = False
         for c in ('#ff0000', '#00ff00', '#0000ff', '#123456',
                   'red', 'green', 'blue', 'white', 'black', 'grey'):
@@ -552,10 +552,10 @@ class ButtonOptionsTests:
     def test_configure_borderless(self):
         widget = self.create()
         self.checkBooleanParam(widget, 'borderless')
-        
+
         if not (self._ttk_parent or self._ttk_parent_with_style):
             org = self._master['bg']
-        
+
         widget['borderless'] = True
         for c in ('#ff0000', '#00ff00', '#0000ff', '#123456',
                   'red', 'green', 'blue', 'white', 'black', 'grey'):
@@ -565,9 +565,10 @@ class ButtonOptionsTests:
                     self._master).lookup(self._ttk_style, "background"))
                 ttk.Style(self._master).configure(self._ttk_style, bg=c)
             else:
-                self.assertEqual(widget['highlightbackground'], self._master['bg'])
+                self.assertEqual(
+                    widget['highlightbackground'], self._master['bg'])
                 self._master['bg'] = c
-        
+
         widget['borderless'] = False
         for c in ('#ff0000', '#00ff00', '#0000ff', '#123456',
                   'red', 'green', 'blue', 'white', 'black', 'grey'):
@@ -576,7 +577,8 @@ class ButtonOptionsTests:
                     self._master).lookup(self._ttk_style, "background"))
                 ttk.Style(self._master).configure(self._ttk_style, bg=c)
             else:
-                self.assertNotEqual(widget['highlightbackground'], self._master['bg'])
+                self.assertNotEqual(
+                    widget['highlightbackground'], self._master['bg'])
                 self._master['bg'] = c
 
         if not (self._ttk_parent or self._ttk_parent_with_style):

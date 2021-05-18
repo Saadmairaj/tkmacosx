@@ -4,8 +4,8 @@ import tkmacosx
 import tkinter.ttk as ttk
 
 from test.widget_tests import (add_standard_options, noconv,
-                               StandardOptionsTests, ButtonOptionsTests, 
-                               IntegerSizeTests, PixelSizeTests, 
+                               StandardOptionsTests, ButtonOptionsTests,
+                               IntegerSizeTests, PixelSizeTests,
                                AbstractWidgetTest)
 
 
@@ -81,7 +81,7 @@ class AbstractButtonTest(AbstractWidgetTest, PixelSizeTests):
             return tkmacosx.Button(self._master, **kwargs)
         if self._type == 'circle':
             return tkmacosx.CircleButton(self._master, **kwargs)
-    
+
     def test_configure_state(self):
         widget = self.create()
         self.checkEnumParam(widget, 'state', 'active',
@@ -90,13 +90,13 @@ class AbstractButtonTest(AbstractWidgetTest, PixelSizeTests):
     def test_configure_highlightbackground(self):
         widget = self.create()
         self.checkColorParam(widget, 'highlightbackground')
-        
+
         widget['borderless'] = True
         for c in ('#ff0000', '#00ff00', '#0000ff', '#123456',
                   'red', 'green', 'blue', 'white', 'black', 'grey'):
             widget['highlightbackground'] = c
             self.assertNotEqual(widget['highlightbackground'], c)
-        
+
         widget['borderless'] = False
         for c in ('#ff0000', '#00ff00', '#0000ff', '#123456',
                   'red', 'green', 'blue', 'white', 'black', 'grey'):
@@ -116,7 +116,7 @@ class ButtonTest(AbstractButtonTest, unittest.TestCase):
         'overforeground', 'overrelief', 'padx', 'pady', 'relief',
         'repeatdelay', 'repeatinterval', 'state', 'takefocus', 'text',
         'textvariable', 'underline', 'width')
-    
+
     _conv_pixels = round
     _ttk_parent = False
     _ttk_parent_with_style = False
@@ -126,7 +126,7 @@ class ButtonTest(AbstractButtonTest, unittest.TestCase):
 @add_standard_options(StandardOptionsTests, ButtonOptionsTests)
 class Button_ttk_Test(AbstractButtonTest, unittest.TestCase):
     OPTIONS = (
-        'bordercolor', 'borderless', 'highlightbackground', 
+        'bordercolor', 'borderless', 'highlightbackground',
         'highlightcolor', 'highlightthickness')
 
     _conv_pixels = round
@@ -136,7 +136,7 @@ class Button_ttk_Test(AbstractButtonTest, unittest.TestCase):
 @add_standard_options(StandardOptionsTests, ButtonOptionsTests)
 class Button_ttk_with_style_Test(AbstractButtonTest, unittest.TestCase):
     OPTIONS = (
-        'bordercolor', 'borderless', 'highlightbackground', 
+        'bordercolor', 'borderless', 'highlightbackground',
         'highlightcolor', 'highlightthickness')
 
     _conv_pixels = round
@@ -168,7 +168,7 @@ class CircleButtonTest(AbstractButtonTest, unittest.TestCase):
 @add_standard_options(StandardOptionsTests, ButtonOptionsTests)
 class CircleButton_ttk_Test(AbstractButtonTest, unittest.TestCase):
     OPTIONS = (
-        'bordercolor', 'borderless', 'highlightbackground', 
+        'bordercolor', 'borderless', 'highlightbackground',
         'highlightcolor', 'highlightthickness')
 
     _conv_pixels = round
@@ -179,7 +179,7 @@ class CircleButton_ttk_Test(AbstractButtonTest, unittest.TestCase):
 @add_standard_options(StandardOptionsTests, ButtonOptionsTests)
 class CirclButton_ttk_with_style_Test(AbstractButtonTest, unittest.TestCase):
     OPTIONS = (
-        'bordercolor', 'borderless', 'highlightbackground', 
+        'bordercolor', 'borderless', 'highlightbackground',
         'highlightcolor', 'highlightthickness')
 
     _conv_pixels = round
