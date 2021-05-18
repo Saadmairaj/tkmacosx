@@ -13,11 +13,12 @@
 #    limitations under the License.
 
 import tkinter
+from tkinter.constants import SEL_FIRST
 import tkinter.ttk as ttk
 from tkmacosx.utils import (SYSTEM_DEFAULT, STDOUT_WARNING,
                             _cnfmerge, _bind, _Canvas, check_param,
-                            _info_button, _on_press_color, 
-                            get_shade, check_function_equality)
+                            _info_button, _on_press_color, get_hex,
+                            get_shade, check_function_equality, check_light_dark)
 import tkmacosx.utils.colorvar_patches as cp
 
 
@@ -748,16 +749,33 @@ class _button_functions:
                 if self.focus_get() is None:
                     self._tmp_bg = self['bg']
                     # [BUG] winfo_rgb doesn't read mac system colors.
-                    color1 = self.winfo_rgb(self['highlightbackground'])
-                    color1 = [int((int(i/257) + 255)/2) for i in color1]
-                    color1 = '#%02x%02x%02x' % (color1[0], color1[1], color1[2])
+                    color1 = get_hex(self['highlightbackground'], self)
                     color2 = get_shade(color1, intensity, 'auto-120')
                     _Canvas._configure(self, 'configure', {'bg': color1}, None)
                     _Canvas._configure(self, ('itemconfigure', '_border'),
                             {'outline': color2}, None)
+
+                    if check_light_dark(
+                        get_hex(self['fg'], self), 
+                        intensity=200, 
+                        dark_value="darkgrey"
+                        ) == check_light_dark(
+                                get_hex(color1, self), 
+                                intensity=200, 
+                                dark_value="darkgrey"):
+                        self._tmp_fg = self['fg']
+                        _Canvas._configure(self, ('itemconfigure', '_txt'),
+                            {'fill': check_light_dark(
+                                get_hex(self['bg'], self), dark_value="darkgrey")}, None)
+                
                 if self.focus_get():
                     if getattr(self, '_tmp_bg', False):
-                        _Canvas._configure(self, 'configure',{'bg': self._tmp_bg}, None)
+                        _Canvas._configure(self, 'configure', {'bg': self._tmp_bg}, None)
+                    
+                    if getattr(self, '_tmp_fg', False):
+                        _Canvas._configure(self, ('itemconfigure', '_txt'),
+                            {'fill': self._tmp_fg}, None)
+                    
                     color = get_shade(self['bg'], intensity, 'auto-120')
                     _Canvas._configure(self, ('itemconfigure', '_border'),
                              {'outline': color}, None)
