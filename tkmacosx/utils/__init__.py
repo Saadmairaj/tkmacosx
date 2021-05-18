@@ -16,11 +16,19 @@ import re
 import sys
 import colour
 import tkinter
+import subprocess
 from tkinter import ttk
 from tkmacosx.utils.check_parameter import Check_Common_Parameters, pixels_conv
 
 
 STDOUT_WARNING = True
+
+
+cmds = {
+    "appearance": "defaults read -g AppleInterfaceStyle",
+    "accent": "defaults read -g AppleAccentColor",
+    "hightlight": "defaults read -g AppleHighlightColor",
+}
 
 
 class _appearanceColor:
@@ -326,17 +334,51 @@ class _Canvas(tkinter.Widget):
         return tuple(ids)
 
 
-def check_appearance(cmd='defaults read -g AppleInterfaceStyle'):
-    """### Checks DARK/LIGHT mode of macos. Returns Boolean.
+def check_appearance(cmd=cmds['appearance'], output=False):
+    """### Checks appearance of macos. Returns Boolean.
     #### Args:
     - `cmd`: Give commands. Like to check DARK/LIGHT mode \
             the command is `'defaults read -g AppleInterfaceStyle'` .
     """
-    import subprocess
-    cmd = 'defaults read -g AppleInterfaceStyle'
-    p = subprocess.Popen(cmd, stdout=subprocess.PIPE,
-                         stderr=subprocess.PIPE, shell=True)
-    return bool(p.communicate()[0])
+    out, err = subprocess.Popen(cmd, stdout=subprocess.PIPE, 
+                        stderr=subprocess.PIPE,
+                        shell=True).communicate()
+    if err:
+        err = err.decode()
+        if err.find('does not exist'):
+            return False
+        return err
+    
+    if output:
+        return out.decode().splitlines()[0]
+    return bool(out.decode().splitlines()[0])
+
+
+def check_accent_color():
+    """Checks for accent color and returns hex code."""
+    color = {
+        '4' : "#2f7bf6",
+        '5' : "#9a56a3",
+        '6' : "#e55d9d",
+        '0' : "#ec5f5d",
+        '1' : "#e8883a",
+        '2' : "#f3bb50",
+        '3' : "#78b756",
+        '-1' : "#8c8c8c",
+    }
+    value = check_appearance(cmd=cmds['accent'], output=True)
+    return color.get(value, color['4'])
+
+
+def check_highlight_color(hex_code=True):
+    """Checks for highlight color and returns the 
+    hex/hsl color with color name."""
+    value = check_appearance(cmds['highlight'], output=True)
+    if value:
+        *value, color = value.split(' ')
+        if hex_code:
+            value = colour.hsl2hex(value)
+        return value, color
 
 
 def check_function_equality(func1, func2):
