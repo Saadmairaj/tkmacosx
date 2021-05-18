@@ -13,6 +13,7 @@
 #    limitations under the License.
 
 import tkinter
+import tkinter.ttk as ttk
 from tkmacosx.utils import (SYSTEM_DEFAULT, STDOUT_WARNING,
                             _cnfmerge, _bind, _Canvas, check_param,
                             _info_button, _on_press_color, 
@@ -136,25 +137,32 @@ class _button_properties:
     def borderless(self, kw):
         def _get_master_bg():
             """Internal function."""
-            try: 
-                return self.master['bg']
-            except tkinter.TclError:
-                if not _warning_msg_shown[0] and STDOUT_WARNING:
-                    print('WARNING: "borderless" option of '
-                        'tkmacosx Button doesn\'t work with ttk widgets. '
-                        'Bordercolor/highlightbackground can be set manually '
-                        'with "highlightbackground" or "bordercolor" options.\n')
-                    _warning_msg_shown[0] = True
-                return self.cnf.get('bordercolor', self.cnf['highlightbackground'])
+            ttk_widget_types = tuple(
+                getattr(ttk, i) for i in ttk.__all__ if isinstance(getattr(ttk, i), type))
+            if isinstance(self.master, ttk_widget_types):
+                try:
+                    style = self.master['style'] or 'T' + self.master.__class__.__name__
+                    ttk_bg = ttk.Style(self.master).lookup(style, "background")
+                    return ttk_bg
+                except tkinter.TclError:
+                    if not _warning_msg_shown[0] and STDOUT_WARNING:
+                        print('WARNING: "borderless" option is partially supported with ttk widgets. '
+                            'Bordercolor/highlightbackground can be set manually '
+                            'with "highlightbackground" or "bordercolor" options.\n')
+                        _warning_msg_shown[0] = True
+                    return self.cnf.get('bordercolor', self.cnf['highlightbackground'])
+            return self.master['bg']
 
         _opt = {}
         if bool(kw.get('borderless')) or self.cnf.get('borderless'):
             if not check_function_equality(self.master.config, self._get_functions('borderless', kw)):
                 self.master.config = self.master.configure = self._get_functions(
                     'borderless', kw)
-            self.cnf['highlightbackground'] = self.cnf['bordercolor'] = _get_master_bg()
-            _opt[1] = [('itemconfigure', '_bd_color'), {'outline': _get_master_bg()}, None]
-            _opt[2] = ['configure', {'highlightbackground': _get_master_bg()}, None]
+            master_bg = _get_master_bg()
+            self.cnf['highlightbackground'] = self.cnf['bordercolor'] = master_bg
+            _opt[1] = [('itemconfigure', '_bd_color'), {'outline': master_bg}, None]
+            _opt[2] = ['configure', {'highlightbackground': master_bg}, None]
+
         elif not bool(kw.get('borderless', True)) or not self.cnf.get('borderless'):
             if self.cnf.get('bordercolor') == _get_master_bg():
                 self.cnf.pop('bordercolor', None)
