@@ -558,7 +558,7 @@ class ButtonOptionsTests:
 
         widget['borderless'] = True
         for c in ('#ff0000', '#00ff00', '#0000ff', '#123456',
-                  'red', 'green', 'blue', 'white', 'black', 'grey'):
+                  'red', 'green', 'blue', 'grey'):
             if self._ttk_parent or self._ttk_parent_with_style:
                 print(self._ttk_style)
                 self.assertEqual(widget['highlightbackground'], ttk.Style(
@@ -571,7 +571,7 @@ class ButtonOptionsTests:
 
         widget['borderless'] = False
         for c in ('#ff0000', '#00ff00', '#0000ff', '#123456',
-                  'red', 'green', 'blue', 'white', 'black', 'grey'):
+                  'red', 'green', 'blue', 'grey'):
             if self._ttk_parent or self._ttk_parent_with_style:
                 self.assertNotEqual(widget['highlightbackground'], ttk.Style(
                     self._master).lookup(self._ttk_style, "background"))
