@@ -1004,7 +1004,7 @@ class ButtonBase(_Canvas, _button_functions):
             if i in BUTTON_FEATURES:
                 cnf[i] = kw.pop(i, None)
 
-        cnf['fg'] = cnf['foreground'] = cnf.get('fg', cnf.get('foreground', SYSTEM_DEFAULT.fg))
+        cnf['fg'] = cnf['foreground'] = cnf.get('fg', cnf.get('foreground', "black"))
         cnf['anchor'] = cnf.get('anchor', 'center')
         cnf['justify'] = cnf.get('justify', 'center')
         cnf['borderless'] = cnf.get('borderless', False)
@@ -1037,7 +1037,7 @@ class ButtonBase(_Canvas, _button_functions):
             kw['height'] = kw.get('height', 24)
 
         kw['takefocus'] = kw.get('takefocus', 1)
-        kw['bg'] = kw.pop('bg', kw.pop('background', SYSTEM_DEFAULT.bg))
+        kw['bg'] = kw.pop('bg', kw.pop('background', 'white'))
         kw['highlightthickness'] = kw.get('highlightthickness', 0)
 
         _Canvas.__init__(self, master=master, **kw)
