@@ -673,6 +673,15 @@ This function returns sequences of rainbow colors hexcodes in order.
 
 ## Changelog
 
+- [**v1.0.3](https://github.com/Saadmairaj/tkmacosx/releases/tag/v1.0.3)
+
+  - Fix Button face color and foreground color.
+  - Fix Button border line color changing to black when swtiching from dark to light mode.
+  - Fix washed out background color of button when window is not in focus ([#28](https://github.com/Saadmairaj/tkmacosx/pull/28))
+  - Remove adapting highlightbackground for consistency ([#27](https://github.com/Saadmairaj/tkmacosx/issues/27))
+  - Increase button border intensity by 0.15
+  - Minor improvements to the overall appearance of the button.
+
 - [**v1.0.2**](https://github.com/Saadmairaj/tkmacosx/releases/tag/v1.0.2)
 
   - Fix unknown color name "systemWindowBackgroundColor" ([#20](https://github.com/Saadmairaj/tkmacosx/issues/20))
