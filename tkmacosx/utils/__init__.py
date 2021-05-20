@@ -344,20 +344,22 @@ def check_function_equality(func1, func2):
     return func1.__code__.co_code == func2.__code__.co_code
 
 
-def check_light_dark(value, intensity=110):
+def check_light_dark(value, intensity=110, light_value="white", dark_value="black"):
     """Tells if the given RGB or HEX code is lighter or darker color.
 
     Args:
         value [str, tuple]: Give sequence of RBG values and hexcode.
         intensity (int): The measurable amount of a brightness.
+        light_value (any): Value returned if lighter. Default is white.
+        dark_value (any): Value returned if darker. Default is black.
 
     Return:
-        str('white') / str('black')"""
+        any: light_value/dark_value"""
     if isinstance(value, str) and value.startswith('#'):
         value = hex_to_rgb(value)
     if (value[0]*0.299 + value[1]*0.587 + value[2]*0.114) > intensity:
-        return 'black'
-    return 'white'
+        return dark_value
+    return light_value
 
 
 def check_param(master, name, cnf={}, **kw):
@@ -433,6 +435,29 @@ def get_shade(color, shade, mode='auto'):
             c = 0.0
         color[index] = int(c*255.0)
     return '#%02x%02x%02x' % (color[0], color[1], color[2])
+
+
+def get_hex(color, master=None):
+    """
+    Get hex code from tkinter named colors
+
+    Args:
+        color (str): Valid colour name
+        master (tkinter.Widget, optional): To get systemDeafult hex,
+            give master or it will raise an error. Defaults to None.
+
+    Returns:
+        str: Full size HEX code
+    """
+    if color == "systemWindowBackgroundColor":
+        color = "#ebeceb"
+        if check_appearance():
+            color = "#333133"
+    if master is None:
+        c = colour.Color(color)
+        return c.hex
+    c = [int((int(i/257) + 255)/2) for i in master.winfo_rgb(color)]
+    return '#%02x%02x%02x' % (c[0], c[1], c[2])
 
 
 def gradient(iteration):
