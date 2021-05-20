@@ -438,11 +438,12 @@ def get_shade(color, shade, mode='auto'):
 
 
 def get_hex(color, master=None):
-    """Get hex code from tkinter named colors
+    """
+    Get hex code from tkinter named colors
 
     Args:
         color (str): Valid colour name
-        master (tkinter.Widget, optional): To get systemDeafult hex, 
+        master (tkinter.Widget, optional): To get systemDeafult hex,
             give master or it will raise an error. Defaults to None.
 
     Returns:
