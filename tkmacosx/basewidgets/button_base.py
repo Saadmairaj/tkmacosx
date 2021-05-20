@@ -47,7 +47,7 @@ BUTTON_ITEMS = (
     '_txt', '_bit', '_img', '_bd_color', '_border', '_tf'
 )
 
-BORDER_INTENSITY = 0.06
+BORDER_INTENSITY = 0.075
 
 _warning_msg_shown = [False]
 
