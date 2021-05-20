@@ -754,28 +754,9 @@ class _button_functions:
                     _Canvas._configure(self, 'configure', {'bg': color1}, None)
                     _Canvas._configure(self, ('itemconfigure', '_border'),
                             {'outline': color2}, None)
-
-                    if check_light_dark(
-                        get_hex(self['fg'], self), 
-                        intensity=200, 
-                        dark_value="darkgrey"
-                        ) == check_light_dark(
-                                get_hex(color1, self), 
-                                intensity=200, 
-                                dark_value="darkgrey"):
-                        self._tmp_fg = self['fg']
-                        _Canvas._configure(self, ('itemconfigure', '_txt'),
-                            {'fill': check_light_dark(
-                                get_hex(self['bg'], self), dark_value="darkgrey")}, None)
-                
                 if self.focus_get():
                     if getattr(self, '_tmp_bg', False):
-                        _Canvas._configure(self, 'configure', {'bg': self._tmp_bg}, None)
-                    
-                    if getattr(self, '_tmp_fg', False):
-                        _Canvas._configure(self, ('itemconfigure', '_txt'),
-                            {'fill': self._tmp_fg}, None)
-                    
+                        _Canvas._configure(self, 'configure', {'bg': self._tmp_bg}, None)                    
                     color = get_shade(self['bg'], intensity, 'auto-120')
                     _Canvas._configure(self, ('itemconfigure', '_border'),
                              {'outline': color}, None)
@@ -1032,7 +1013,7 @@ class ButtonBase(_Canvas, _button_functions):
             if i in BUTTON_FEATURES:
                 cnf[i] = kw.pop(i, None)
 
-        cnf['fg'] = cnf['foreground'] = cnf.get('fg', cnf.get('foreground', SYSTEM_DEFAULT.fg))
+        cnf['fg'] = cnf['foreground'] = cnf.get('fg', cnf.get('foreground', 'black'))
         cnf['anchor'] = cnf.get('anchor', 'center')
         cnf['justify'] = cnf.get('justify', 'center')
         cnf['borderless'] = cnf.get('borderless', False)
@@ -1065,7 +1046,7 @@ class ButtonBase(_Canvas, _button_functions):
             kw['height'] = kw.get('height', 24)
 
         kw['takefocus'] = kw.get('takefocus', 1)
-        kw['bg'] = kw.pop('bg', kw.pop('background', SYSTEM_DEFAULT.bg))
+        kw['bg'] = kw.pop('bg', kw.pop('background', 'white'))
         kw['highlightthickness'] = kw.get('highlightthickness', 0)
 
         _Canvas.__init__(self, master=master, **kw)

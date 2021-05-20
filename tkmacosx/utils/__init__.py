@@ -448,6 +448,10 @@ def get_hex(color, master=None):
     Returns:
         str: Full size HEX code
     """
+    if color == "systemWindowBackgroundColor":
+        color = "#ebeceb"
+        if check_appearance():
+            color = "#333133"
     if master is None:
         c = colour.Color(color)
         return c.hex
