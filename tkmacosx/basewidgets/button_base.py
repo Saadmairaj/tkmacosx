@@ -168,13 +168,9 @@ class _button_properties:
             if self.cnf.get('bordercolor') == _get_master_bg():
                 self.cnf.pop('bordercolor', None)
                 self.cnf.pop('highlightbackground', None)
-            bd_color = self.cnf.get(
-                'bordercolor', get_shade(self['bg'], 0.04, 'auto-120'))
+            bd_color = self.cnf.get('bordercolor', SYSTEM_DEFAULT.bg)
             if bd_color == '':
-                bd_color = get_shade(self['bg'], 0.04, 'auto-120')
-            elif bd_color.lower() == 'default':
-                bd_color = get_shade('white', 0.04, 'auto-120')
-            self.cnf.update({'bordercolor': bd_color})
+                bd_color = SYSTEM_DEFAULT.bg
             self.cnf['highlightbackground'] = self.cnf['bordercolor'] = bd_color
             if self.itemcget('_bd_color', 'outline') != bd_color:
                 _opt[1] = [('itemconfigure', '_bd_color'), {'outline': bd_color}, None]
@@ -230,9 +226,7 @@ class _button_properties:
                     {'className': 'overforeground', 'sequence': '<Leave>',
                     'func': fn.get('<Leave>')}]
             if self._mouse_state_condition():
-                # [issue-3] doesn't change if overrelief is on.
-                # [issue-3] (FIXED) using after with 0ms delay
-                #           fixes the issue. To be safe delay is 1ms.
+    
                 self.after(1, lambda: _Canvas._configure(self,
                     ('itemconfigure', '_txt'), {'fill': kw.get('overforeground')}, None))
         elif kw.get('overforeground') == '':
@@ -409,7 +403,7 @@ class _button_items:
     
     def _bd_color(self, *ags, **kw):
         "Border color item."
-        bd_color = self.cnf.get('bordercolor', get_shade(self['bg'], 0.04, 'auto-120'))
+        bd_color = self.cnf.get('bordercolor', SYSTEM_DEFAULT.bg)
         if self._type == 'circle':
             pad = 2
             width = r = int(self.cnf.get('width', 87)/2)  # radius = x = y (in pixels)
@@ -599,8 +593,6 @@ class _button_functions:
                            '<Leave>': if_state(lambda _: self._configure(
                                 'configure', {'_relief': self._rel[0]}))},
 
-            # [issue-3] doesn't change if overrelief is on.
-            # [issue-3] (FIXED) using after with 0ms delay fixes the issue. To be safe delay is 1ms.
             'overforeground': {'<Enter>': if_state(lambda _: self.after(1, overfg, 'enter')),
                                '<Leave>': if_state(lambda _: overfg('leave'))},
             
@@ -815,9 +807,7 @@ class _button_functions:
             cur_focus.focus()
         else:
             self.master.focus()
-            # [issue-7] Need a better fix to get focus back to the button if it has it previously
             if cur_focus == self:
-                # [issue-7] (fixed) using after with 1ms delay solves the issue.
                 self._after_IDs[3] = self.after(1, self.focus)
 
     def _active(self, value):
@@ -1012,7 +1002,7 @@ class ButtonBase(_Canvas, _button_functions):
         for i in kw.copy().keys():
             if i in BUTTON_FEATURES:
                 cnf[i] = kw.pop(i, None)
-
+                
         cnf['fg'] = cnf['foreground'] = cnf.get('fg', cnf.get('foreground', 'black'))
         cnf['anchor'] = cnf.get('anchor', 'center')
         cnf['justify'] = cnf.get('justify', 'center')
@@ -1052,7 +1042,7 @@ class ButtonBase(_Canvas, _button_functions):
         _Canvas.__init__(self, master=master, **kw)
         self.cnf = check_param(self, 'button', **cnf)
         self.cnf['bordercolor'] = self.cnf['highlightbackground'] = self.cnf.get(
-            'bordercolor', self.cnf.get('highlightbackground', get_shade(self['bg'], 0.04, 'auto-120')))
+            'bordercolor', self.cnf.get('highlightbackground', SYSTEM_DEFAULT.bg))
 
         self._buttons.append(self)
         self._size = (self.winfo_width(), self.winfo_height())
