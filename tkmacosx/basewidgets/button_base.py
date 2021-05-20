@@ -13,12 +13,11 @@
 #    limitations under the License.
 
 import tkinter
-from tkinter.constants import SEL_FIRST
 import tkinter.ttk as ttk
 from tkmacosx.utils import (SYSTEM_DEFAULT, STDOUT_WARNING,
                             _cnfmerge, _bind, _Canvas, check_param,
                             _info_button, _on_press_color, get_hex,
-                            get_shade, check_function_equality, check_light_dark)
+                            get_shade, check_function_equality)
 import tkmacosx.utils.colorvar_patches as cp
 
 
