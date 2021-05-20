@@ -23,11 +23,10 @@ from tkmacosx.utils.check_parameter import Check_Common_Parameters, pixels_conv
 
 STDOUT_WARNING = True
 
-
-cmds = {
+__appearance_cmds = {
     "appearance": "defaults read -g AppleInterfaceStyle",
     "accent": "defaults read -g AppleAccentColor",
-    "hightlight": "defaults read -g AppleHighlightColor",
+    "highlight": "defaults read -g AppleHighlightColor",
 }
 
 
@@ -334,50 +333,57 @@ class _Canvas(tkinter.Widget):
         return tuple(ids)
 
 
-def check_appearance(cmd=cmds['appearance'], output=False):
-    """### Checks appearance of macos. Returns Boolean.
-    #### Args:
-    - `cmd`: Give commands. Like to check DARK/LIGHT mode \
-            the command is `'defaults read -g AppleInterfaceStyle'` .
-    """
-    out, err = subprocess.Popen(cmd, stdout=subprocess.PIPE, 
-                        stderr=subprocess.PIPE,
-                        shell=True).communicate()
+def __run_command(cmd, output):
+    """Internal function.
+
+    Don't call this function."""
+    out, err = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE,
+                                shell=True).communicate()
     if err:
         err = err.decode()
         if err.find('does not exist'):
             return False
         return err
-    
+
     if output:
         return out.decode().splitlines()[0]
     return bool(out.decode().splitlines()[0])
 
 
+def check_appearance():
+    """Checks appearance of macos light/dark mode. Returns Boolean"""
+    return __run_command(
+        cmd=__appearance_cmds['appearance'], output=False)
+
+
 def check_accent_color():
     """Checks for accent color and returns hex code."""
     color = {
-        '4' : "#2f7bf6",
-        '5' : "#9a56a3",
-        '6' : "#e55d9d",
-        '0' : "#ec5f5d",
-        '1' : "#e8883a",
-        '2' : "#f3bb50",
-        '3' : "#78b756",
-        '-1' : "#8c8c8c",
-    }
-    value = check_appearance(cmd=cmds['accent'], output=True)
+        '4': "#2f7bf6",
+        '5': "#9a56a3",
+        '6': "#e55d9d",
+        '0': "#ec5f5d",
+        '1': "#e8883a",
+        '2': "#f3bb50",
+        '3': "#78b756",
+        '-1': "#8c8c8c"}
+    value = __run_command(cmd=__appearance_cmds['accent'], output=True)
     return color.get(value, color['4'])
 
 
 def check_highlight_color(hex_code=True):
     """Checks for highlight color and returns the 
     hex/hsl color with color name."""
-    value = check_appearance(cmds['highlight'], output=True)
+    value = __run_command(cmd=__appearance_cmds['highlight'], output=True)
     if value:
         *value, color = value.split(' ')
+        value = tuple(float(v) for v in value)
         if hex_code:
-            value = colour.hsl2hex(value)
+            try:
+                value = colour.Color(color).get_hex()
+            except:
+                value = colour.hsl2hex(value)
         return value, color
 
 
@@ -491,7 +497,8 @@ def gradient(iteration):
     combo = ((2, 1, 0), (2, 0, 1), (0, 2, 1), (0, 1, 2), (1, 0, 2), (1, 2, 0))
     step = float(len(combo)) / float(iteration)
     _list.append('#%02x%02x%02x' % (round(rgb[0]*255),
-                                    round(rgb[1]*255), round(rgb[2]*255)))
+                                    round(rgb[1]*255),
+                                    round(rgb[2]*255)))
     for i in range(iteration):
         if (rgb[combo[index][1]] == 1.0 and operation == '+') or \
            (rgb[combo[index][1]] == 0.0 and operation == '-'):
@@ -499,14 +506,18 @@ def gradient(iteration):
             index += 1
         rgb[combo[index][1]] = ops[operation](rgb[combo[index][1]], step)
         _list.append('#%02x%02x%02x' % (round(rgb[0]*255),
-                                        round(rgb[1]*255), round(rgb[2]*255)))
+                                        round(rgb[1]*255),
+                                        round(rgb[2]*255)))
     _list.append('#%02x%02x%02x' % (round(1.0*255),
-                                    round(0.0*255), round(0.0*255)))
+                                    round(0.0*255),
+                                    round(0.0*255)))
     return _list
 
 
 __all__ = [
     'check_appearance',
+    'check_accent_color',
+    'check_highlight_color',
     'check_light_dark',
     'delta',
     'get_shade',
