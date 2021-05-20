@@ -673,7 +673,7 @@ This function returns sequences of rainbow colors hexcodes in order.
 
 ## Changelog
 
-- [**v1.0.3](https://github.com/Saadmairaj/tkmacosx/releases/tag/v1.0.3)
+- [**v1.0.3**](https://github.com/Saadmairaj/tkmacosx/releases/tag/v1.0.3)
 
   - Fix Button face color and foreground color.
   - Fix Button border line color changing to black when swtiching from dark to light mode.
