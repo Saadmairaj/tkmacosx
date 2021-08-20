@@ -48,8 +48,8 @@ class _appearanceColor:
                 return True
         except Exception:
             if not self._warning_msg_shown and STDOUT_WARNING:
-                print("WARNING: Appearance colours are not either "
-                      "supported with the current tkinter or the "
+                print("WARNING: Appearance colors are either not"
+                      "supported with this tkinter or the "
                       "colors doesn't exist on this Mac.")
                 self._warning_msg_shown = True
         return False
