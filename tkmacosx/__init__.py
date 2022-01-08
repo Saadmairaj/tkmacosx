@@ -22,7 +22,7 @@ Read more about tkmacosx in detail on
 https://github.com/Saadmairaj/tkmacosx#tkmacosx
 """
 
-__version__ = '1.0.3'
+__version__ = '1.0.4'
 __author__ = 'Saad Mairaj'
 
 from tkmacosx.variables import ColorVar, DictVar, SaveVar
