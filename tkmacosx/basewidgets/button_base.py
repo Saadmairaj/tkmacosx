@@ -423,7 +423,7 @@ class _button_items:
         bo_color = get_shade(self['bg'], BORDER_INTENSITY, 'auto-120')
         if self._type == 'circle':
             pad = 2
-            r = int(self.cnf.get('width', 87)/2)  # radius = x = y
+            r = int(self.cnf.get('width', 87)/2)  # radius = x = y (in pixels)
             _bo_points = (pad, pad, r*2-(pad+1), r*2-(pad+1))
             return self._create('oval', _bo_points, {
                 'tag': '_border', 'outline': self.cnf.get('bordercolor', bo_color) })
@@ -443,7 +443,7 @@ class _button_items:
         if self._type == 'circle':
             pad = 1
             width = self.cnf.get('focusthickness', 2)
-            r = int(self.cnf.get('width', 87)/2)  # radius = x = y
+            r = int(self.cnf.get('width', 87)/2)  # radius = x = y (in pixels)
             _tk_points = (pad+width, pad+width, r*2-width-pad, r*2-width-pad)
             return self._create('oval', _tk_points, {
                     'tag': '_tf', 'width': width,
@@ -492,9 +492,11 @@ class _button_functions:
         con2 = bool(self.winfo_containing(*self.winfo_pointerxy()) == self)
         return con1 and con2
     
-    def _make_dictionaries(self, cnf={}, kw={}):
+    def _make_dictionaries(self, cnf=None, kw=None):
         """Internal function.\n
         Merges kw into cnf and removes None values."""
+        cnf = cnf or {}
+        kw = kw or {}
         kw['bordercolor'] = kw['highlightbackground'] = kw.get(
             'bordercolor', kw.get('highlightbackground'))
         kw = {k: v for k, v in kw.items() if v is not None}
@@ -867,7 +869,7 @@ class _button_functions:
             if self.cnf.get('repeatdelay', 0) and self.cnf.get('repeatinterval', 0) and self._rpinloop:
                 self._rpin = self.after(self.cnf.get('repeatinterval', 0), cmd)
             if self.cnf.get('command'):
-                self.cnf['command']() 
+                self.cnf['command']()
 
         def on_enter(*a):
             """Internal function.\n
@@ -910,6 +912,23 @@ class _button_functions:
         _bind(self, {'className': 'on_press_enter', 'sequence': '<Enter>'},
               {'className': 'on_press_leave', 'sequence': '<Leave>'},
               {'className': 'button_command', 'sequence': '<ButtonRelease-1>'})
+    
+    def _on_spacebar_press(self, *ags):
+        """Internal function. Triggers when spacebar is pressed"""
+        _bind(self,
+            {'className': 'spacebar_tab_remove','sequence': '<Tab>', 'func': self._on_release}
+        )
+        self._active("on_press")
+        if self.cnf.get('command'):
+            self.cnf['command']()
+
+    def _on_spacebar_release(self, *ags):
+        """Internal function. Triggers when the spacebar is released"""
+        _bind(self,
+            {'className': 'spacebar_tab_remove','sequence': '<Tab>'}
+        )
+        if ags and ags[0].keysym == 'space':
+            self._on_release(*ags)
 
     def _compound(self, flag, width, height):
         """Internal function.\n
@@ -996,12 +1015,12 @@ class ButtonBase(_Canvas, _button_functions):
         self._fixed_size = {'w': False, 'h': False}
         self._var_cb = None
         self.cnf = {}
-        
+
         cnf = {}
         for i in kw.copy().keys():
             if i in BUTTON_FEATURES:
                 cnf[i] = kw.pop(i, None)
-                
+
         cnf['fg'] = cnf['foreground'] = cnf.get('fg', cnf.get('foreground', 'black'))
         cnf['anchor'] = cnf.get('anchor', 'center')
         cnf['justify'] = cnf.get('justify', 'center')
@@ -1031,8 +1050,8 @@ class ButtonBase(_Canvas, _button_functions):
             ra = int(cnf['radius']*2 + 4)
             kw['width'] = kw['height'] = kw.get('width', kw.get('height', ra))
         else:
-            kw['width'] = kw.get('width', 87)
-            kw['height'] = kw.get('height', 24)
+            kw['width'] = cnf.get('width', 87)
+            kw['height'] = cnf.get('height', 24)
 
         kw['takefocus'] = kw.get('takefocus', 1)
         kw['bg'] = kw.pop('bg', kw.pop('background', 'white'))
@@ -1053,11 +1072,12 @@ class ButtonBase(_Canvas, _button_functions):
             self._rel = ('flat', False)
 
         _bind(self,
-              {'className': 'button_release',
-                  'sequence': '<ButtonRelease-1>', 'func': self._on_release},
-              {'className': 'button_press',
-                  'sequence': '<Button-1>', 'func': self._on_press},
-              {'className': 'set_size', 'sequence': '<Configure>', 'func': self._set_size})
+              {'className': 'button_release','sequence': '<ButtonRelease-1>', 'func': self._on_release},
+              {'className': 'button_press','sequence': '<Button-1>', 'func': self._on_press},
+              {'className': 'set_size', 'sequence': '<Configure>', 'func': self._set_size},
+              {'className': 'button_spacebar', 'sequence': '<space>', 'func': self._on_spacebar_press},
+              {'className': 'button_spacebar', 'sequence': '<KeyRelease>', 'func': self._on_spacebar_release}
+        )
 
         self._focus_in_out(BORDER_INTENSITY)
         self._configure1(self.cnf)
