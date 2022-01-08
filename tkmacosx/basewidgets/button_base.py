@@ -952,8 +952,8 @@ class _button_functions:
         item_height = bbox[3] - bbox[1]
         default_padx = 2 + int(item_width/2)
         default_pady = 0 + int(item_height/2)
-        width = self.cnf['width'] = self.winfo_width()
-        height = self.cnf['height'] = self.winfo_height()
+        width = self.cnf['width'] = self.cnf.get('width', self.winfo_width())
+        height = self.cnf['height'] = self.cnf.get('height', self.winfo_height())
 
         # Center
         x = width / 2
