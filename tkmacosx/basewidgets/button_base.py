@@ -22,23 +22,23 @@ import tkmacosx.utils.colorvar_patches as cp
 
 
 BUTTON_PROPERTIES = [
-    'activebackground', 'activeforeground', 'anchor', 'background', 
-    'bd', 'bg', 'bitmap', 'borderwidth', 'command', 'compound', 'cursor', 
-    'disabledforeground', 'fg', 'font', 'foreground', 'height', 
-    'highlightbackground', 'highlightcolor', 'highlightthickness', 'image', 
-    'justify', 'overrelief', 'padx', 'pady', 'relief', 'repeatdelay', 
-    'repeatinterval', 'state', 'takefocus', 'text', 'textvariable', 
+    'activebackground', 'activeforeground', 'anchor', 'background',
+    'bd', 'bg', 'bitmap', 'borderwidth', 'command', 'compound', 'cursor',
+    'disabledforeground', 'fg', 'font', 'foreground', 'height',
+    'highlightbackground', 'highlightcolor', 'highlightthickness', 'image',
+    'justify', 'overrelief', 'padx', 'pady', 'relief', 'repeatdelay',
+    'repeatinterval', 'state', 'takefocus', 'text', 'textvariable',
     'underline', 'width'
 ]
 
 
 BUTTON_FEATURES = (
-    'overbackground', 'overforeground', 'activeimage', 'activebitmap', 
-    'anchor', 'bitmap', 'bordercolor', 'borderless', 'command', 'compound', 
-    'disabledforeground', 'justify', 'disabledbackground', 'fg', 'font', 
-    'foreground', 'height', 'image', 'overrelief', 'padx', 'pady', 'repeatdelay', 
-    'repeatinterval', 'text', 'textvariable', 'underline', 'width', 'state', 
-    'focusthickness', 'focuscolor', 'highlightbackground', 'activebackground', 
+    'overbackground', 'overforeground', 'activeimage', 'activebitmap',
+    'anchor', 'bitmap', 'bordercolor', 'borderless', 'command', 'compound',
+    'disabledforeground', 'justify', 'disabledbackground', 'fg', 'font',
+    'foreground', 'height', 'image', 'overrelief', 'padx', 'pady', 'repeatdelay',
+    'repeatinterval', 'text', 'textvariable', 'underline', 'width', 'state',
+    'focusthickness', 'focuscolor', 'highlightbackground', 'activebackground',
     'activeforeground'
 )
 
@@ -63,10 +63,10 @@ class _button_properties:
             state = 'disabled' if self.cnf.get('state') in (
                 'disabled', 'disable') else 'normal'
             _opt = dict(state=state, **{i: kw.get(i, self.cnf.get(i))
-                                    for i in ('anchor', cmd)})
+                                        for i in ('anchor', cmd)})
             return (('itemconfigure', tag), _opt, None)
         self.delete(tag)
-    
+
     def _active_bit_img(self, cmd, kw):
         tag = '_bit' if cmd == 'activebitmap' else '_img'
         name = cmd.rsplit('active')[-1]
@@ -77,16 +77,17 @@ class _button_properties:
     def _item(self, cmd, kw):
         self.cnf['width'] = self.winfo_width()
         self.cnf['height'] = self.winfo_height()
-        
-        r1 = self._compound(self.cnf.get('compound'), self.cnf.get('width'), self.cnf.get('height'))
+
+        r1 = self._compound(self.cnf.get('compound'),
+                            self.cnf.get('width'), self.cnf.get('height'))
         r2 = {cmd: ((self.cnf['width']/2), self.cnf['height']/2)}
         return r1 or r2
-    
+
     def _size_opts(self):
         _opt = {}
         for i in ('text', 'font', 'textvariable', 'image', 'bitmap',
-                    'compound', 'padx', 'pady', 'activeimage',
-                    'activebitmap'):
+                  'compound', 'padx', 'pady', 'activeimage',
+                  'activebitmap'):
             cond1 = self.cnf.get(i, '') != ''
             if cond1 and i == 'activeimage':
                 _opt['image'] = self.cnf[i]
@@ -99,9 +100,9 @@ class _button_properties:
     # These are properties of button widget:
     def _border(self, kw):
         return [('itemconfigure', '_border'),
-            {'outline': get_shade(self['bg'], 
-                BORDER_INTENSITY, 'auto-120')}, None]
-    
+                {'outline': get_shade(self['bg'],
+                                      BORDER_INTENSITY, 'auto-120')}, None]
+
     def _bit(self, kw):
         return _button_properties._item(self, '_bit', kw)
 
@@ -114,20 +115,21 @@ class _button_properties:
     def activebackground(self, kw):
         color = None
         if kw.get('activebackground', '') != '':
-            color = kw.get('activebackground', self.cnf.get('activebackground'))
+            color = kw.get('activebackground',
+                           self.cnf.get('activebackground'))
         return [self, {'tag': '_activebg',
-                        'width':  self.winfo_width(),
-                        'height': self.winfo_height(),
-                        'color': color}]
-    
+                       'width':  self.winfo_width(),
+                       'height': self.winfo_height(),
+                       'color': color}]
+
     def activeforeground(self, kw):
         if self['state'] in ('pressed', 'active'):
             return (('itemconfigure', '_txt'), {
                     'fill': self.cnf.get('activeforeground', 'white')}, None)
-    
+
     def activebitmap(self, kw):
         return _button_properties._active_bit_img(self, 'activebitmap', kw)
-    
+
     def activeimage(self, kw):
         return _button_properties._active_bit_img(self, 'activeimage', kw)
 
@@ -141,14 +143,15 @@ class _button_properties:
                 getattr(ttk, i) for i in ttk.__all__ if isinstance(getattr(ttk, i), type))
             if isinstance(self.master, ttk_widget_types):
                 try:
-                    style = self.master['style'] or 'T' + self.master.__class__.__name__
+                    style = self.master['style'] or 'T' + \
+                        self.master.__class__.__name__
                     ttk_bg = ttk.Style(self.master).lookup(style, "background")
                     return ttk_bg
                 except tkinter.TclError:
                     if not _warning_msg_shown[0] and STDOUT_WARNING:
                         print('WARNING: "borderless" option is partially supported with ttk widgets. '
-                            'Bordercolor/highlightbackground can be set manually '
-                            'with "highlightbackground" or "bordercolor" options.\n')
+                              'Bordercolor/highlightbackground can be set manually '
+                              'with "highlightbackground" or "bordercolor" options.\n')
                         _warning_msg_shown[0] = True
                     return self.cnf.get('bordercolor', self.cnf['highlightbackground'])
             return self.master['bg']
@@ -160,7 +163,8 @@ class _button_properties:
                     'borderless', kw)
             master_bg = _get_master_bg()
             self.cnf['highlightbackground'] = self.cnf['bordercolor'] = master_bg
-            _opt[1] = [('itemconfigure', '_bd_color'), {'outline': master_bg}, None]
+            _opt[1] = [('itemconfigure', '_bd_color'),
+                       {'outline': master_bg}, None]
             _opt[2] = ['configure', {'highlightbackground': master_bg}, None]
 
         elif not bool(kw.get('borderless', True)) or not self.cnf.get('borderless'):
@@ -172,8 +176,10 @@ class _button_properties:
                 bd_color = SYSTEM_DEFAULT.bg
             self.cnf['highlightbackground'] = self.cnf['bordercolor'] = bd_color
             if self.itemcget('_bd_color', 'outline') != bd_color:
-                _opt[1] = [('itemconfigure', '_bd_color'), {'outline': bd_color}, None]
-                _opt[2] = ['configure', {'highlightbackground': bd_color}, None]
+                _opt[1] = [('itemconfigure', '_bd_color'),
+                           {'outline': bd_color}, None]
+                _opt[2] = ['configure', {
+                    'highlightbackground': bd_color}, None]
         return _opt
     bordercolor = highlightbackground = borderless
 
@@ -185,34 +191,35 @@ class _button_properties:
     def focuscolor(self, kw):
         return (('itemconfigure', '_tf'),
                 {'outline': kw.get('focuscolor', self.cnf.get('focuscolor'))}, None)
-    
+
     def focusthickness(self, kw):
         _button_items.create_items(self, 'create', True, avoid=(
             '_txt', '_img', '_bit', '_bd_color', '_border'))
-    
+
     def image(self, kw):
         return _button_properties._bit_img(self, 'image', kw)
-    
+
     def overbackground(self, kw):
         _opt = []
         if kw.get('overbackground', '') != '':
             fn = self._get_functions('overbackground', kw)
             _opt = [self,
                     {'className': 'overbackground', 'sequence': '<Enter>',
-                    'func': fn.get('<Enter>')},
+                     'func': fn.get('<Enter>')},
                     {'className': 'overbackground', 'sequence': '<Leave>',
-                    'func': fn.get('<Leave>')}]
+                     'func': fn.get('<Leave>')}]
             if self._mouse_state_condition():
-                _Canvas._configure(self, 'configure', {'bg': kw.get('overbackground')}, None)
-                _Canvas._configure(self, ('itemconfigure', '_border'), 
-                    {'outline': get_shade(kw.get('overbackground'), 0.1, 'auto-120')}, None)
+                _Canvas._configure(self, 'configure', {
+                                   'bg': kw.get('overbackground')}, None)
+                _Canvas._configure(self, ('itemconfigure', '_border'),
+                                   {'outline': get_shade(kw.get('overbackground'), 0.1, 'auto-120')}, None)
         elif kw.get('overbackground') == '':
             _opt = [self,
                     {'className': 'overbackground', 'sequence': '<Enter>'},
-                    {'className': 'overbackground', 'sequence': '<Leave>'}, 
-                    ('configure', {'bg': self._org_bg}, None), 
-                    (('itemconfigure', '_border'), {'outline': 
-                    get_shade(self._org_bg, 0.1, 'auto-120')}, None)]
+                    {'className': 'overbackground', 'sequence': '<Leave>'},
+                    ('configure', {'bg': self._org_bg}, None),
+                    (('itemconfigure', '_border'), {'outline':
+                                                    get_shade(self._org_bg, 0.1, 'auto-120')}, None)]
         return _opt
 
     def overforeground(self, kw):
@@ -221,19 +228,19 @@ class _button_properties:
             fn = self._get_functions('overforeground', kw)
             _opt = [self,
                     {'className': 'overforeground', 'sequence': '<Enter>',
-                    'func': fn.get('<Enter>')},
+                     'func': fn.get('<Enter>')},
                     {'className': 'overforeground', 'sequence': '<Leave>',
-                    'func': fn.get('<Leave>')}]
+                     'func': fn.get('<Leave>')}]
             if self._mouse_state_condition():
-    
+
                 self.after(1, lambda: _Canvas._configure(self,
-                    ('itemconfigure', '_txt'), {'fill': kw.get('overforeground')}, None))
+                                                         ('itemconfigure', '_txt'), {'fill': kw.get('overforeground')}, None))
         elif kw.get('overforeground') == '':
             _opt = [self,
                     {'className': 'overforeground', 'sequence': '<Enter>'},
                     {'className': 'overforeground', 'sequence': '<Leave>'}]
             _opt.append((('itemconfigure', '_txt'),
-                        {'fill': self.cnf.get('fg', 'black')}, None))
+                         {'fill': self.cnf.get('fg', 'black')}, None))
         return _opt
 
     def overrelief(self, kw):
@@ -266,24 +273,29 @@ class _button_properties:
             kw['width'] = self.cnf['width']
         if self._fixed_size['h'] and kw.get('height', True):
             kw['height'] = self.cnf['height']
-        self._fixed_size['w'] = True if kw.get('width', kw.get('radius')) is not None else False
-        self._fixed_size['h'] = True if kw.get('height', kw.get('radius')) is not None else False
+        self._fixed_size['w'] = True if kw.get(
+            'width', kw.get('radius')) is not None else False
+        self._fixed_size['h'] = True if kw.get(
+            'height', kw.get('radius')) is not None else False
         W, H = _info_button(self, **_button_properties._size_opts(self))
-        self.cnf['width'] = self.cnf.get('width') if self._fixed_size['w'] else W
-        self.cnf['height'] = self.cnf.get('height') if self._fixed_size['h'] else H
+        self.cnf['width'] = self.cnf.get(
+            'width') if self._fixed_size['w'] else W
+        self.cnf['height'] = self.cnf.get(
+            'height') if self._fixed_size['h'] else H
         return ('configure', {'width': self.cnf['width'],
                               'height': self.cnf['height']}, None)
-    
+
     def state(self, kw):
         _opt = {}
         if kw.get('state') in 'disabled':
             _opt[1] = ('configure', {'bg': self.cnf.get('disabledbackground'),
-                                    'state': 'disabled'}, None)
+                                     'state': 'disabled'}, None)
             _opt[2] = (('itemconfigure', '_txt'), {
-                            'disabledfill': kw.get('disabledforeground', 
-                            self.cnf.get('disabledforeground')), 
-                            'state': 'disabled'}, None)
-            _opt[3] = (('itemconfigure', '_activebg'), {'state': 'hidden'}, None)
+                'disabledfill': kw.get('disabledforeground',
+                                       self.cnf.get('disabledforeground')),
+                'state': 'disabled'}, None)
+            _opt[3] = (('itemconfigure', '_activebg'),
+                       {'state': 'hidden'}, None)
             _opt[5] = (('itemconfigure', '_img'), {'state': 'disabled'}, None)
             _opt[6] = (('itemconfigure', '_bit'), {'state': 'disabled'}, None)
         elif kw.get('state') == 'normal':
@@ -291,27 +303,29 @@ class _button_properties:
             if self._mouse_state_condition() and self.cnf.get('overbackground'):
                 _bg = self.cnf['overbackground']
             _opt[1] = ('configure', {'bg': _bg, 'state': 'normal'}, None)
-            _opt[2] = (('itemconfigure', '_txt'), {'state': 'normal', 
-                            'fill': self.cnf.get('foreground', 'black')}, None)
-            _opt[3] = (('itemconfigure', '_activebg'), {'state': 'hidden'}, None)
+            _opt[2] = (('itemconfigure', '_txt'), {'state': 'normal',
+                                                   'fill': self.cnf.get('foreground', 'black')}, None)
+            _opt[3] = (('itemconfigure', '_activebg'),
+                       {'state': 'hidden'}, None)
             _opt[4] = (('itemconfigure', '_border'), {'state': 'normal'}, None)
             _opt[5] = (('itemconfigure', '_img'), {
-                            'image': self.cnf.get('image', '')}, None)
+                'image': self.cnf.get('image', '')}, None)
             _opt[6] = (('itemconfigure', '_bit'), {
-                            'bitmap': self.cnf.get('bitmap', '')}, None)
+                'bitmap': self.cnf.get('bitmap', '')}, None)
         elif kw.get('state') in ('active', 'pressed'):
             _bg = self._org_bg
             if self._mouse_state_condition() and self.cnf.get('overbackground'):
                 _bg = self.cnf['overbackground']
             _opt[1] = ('configure', {'bg': _bg, 'state': 'normal'}, None)
-            _opt[2] = (('itemconfigure', '_txt'), {'state': 'normal', 
-                            'fill': self.cnf.get('activeforeground', 'white')}, None)
-            _opt[3] = (('itemconfigure', '_activebg'), {'state': 'normal'}, None)
+            _opt[2] = (('itemconfigure', '_txt'), {'state': 'normal',
+                                                   'fill': self.cnf.get('activeforeground', 'white')}, None)
+            _opt[3] = (('itemconfigure', '_activebg'),
+                       {'state': 'normal'}, None)
             _opt[4] = (('itemconfigure', '_border'), {'state': 'hidden'}, None)
             _opt[5] = (('itemconfigure', '_img'), {
-                            'image': self.cnf.get('activeimage', '')}, None)
+                'image': self.cnf.get('activeimage', '')}, None)
             _opt[6] = (('itemconfigure', '_bit'), {
-                            'bitmap': self.cnf.get('activebitmap', '')}, None)
+                'bitmap': self.cnf.get('activebitmap', '')}, None)
         return _opt
 
     def takefocus(self, kw):
@@ -319,9 +333,9 @@ class _button_properties:
         if self['takefocus'] and self['state'] in ('normal', 'active', 'pressed'):
             fn = self._get_functions('takefocus', kw)
             _opt = [self, {'className': 'takefocus', 'sequence':
-                            '<FocusIn>', 'func': fn.get('<FocusIn>')},
-                            {'className': 'takefocus', 'sequence':
-                            '<FocusOut>', 'func': fn.get('<FocusOut>')}]
+                           '<FocusIn>', 'func': fn.get('<FocusIn>')},
+                    {'className': 'takefocus', 'sequence':
+                     '<FocusOut>', 'func': fn.get('<FocusOut>')}]
 
         elif not self['takefocus'] or self['state'] in 'disabled':
             _opt = [self,
@@ -334,7 +348,7 @@ class _button_properties:
         if kw.get('textvariable', '') != '':
             kw['text'] = self.cnf['text'] = self.cnf['textvariable'].get()
             cbn = self.cnf['textvariable'].trace_variable('w',
-                    self._get_functions('textvariable', kw).get('w'))
+                                                          self._get_functions('textvariable', kw).get('w'))
             self._var_cb = (self.cnf['textvariable'], cbn)
 
         elif kw.get('textvariable') == '' and self._var_cb:
@@ -364,60 +378,61 @@ class _button_items:
     # Utils
     def _active_state(self, val):
         """Internal function."""
-        _kw = dict( fill=self.cnf.get('foreground', 'black'),
-                    img=self.cnf.get('image', ''),
-                    bit=self.cnf.get('bitmap', ''),
-                    state='normal')
+        _kw = dict(fill=self.cnf.get('foreground', 'black'),
+                   img=self.cnf.get('image', ''),
+                   bit=self.cnf.get('bitmap', ''),
+                   state='normal')
         if self['state'] in ('pressed', 'active'):
             return dict(fill=self.cnf.get('activeforeground', 'white'),
                         img=self.cnf.get('activeimage', _kw['img']),
                         bit=self.cnf.get('activebitmap', _kw['bit']),
                         state='hidden')[val]
         return _kw[val]
-    
+
     def _bit_img_main(self, opt, *ags, **kw):
         kw['tag'] = '_img' if opt == 'image' else '_bit'
-        if (self.cnf.get(opt) != '' or 
-                self.cnf.get(str('active'+opt), '') != '' ):
+        if (self.cnf.get(opt) != '' or
+                self.cnf.get(str('active'+opt), '') != ''):
             return self._create(
-                opt, (0, 0), {'tag': kw['tag'], 
-                opt: _button_items._active_state(self, kw['tag'][1:])})
+                opt, (0, 0), {'tag': kw['tag'],
+                              opt: _button_items._active_state(self, kw['tag'][1:])})
 
     # These are main items (function names = item tag name.)
     def _txt(self, *ags, **kw):
         "Text item."
         txt_id = self._create(
-            'text', (0, 0), {'text': None, 'tag': '_txt', 
-            'fill': _button_items._active_state(self, 'fill')})
+            'text', (0, 0), {'text': None, 'tag': '_txt',
+                             'fill': _button_items._active_state(self, 'fill')})
         self.cnf['font'] = self.cnf.get('font', self.itemcget(txt_id, 'font'))
         return txt_id
 
     def _bit(self, *ags, **kw):
         "Bitmap items (bitmap and activebitmap)."
-        return _button_items._bit_img_main(self,'bitmap', *ags, **kw)
-    
+        return _button_items._bit_img_main(self, 'bitmap', *ags, **kw)
+
     def _img(self, *ags, **kw):
         "Image item (image and activeimage)."
         return _button_items._bit_img_main(self, 'image', *ags, **kw)
-    
+
     def _bd_color(self, *ags, **kw):
         "Border color item."
         bd_color = self.cnf.get('bordercolor', SYSTEM_DEFAULT.bg)
         if self._type == 'circle':
             pad = 2
-            width = r = int(self.cnf.get('width', 87)/2)  # radius = x = y (in pixels)
+            # radius = x = y (in pixels)
+            width = r = int(self.cnf.get('width', 87)/2)
             _bd_points = (pad-width, pad-width, r*2+width-pad, r*2+width-pad)
             kw_bd_color = {
-                'tag': '_bd_color', 
+                'tag': '_bd_color',
                 'state': _button_items._active_state(self, 'state'),
-                'width': width*2,'outline': bd_color}
+                'width': width*2, 'outline': bd_color}
             return self._create('oval', _bd_points, kw_bd_color)
-        _bd_points = (0, -1, self.cnf.get('width', 87), 
-                        self.cnf.get('height', 24)+3, 7)  # was 6
+        _bd_points = (0, -1, self.cnf.get('width', 87),
+                      self.cnf.get('height', 24)+3, 7)  # was 6
         return self.rounded_rect(
-            _bd_points, width=6, tag='_bd_color', 
+            _bd_points, width=6, tag='_bd_color',
             style='arc', outline=bd_color)
-    
+
     def _border(self, *ags, **kw):
         "Border item."
         bo_color = get_shade(self['bg'], BORDER_INTENSITY, 'auto-120')
@@ -426,16 +441,17 @@ class _button_items:
             r = int(self.cnf.get('width', 87)/2)  # radius = x = y (in pixels)
             _bo_points = (pad, pad, r*2-(pad+1), r*2-(pad+1))
             return self._create('oval', _bo_points, {
-                'tag': '_border', 'outline': self.cnf.get('bordercolor', bo_color) })
+                'tag': '_border', 'outline': self.cnf.get('bordercolor', bo_color)})
         h = 4
         if int(self['highlightthickness']):
             h += 1
-        _bo_points = (2, 2, self.cnf.get('width', 87)-5, self.cnf.get('height', 24)-h, 4)  # was 3
+        _bo_points = (2, 2, self.cnf.get('width', 87)-5,
+                      self.cnf.get('height', 24)-h, 4)  # was 3
         return self.rounded_rect(
-            _bo_points, width=1, outline=bo_color, smooth=1, 
-            tag='_border', style='arc', 
-            state=_button_items._active_state(self,'state'))
-    
+            _bo_points, width=1, outline=bo_color, smooth=1,
+            tag='_border', style='arc',
+            state=_button_items._active_state(self, 'state'))
+
     def _tf(self, *ags, **kw):
         "Takefocus highlight ring."
         if self.cnf.get('focusthickness') == 0:
@@ -446,9 +462,9 @@ class _button_items:
             r = int(self.cnf.get('width', 87)/2)  # radius = x = y (in pixels)
             _tk_points = (pad+width, pad+width, r*2-width-pad, r*2-width-pad)
             return self._create('oval', _tk_points, {
-                    'tag': '_tf', 'width': width,
-                    'outline': self.cnf.get('focuscolor', '#81b3f4'), 
-                    'state': 'hidden'})
+                'tag': '_tf', 'width': width,
+                'outline': self.cnf.get('focuscolor', '#81b3f4'),
+                'state': 'hidden'})
 
         # takefocuswidth can be changed.
         # Focus line is not on point the line is off when thickness is changed.
@@ -456,21 +472,21 @@ class _button_items:
         diff1 = diff2 = (int(self['highlightthickness'])*2) + (s*2)
         if diff2 == (s*2):
             diff2 -= 1
-        
+
         if s == 1:
             s = 2
             diff2 = (int(self['highlightthickness'])*2) + (s*2)
             diff1 = diff2 + 1
-        
+
         _tk_points = (s+int(self['highlightthickness']),
-                        s+int(self['highlightthickness']),
-                        self.cnf.get('width',  87)-diff1,
-                        self.cnf.get('height', 24)-diff2, 4)
+                      s+int(self['highlightthickness']),
+                      self.cnf.get('width',  87)-diff1,
+                      self.cnf.get('height', 24)-diff2, 4)
         return self.rounded_rect(
-            _tk_points, width=w, style='arc', 
-            outline=self.cnf.get('focuscolor', '#81b3f4'), 
+            _tk_points, width=w, style='arc',
+            outline=self.cnf.get('focuscolor', '#81b3f4'),
             tag='_tf', state='hidden')
-    
+
     # Main function
     def create_items(self, cmd, safe_create=False, **kw):
         _id = []
@@ -491,7 +507,7 @@ class _button_functions:
         con1 = bool(self.cnf.get('state') not in 'disabled')
         con2 = bool(self.winfo_containing(*self.winfo_pointerxy()) == self)
         return con1 and con2
-    
+
     def _make_dictionaries(self, cnf=None, kw=None):
         """Internal function.\n
         Merges kw into cnf and removes None values."""
@@ -512,14 +528,14 @@ class _button_functions:
 
     def _set_trace(self, kw):
         """Internal function."""
-        for i in ('activeforeground', 'activebackground', 'bordercolor', 
-                  'disabledbackground', 'disabledforeground', 'foreground', 
-                  'fg', 'focuscolor', 'highlightbackground', 'overbackground', 
+        for i in ('activeforeground', 'activebackground', 'bordercolor',
+                  'disabledbackground', 'disabledforeground', 'foreground',
+                  'fg', 'focuscolor', 'highlightbackground', 'overbackground',
                   'overforeground'):
             if isinstance(kw.get(i), tkinter.Variable):
                 var = kw[i]
                 cbname = var.trace_variable('w', lambda a, b, c, i=i, var=var,
-                                cls=self: cls.config({i: var.get()}))
+                                            cls=self: cls.config({i: var.get()}))
                 if (self, i) in cp._all_traces_colorvar:
                     v, cb = cp._all_traces_colorvar.get((self, i))
                     v.trace_vdelete('w', cb)
@@ -559,65 +575,66 @@ class _button_functions:
                 return
             tag = '_img' if key == 'image' else '_bit'
             if seq == 'enter':
-                _Canvas._configure(self, ('itemconfigure', tag), 
+                _Canvas._configure(self, ('itemconfigure', tag),
                                    {key: kw.get('over'+key)}, None)
             elif seq == 'leave':
-                _Canvas._configure(self, ('itemconfigure', tag), 
+                _Canvas._configure(self, ('itemconfigure', tag),
                                    {key: self.cnf.get(key, '')}, None)
             self._set_coords(self._get_options(
-                                ('_txt', '_img', '_bit'), self.cnf))
-        
+                ('_txt', '_img', '_bit'), self.cnf))
+
         def overbg(seq):
             """Implement overbackground properly."""
             if seq == 'enter':
-                _Canvas._configure(self, 'configure', {'bg': kw.get('overbackground')}, None)
-                _Canvas._configure(self, ('itemconfigure', '_border'), 
-                    {'outline': get_shade(kw.get('overbackground'), 0.1, 'auto-120')}, None)
+                _Canvas._configure(self, 'configure', {
+                                   'bg': kw.get('overbackground')}, None)
+                _Canvas._configure(self, ('itemconfigure', '_border'),
+                                   {'outline': get_shade(kw.get('overbackground'), 0.1, 'auto-120')}, None)
             elif seq == 'leave':
                 self._configure('configure', {'bg': self._org_bg}, None)
-        
+
         def overfg(seq):
             """Handle overforeground, 
             foreground and activeforeground."""
             if self.cnf['state'] in ('active', 'pressed'):
                 return
             if seq == 'enter':
-                _Canvas._configure(self, ('itemconfigure', '_txt'), 
-                    {'fill': self.cnf.get('overforeground', 'black')}, None)
+                _Canvas._configure(self, ('itemconfigure', '_txt'),
+                                   {'fill': self.cnf.get('overforeground', 'black')}, None)
             elif seq == 'leave':
-                _Canvas._configure(self, ('itemconfigure', '_txt'), 
-                    {'fill': self.cnf.get('fg', 'black')}, None)
+                _Canvas._configure(self, ('itemconfigure', '_txt'),
+                                   {'fill': self.cnf.get('fg', 'black')}, None)
 
         binds = {
             'overrelief': {'<Enter>': if_state(lambda _: self._configure(
-                                'configure', {'_relief': kw.get('overrelief')})),
-                           '<Leave>': if_state(lambda _: self._configure(
-                                'configure', {'_relief': self._rel[0]}))},
+                'configure', {'_relief': kw.get('overrelief')})),
+                '<Leave>': if_state(lambda _: self._configure(
+                    'configure', {'_relief': self._rel[0]}))},
 
             'overforeground': {'<Enter>': if_state(lambda _: self.after(1, overfg, 'enter')),
                                '<Leave>': if_state(lambda _: overfg('leave'))},
-            
-            'overbackground': {'<Enter>': if_state(lambda _: overbg('enter')), 
-                               '<Leave>': if_state(lambda _: overbg('leave')) },
+
+            'overbackground': {'<Enter>': if_state(lambda _: overbg('enter')),
+                               '<Leave>': if_state(lambda _: overbg('leave'))},
 
             'overimage': {'<Enter>': if_state(lambda _: over_img_bit('enter', 'image')),
-                            '<Leave>': if_state(lambda _: over_img_bit('leave', 'image'))},
+                          '<Leave>': if_state(lambda _: over_img_bit('leave', 'image'))},
 
             'overbitmap': {'<Enter>': if_state(lambda _: over_img_bit('enter', 'bitmap')),
-                             '<Leave>': if_state(lambda _: over_img_bit('leave', 'bitmap'))},
+                           '<Leave>': if_state(lambda _: over_img_bit('leave', 'bitmap'))},
 
             'takefocus': {'<FocusIn>': lambda _: _Canvas._configure(self, (
-                            'itemconfigure', '_tf'), {'state': 'normal'}, None),
-                          '<FocusOut>': lambda _: _Canvas._configure(self, (
-                            'itemconfigure', '_tf'), {'state': 'hidden'}, None)},
+                'itemconfigure', '_tf'), {'state': 'normal'}, None),
+                '<FocusOut>': lambda _: _Canvas._configure(self, (
+                    'itemconfigure', '_tf'), {'state': 'hidden'}, None)},
         }
 
         other_functions = {
             'borderless': _borderless_support,
 
             'textvariable': {'w': lambda *a: _Canvas._configure(self, (
-                            'itemconfigure', '_txt'), {'text': self.cnf.get(
-                                                       'textvariable').get()}, None)},
+                'itemconfigure', '_txt'), {'text': self.cnf.get(
+                    'textvariable').get()}, None)},
 
             '_activebg': lambda: _on_press_color(*self._get_options(
                                                  'activebackground', self.cnf)),
@@ -656,7 +673,7 @@ class _button_functions:
         Set Coordinates of the items."""
         kw = _cnfmerge((cnf, kw))
         r = [self.coords(tag, *kw[tag]) for tag in
-                ('_txt', '_img', '_bit', '_bd_color',
+             ('_txt', '_img', '_bit', '_bd_color',
                  '_border', '_tf') if kw.get(tag)]
         for i in ('_txt', '_bit', '_img'):
             if self.coords(i):
@@ -704,17 +721,18 @@ class _button_functions:
         for opt in ('overbackground', 'activebitmap', 'activeimage',
                     'bitmap', 'fg', 'bordercolor', 'borderless', 'image',
                     'overrelief', 'foreground', 'state', 'overforeground',
-                    'focuscolor', 'focusthickness', 'activebackground', 
+                    'focuscolor', 'focusthickness', 'activebackground',
                     'activeforeground', 'compound'):
             if kw.get(opt) is not None:
                 self._set_configure(self._get_options(opt, kw))
                 if ((opt == 'state' and kw.get('compound', self.cnf.get('compound')))
-                    or opt == 'compound'):
-                    self._set_coords(**self._get_options(('_txt', '_img', '_bit'), kw))
+                        or opt == 'compound'):
+                    self._set_coords(
+                        **self._get_options(('_txt', '_img', '_bit'), kw))
         # Size
         if bool({'text', 'font', 'textvariable', 'image', 'bitmap', 'compound',
                  'padx', 'pady', 'width', 'height', 'activeimage', 'radius',
-                 'activebitmap',}.intersection(set(kw))):
+                 'activebitmap', }.intersection(set(kw))):
             self._set_configure(self._get_options('size', kw))
         # Text
         if {'text', 'anchor', 'font', 'justify', 'textvariable'}.intersection(set(kw)):
@@ -746,17 +764,18 @@ class _button_functions:
                     color2 = get_shade(color1, intensity, 'auto-120')
                     _Canvas._configure(self, 'configure', {'bg': color1}, None)
                     _Canvas._configure(self, ('itemconfigure', '_border'),
-                            {'outline': color2}, None)
+                                       {'outline': color2}, None)
                 if self.focus_get():
                     if getattr(self, '_tmp_bg', False):
-                        _Canvas._configure(self, 'configure', {'bg': self._tmp_bg}, None)
+                        _Canvas._configure(self, 'configure', {
+                                           'bg': self._tmp_bg}, None)
                     color = get_shade(self['bg'], intensity, 'auto-120')
                     _Canvas._configure(self, ('itemconfigure', '_border'),
-                             {'outline': color}, None)
+                                       {'outline': color}, None)
             except KeyError:
                 pass
 
-        _bind(self._main_win, 
+        _bind(self._main_win,
               {'className': 'focus%s' % str(self),
                'sequence': '<FocusIn>', 'func': _chngIn},
               {'className': 'focus%s' % str(self),
@@ -782,7 +801,7 @@ class _button_functions:
         This will resize everything that is in the button"""
         if evt.width == self._size[0] and evt.height == self._size[1]:
             return
-        # [issue-9] (NOT FIXED) On resizing the window the circlebutton doesn't resize properly, 
+        # [issue-9] (NOT FIXED) On resizing the window the circlebutton doesn't resize properly,
         #           current fix doesn't work properly.
         if self._type == 'circle' and evt.width != evt.height:
             if evt.width > evt.height:
@@ -792,7 +811,8 @@ class _button_functions:
                 evt.height = evt.width
                 # tkinter.Canvas.config(self, height=evt.width)
             self.cnf['radius'] = evt.width
-        self._size = (self.cnf['width'], self.cnf['height']) = (evt.width, evt.height)
+        self._size = (self.cnf['width'], self.cnf['height']) = (
+            evt.width, evt.height)
         self.delete('_activebg')
         for i in self._after_IDs:
             self.after_cancel(self._after_IDs[i])
@@ -818,41 +838,41 @@ class _button_functions:
         def check_active_img_bit(op=''):
             tag = '_bit' if 'bit' in op else '_img'
             if self['activeimage'] != '':
-                _Canvas._configure(self, ('itemconfigure', tag), 
-                    {'image': self[op+'image']}, None)
+                _Canvas._configure(self, ('itemconfigure', tag),
+                                   {'image': self[op+'image']}, None)
             elif self['activebitmap'] != '':
-                 _Canvas._configure(self, ('itemconfigure', tag), 
-                    {'bitmap': self[op+'bitmap']}, None)
+                _Canvas._configure(self, ('itemconfigure', tag),
+                                   {'bitmap': self[op+'bitmap']}, None)
 
         if value in ('on_press', 'on_enter') or value is True:
-            if self['state'] != 'pressed' :
-                if value == 'on_press': 
+            if self['state'] != 'pressed':
+                if value == 'on_press':
                     self.cnf['_state'] = self.cnf['state']
                 self.cnf['state'] = 'active'
-                _Canvas._configure(self, ('itemconfigure', '_activebg'), 
+                _Canvas._configure(self, ('itemconfigure', '_activebg'),
                                    {'state': 'normal'}, None)
-            _Canvas._configure(self, ('itemconfigure', '_border'), 
+            _Canvas._configure(self, ('itemconfigure', '_border'),
                                {'state': 'hidden'}, None)
-            _Canvas._configure(self, ('itemconfigure', '_txt'), 
+            _Canvas._configure(self, ('itemconfigure', '_txt'),
                                {'fill': self['activeforeground']}, None)
             check_active_img_bit('active')
 
         elif value in ('on_leave', 'on_release') or value is False:  # When not active (False)
             if self['state'] != 'pressed':
-                if self.cnf.get('_state'): 
+                if self.cnf.get('_state'):
                     self.cnf['state'] = self.cnf['_state']
                 if value == 'on_release':
                     self.cnf.pop('_state', None)
-                    if self['state'] == 'active': 
+                    if self['state'] == 'active':
                         self['state'] = 'normal'
-                _Canvas._configure(self, ('itemconfigure', '_activebg'), 
+                _Canvas._configure(self, ('itemconfigure', '_activebg'),
                                    {'state': 'hidden'}, None)
-                _Canvas._configure(self, ('itemconfigure', '_border'), 
+                _Canvas._configure(self, ('itemconfigure', '_border'),
                                    {'state': 'normal'}, None)
                 fill = self['fg']
                 if self._mouse_state_condition() and self['overforeground'] != '':
                     fill = self['overforeground']
-                _Canvas._configure(self, ('itemconfigure', '_txt'), 
+                _Canvas._configure(self, ('itemconfigure', '_txt'),
                                    {'fill': fill}, None)
                 check_active_img_bit()
 
@@ -865,7 +885,8 @@ class _button_functions:
 
         def cmd(*a):
             """trigger function callback."""
-            _bind(self, className='button_command', sequence='<ButtonRelease-1>')
+            _bind(self, className='button_command',
+                  sequence='<ButtonRelease-1>')
             if self.cnf.get('repeatdelay', 0) and self.cnf.get('repeatinterval', 0) and self._rpinloop:
                 self._rpin = self.after(self.cnf.get('repeatinterval', 0), cmd)
             if self.cnf.get('command'):
@@ -886,38 +907,41 @@ class _button_functions:
             """Internal function.\n
             Disables/Cancels when pressed and cursor
             is moved away from the button."""
-            self._active('on_leave')                
+            self._active('on_leave')
             if self.cnf.get('repeatdelay', 0) and self.cnf.get('repeatinterval', 1):
                 self._rpinloop = False
                 self.after_cancel(self._rpin)
-            _bind(self, className='button_command', sequence='<ButtonRelease-1>')
+            _bind(self, className='button_command',
+                  sequence='<ButtonRelease-1>')
 
         if self['state'] not in 'disabled':
             self.focus_set()
-            self._active('on_press')            
+            self._active('on_press')
             if self.cnf.get('repeatdelay', 0) and self.cnf.get('repeatinterval', 1):
                 self._rpin = self.after(self.cnf.get('repeatdelay', 0), cmd)
             _bind(self, {'className': 'on_press_enter', 'sequence': '<Enter>', 'func': on_enter},
-                  {'className': 'on_press_leave', 'sequence': '<Leave>', 'func': on_leave},
+                  {'className': 'on_press_leave',
+                      'sequence': '<Leave>', 'func': on_leave},
                   {'className': 'button_command', 'sequence': '<ButtonRelease-1>', 'func': cmd})
 
     def _on_release(self, *ags):
         """Internal function. When button is released <ButtonRelease-1>"""
-        if self['state'] in 'disabled': 
+        if self['state'] in 'disabled':
             return
         self._active('on_release')
         self._rpinloop = False
-        if getattr(self, '_rpin', None): 
+        if getattr(self, '_rpin', None):
             self.after_cancel(self._rpin)
         _bind(self, {'className': 'on_press_enter', 'sequence': '<Enter>'},
               {'className': 'on_press_leave', 'sequence': '<Leave>'},
               {'className': 'button_command', 'sequence': '<ButtonRelease-1>'})
-    
+
     def _on_spacebar_press(self, *ags):
         """Internal function. Triggers when spacebar is pressed"""
         _bind(self,
-            {'className': 'spacebar_tab_remove','sequence': '<Tab>', 'func': self._on_release}
-        )
+              {'className': 'spacebar_tab_remove',
+                  'sequence': '<Tab>', 'func': self._on_release}
+              )
         self._active("on_press")
         if self.cnf.get('command'):
             self.cnf['command']()
@@ -925,8 +949,8 @@ class _button_functions:
     def _on_spacebar_release(self, *ags):
         """Internal function. Triggers when the spacebar is released"""
         _bind(self,
-            {'className': 'spacebar_tab_remove','sequence': '<Tab>'}
-        )
+              {'className': 'spacebar_tab_remove', 'sequence': '<Tab>'}
+              )
         if ags and ags[0].keysym == 'space':
             self._on_release(*ags)
 
@@ -956,10 +980,10 @@ class _button_functions:
                 height = (height/2, height/2)
             elif flag == 'left':
                 width = (width/2+W_im/2, width/2-W_txt/2)
-                height = (height/2, height/2)        
+                height = (height/2, height/2)
             if isinstance(height, tuple):
                 return {'_txt': (width[0], height[0]),
-                            _PiTag: (width[1], height[1])}
+                        _PiTag: (width[1], height[1])}
 
     def _set_anchor(self, anchor, item):
         """Internal function.\n
@@ -972,7 +996,8 @@ class _button_functions:
         default_padx = 2 + int(item_width/2)
         default_pady = 0 + int(item_height/2)
         width = self.cnf['width'] = self.cnf.get('width', self.winfo_width())
-        height = self.cnf['height'] = self.cnf.get('height', self.winfo_height())
+        height = self.cnf['height'] = self.cnf.get(
+            'height', self.winfo_height())
 
         # Center
         x = width / 2
@@ -985,7 +1010,7 @@ class _button_functions:
                 x = default_padx + 0
             elif anchor == 'ne':
                 x = default_padx + (width - item_width) - 4
-        
+
         elif anchor in ('s', 'sw', 'se'):
             x = int(width/2)
             y = default_pady + (height - item_height)
@@ -993,10 +1018,10 @@ class _button_functions:
                 x = default_padx + 0
             elif anchor == 'se':
                 x = default_padx + (width - item_width) - 4
-        
+
         elif anchor == 'e':
             x = default_padx + (width - item_width) - 4
-                
+
         elif anchor == 'w':
             x = default_padx + 0
         return self.coords(item, x, y)
@@ -1011,7 +1036,7 @@ class ButtonBase(_Canvas, _button_functions):
         kw = self._set_trace(_cnfmerge((cnf, kw)))
         kw = {k: v for k, v in kw.items() if v is not None}
         self._type = _type  # button type (circle, normal)
-        self._after_IDs = {} # _after_IDs
+        self._after_IDs = {}  # _after_IDs
         self._fixed_size = {'w': False, 'h': False}
         self._var_cb = None
         self.cnf = {}
@@ -1021,15 +1046,19 @@ class ButtonBase(_Canvas, _button_functions):
             if i in BUTTON_FEATURES:
                 cnf[i] = kw.pop(i, None)
 
-        cnf['fg'] = cnf['foreground'] = cnf.get('fg', cnf.get('foreground', 'black'))
+        cnf['fg'] = cnf['foreground'] = cnf.get(
+            'fg', cnf.get('foreground', 'black'))
         cnf['anchor'] = cnf.get('anchor', 'center')
         cnf['justify'] = cnf.get('justify', 'center')
         cnf['borderless'] = cnf.get('borderless', False)
-        cnf['disabledforeground'] = cnf.get('disabledforeground', get_shade("white", 0.5, '-'))
-        cnf['disabledbackground'] = cnf.get('disabledbackground', get_shade("white", 0.15, '-'))
+        cnf['disabledforeground'] = cnf.get(
+            'disabledforeground', get_shade("white", 0.5, '-'))
+        cnf['disabledbackground'] = cnf.get(
+            'disabledbackground', get_shade("white", 0.15, '-'))
         cnf['state'] = cnf.get('state', 'normal')
         cnf['activeforeground'] = cnf.get('activeforeground', 'white')
-        cnf['activebackground'] = cnf.get('activebackground', ("#4b91fe", "#055be5"))
+        cnf['activebackground'] = cnf.get(
+            'activebackground', ("#4b91fe", "#055be5"))
         cnf['focuscolor'] = cnf.get('focuscolor', '#81b3f4')
         cnf['focusthickness'] = cnf.get('focusthickness', 2)
         cnf['compound'] = cnf.get('compound', None)
@@ -1040,13 +1069,13 @@ class ButtonBase(_Canvas, _button_functions):
         cnf['wraplength'] = cnf.get('wraplength', 0)
         cnf['underline'] = cnf.get('underline', -1)
 
-        for i in ('activebitmap', 'activeimage', 'bitmap', 'command', 
-                  'image', 'overbackground', 'overforeground', 'overrelief', 
+        for i in ('activebitmap', 'activeimage', 'bitmap', 'command',
+                  'image', 'overbackground', 'overforeground', 'overrelief',
                   'text', 'textvariable'):
             cnf[i] = cnf.get(i, '')
 
         if self._type == 'circle':
-            cnf['radius'] = int(kw.pop('radius', 35)) 
+            cnf['radius'] = int(kw.pop('radius', 35))
             ra = int(cnf['radius']*2 + 4)
             kw['width'] = kw['height'] = kw.get('width', kw.get('height', ra))
         else:
@@ -1072,12 +1101,17 @@ class ButtonBase(_Canvas, _button_functions):
             self._rel = ('flat', False)
 
         _bind(self,
-              {'className': 'button_release','sequence': '<ButtonRelease-1>', 'func': self._on_release},
-              {'className': 'button_press','sequence': '<Button-1>', 'func': self._on_press},
-              {'className': 'set_size', 'sequence': '<Configure>', 'func': self._set_size},
-              {'className': 'button_spacebar', 'sequence': '<space>', 'func': self._on_spacebar_press},
-              {'className': 'button_spacebar', 'sequence': '<KeyRelease>', 'func': self._on_spacebar_release}
-        )
+              {'className': 'button_release',
+                  'sequence': '<ButtonRelease-1>', 'func': self._on_release},
+              {'className': 'button_press',
+                  'sequence': '<Button-1>', 'func': self._on_press},
+              {'className': 'set_size', 'sequence': '<Configure>',
+                  'func': self._set_size},
+              {'className': 'button_spacebar', 'sequence': '<space>',
+                  'func': self._on_spacebar_press},
+              {'className': 'button_spacebar', 'sequence': '<KeyRelease>',
+                  'func': self._on_spacebar_release}
+              )
 
         self._focus_in_out(BORDER_INTENSITY)
         self._configure1(self.cnf)
@@ -1088,7 +1122,7 @@ class ButtonBase(_Canvas, _button_functions):
         cnf = {}
         for i in list(kw):
             if ((i in BUTTON_FEATURES)
-                or (i == 'radius' and self._type == 'circle')):
+                    or (i == 'radius' and self._type == 'circle')):
                 cnf[i] = kw.pop(i, None)
         _return = _Canvas._configure(self, cmd, None, kw)
         if kw.get('bg') or kw.get('background'):
@@ -1125,7 +1159,7 @@ class ButtonBase(_Canvas, _button_functions):
         return sorted(
             set([*BUTTON_PROPERTIES, *BUTTON_FEATURES])
         )
-    
+
     def invoke(self):
         """Invoke the command associated with the button.
 
@@ -1134,7 +1168,7 @@ class ButtonBase(_Canvas, _button_functions):
         the button. This command is ignored if the button's state
         is disabled.
         """
-        if (self['state'] not in ('disable', 'disabled') 
+        if (self['state'] not in ('disable', 'disabled')
                 and self.cnf.get('command')):
             return self.cnf['command']()
 
@@ -1144,8 +1178,9 @@ class ButtonBase(_Canvas, _button_functions):
         end the application of this Tcl interpreter."""
         if self._main_win.winfo_exists():
             _bind(self._main_win,
-                {'className': 'focus%s' % str(self), 'sequence': '<FocusIn>'},
-                {'className': 'focus%s' % str(self), 'sequence': '<FocusOut>'})
+                  {'className': 'focus%s' % str(
+                      self), 'sequence': '<FocusIn>'},
+                  {'className': 'focus%s' % str(self), 'sequence': '<FocusOut>'})
         for i in self._after_IDs:
             self.after_cancel(self._after_IDs[i])
         if self.cnf.get('textvariable', '') != '':
