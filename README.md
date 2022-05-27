@@ -673,6 +673,11 @@ This function returns sequences of rainbow colors hexcodes in order.
 
 ## Changelog
 
+- [**v1.0.5**](https://github.com/Saadmairaj/tkmacosx/releases/tag/v1.0.5)
+
+  - Fix Button disbaled state ([#39](https://github.com/Saadmairaj/tkmacosx/issues/39))
+  - Improved focus out appearence ([#39](https://github.com/Saadmairaj/tkmacosx/issues/39))
+
 - [**v1.0.4**](https://github.com/Saadmairaj/tkmacosx/releases/tag/v1.0.4)
 
   - Fix button with image disappear on setting size ([#37](https://github.com/Saadmairaj/tkmacosx/issues/37))

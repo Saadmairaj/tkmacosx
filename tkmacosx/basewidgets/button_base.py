@@ -742,18 +742,18 @@ class _button_functions:
                 if self.focus_get() is None:
                     self._tmp_bg = self['bg']
                     # [BUG] winfo_rgb doesn't read mac system colors.
-                    color1 = get_hex(self['highlightbackground'], self)
+                    color1 = get_hex(self['bg'], self)
                     color2 = get_shade(color1, intensity, 'auto-120')
                     _Canvas._configure(self, 'configure', {'bg': color1}, None)
                     _Canvas._configure(self, ('itemconfigure', '_border'),
                             {'outline': color2}, None)
                 if self.focus_get():
                     if getattr(self, '_tmp_bg', False):
-                        _Canvas._configure(self, 'configure', {'bg': self._tmp_bg}, None)                    
+                        _Canvas._configure(self, 'configure', {'bg': self._tmp_bg}, None)
                     color = get_shade(self['bg'], intensity, 'auto-120')
                     _Canvas._configure(self, ('itemconfigure', '_border'),
                              {'outline': color}, None)
-            except KeyError: 
+            except KeyError:
                 pass
 
         _bind(self._main_win, 
@@ -1025,8 +1025,8 @@ class ButtonBase(_Canvas, _button_functions):
         cnf['anchor'] = cnf.get('anchor', 'center')
         cnf['justify'] = cnf.get('justify', 'center')
         cnf['borderless'] = cnf.get('borderless', False)
-        cnf['disabledforeground'] = cnf.get('disabledforeground', 'grey')
-        cnf['disabledbackground'] = cnf.get('disabledbackground', 'grey')
+        cnf['disabledforeground'] = cnf.get('disabledforeground', get_shade("white", 0.5, '-'))
+        cnf['disabledbackground'] = cnf.get('disabledbackground', get_shade("white", 0.15, '-'))
         cnf['state'] = cnf.get('state', 'normal')
         cnf['activeforeground'] = cnf.get('activeforeground', 'white')
         cnf['activebackground'] = cnf.get('activebackground', ("#4b91fe", "#055be5"))

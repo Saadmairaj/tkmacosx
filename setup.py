@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 
 def get_long_description(path):
-    """Opens and fetches text of long descrition file."""
+    """Opens and fetches text of long description file."""
     with open(path, 'r') as f:
         text = f.read()
     return text
