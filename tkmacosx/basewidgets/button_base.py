@@ -118,7 +118,7 @@ class _button_properties:
             color = kw.get('activebackground',
                            self.cnf.get('activebackground'))
         return [self, {'tag': '_activebg',
-                       'width':  self.winfo_width(),
+                       'width': self.winfo_width(),
                        'height': self.winfo_height(),
                        'color': color}]
 
@@ -480,7 +480,7 @@ class _button_items:
 
         _tk_points = (s+int(self['highlightthickness']),
                       s+int(self['highlightthickness']),
-                      self.cnf.get('width',  87)-diff1,
+                      self.cnf.get('width', 87)-diff1,
                       self.cnf.get('height', 24)-diff2, 4)
         return self.rounded_rect(
             _tk_points, width=w, style='arc',
