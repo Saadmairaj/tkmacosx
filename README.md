@@ -7,6 +7,7 @@
    <a href="https://lgtm.com/projects/g/Saadmairaj/tkmacosx/context:python"><img src="https://img.shields.io/lgtm/grade/python/g/Saadmairaj/tkmacosx.svg?logo=lgtm&logoWidth=18"></a>
    <a href="https://www.codefactor.io/repository/github/saadmairaj/tkmacosx"><img src="https://www.codefactor.io/repository/github/saadmairaj/tkmacosx/badge"></a>
    <a href="https://GitHub.com/Saadmairaj/tkmacosx/graphs/commit-activity"><img src="https://img.shields.io/badge/Maintained%3F-yes-green.svg"></a>
+   <a href="https://conda.anaconda.org/saad_7"><img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2FSaadmairaj%2Ftkmacosx&count_bg=%23AA6B8A&title_bg=%23AA6B8A&icon=python.svg&icon_color=%23FFFFFF&title=hits&edge_flat=true"></a>  
    <a href="https://pepy.tech/project/tkmacosx"><img src="https://pepy.tech/badge/tkmacosx"></a>
    <a href="https://app.fossa.com/projects/git%2Bgithub.com%2FSaadmairaj%2Ftkmacosx?ref=badge_small"><img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2FSaadmairaj%2Ftkmacosx.svg?type=small"></a>
    <a href="https://github.com/Saadmairaj/tkmacosx/blob/master/LICENSE"><img src="https://img.shields.io/github/license/Saadmairaj/tkmacosx.svg"></a>
