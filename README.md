@@ -4,7 +4,6 @@
 <p align="center">
    <a href="https://pypi.org/project/tkmacosx/"><img src="https://img.shields.io/pypi/v/tkmacosx"></a>
    <a href="https://github.com/Saadmairaj/tkmacosx/actions/workflows/python-package.yml"><img src="https://github.com/Saadmairaj/tkmacosx/actions/workflows/python-package.yml/badge.svg"></a>
-   <a href="https://lgtm.com/projects/g/Saadmairaj/tkmacosx/context:python"><img src="https://img.shields.io/lgtm/grade/python/g/Saadmairaj/tkmacosx.svg?logo=lgtm&logoWidth=18"></a>
    <a href="https://www.codefactor.io/repository/github/saadmairaj/tkmacosx"><img src="https://www.codefactor.io/repository/github/saadmairaj/tkmacosx/badge"></a>
    <a href="https://GitHub.com/Saadmairaj/tkmacosx/graphs/commit-activity"><img src="https://img.shields.io/badge/Maintained%3F-yes-green.svg"></a>
    <a href="https://conda.anaconda.org/saad_7"><img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2FSaadmairaj%2Ftkmacosx&count_bg=%23AA6B8A&title_bg=%23AA6B8A&icon=python.svg&icon_color=%23FFFFFF&title=hits&edge_flat=true"></a>  
@@ -12,7 +11,7 @@
    <a href="https://app.fossa.com/projects/git%2Bgithub.com%2FSaadmairaj%2Ftkmacosx?ref=badge_small"><img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2FSaadmairaj%2Ftkmacosx.svg?type=small"></a>
    <a href="https://github.com/Saadmairaj/tkmacosx/blob/master/LICENSE"><img src="https://img.shields.io/github/license/Saadmairaj/tkmacosx.svg"></a>
    <a href="https://github.com/Saadmairaj/tkmacosx/issues?q=is%3Aissue+is%3Aclosed"><img src="https://img.shields.io/github/issues-closed/Saadmairaj/tkmacosx.svg"></a>
-   <a href="https://conda.anaconda.org/saad_7"><img src="https://anaconda.org/saad_7/tkmacosx/badges/installer/conda.svg"></a>   
+
    <img src="https://img.shields.io/powershellgallery/p/Pester?color=blue">
 </p>
 
